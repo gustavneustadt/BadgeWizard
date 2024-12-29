@@ -2,33 +2,71 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var bluetoothManager = LEDBadgeManager()
+    @StateObject private var pixelGridViewModel = PixelGridViewModel()
     @State var text: String = ""
+    @State var speed: Double = 7
     
     var body: some View {
-        VStack(spacing: 20) {
-            Text("LED Badge Test")
-                .font(.title)
-            
-            Text("Status: \(bluetoothManager.connectionStatus)")
+        VStack(spacing: 0) {
+            Form {
+                LabeledContent(content: {
+                    HStack {
+                        if bluetoothManager.isConnected {
+                            Label(title: {
+                                Text("Connected")
+                            }) {
+                                Image(systemName: "checkmark")
+                            }
+                            .foregroundStyle(.green)
+                        } else {
+                            Text("Disconnected")
+                                .foregroundStyle(.secondary)
+                        }
+                        Button(action: {
+                            bluetoothManager.startScanning()
+                        }) {
+                            Text(
+                                bluetoothManager.isScanning ? "Scanning..." : "Connect"
+                            )
+                        }
+                        .disabled(bluetoothManager.isScanning)
+                    }
+                }, label: {
+                    Text("Status:")
+                })
+                TextField("Width:", value: $pixelGridViewModel.width, format: .number)
+                Slider(value: $speed, in: 0...7, step: 1) {
+                    Text("Speed:")
+                }
+                
+            }
+            .formStyle(.grouped)
+            .frame(width: 400)
+            Divider()
+            PixelEditorView(viewModel: pixelGridViewModel)
+                .background(.thickMaterial)
+            Divider()
             HStack {
-                TextField(text: $text) {
-                    Text("String")
+                Button("Clear All") {
+                    pixelGridViewModel.clearAll()
                 }
-                Button("Send …") {
-                    bluetoothManager.sendText(text, speed: 7)
+                .padding()
+                Spacer()
+                Button("Send to Badge") {
+                    let hexStrings = pixelGridViewModel.toHexStrings()
+                    print("Sending hex strings: \(hexStrings)")
+                    bluetoothManager.sendBitmaps(bitmaps: hexStrings, speed: Int(speed))
                 }
-                .disabled(bluetoothManager.connectionStatus != "Connected")
+                .padding()
             }
-            Button(action: {
-                bluetoothManager.startScanning()
-            }) {
-                Text(bluetoothManager.isScanning ? "Scanning..." : "Connect")
-                    .frame(width: 200)
-            }
-            .disabled(bluetoothManager.isScanning)
-            
-            PixelEditorView(bluetoothManager: bluetoothManager)
+            .padding(8)
+            .background(.thinMaterial)
         }
-        .padding()
     }
+}
+
+
+#Preview {
+    ContentView()
+        .frame(height: 300)
 }

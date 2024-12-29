@@ -9,7 +9,7 @@ struct Pixel: Identifiable {
 
 class PixelGridViewModel: ObservableObject {
     @Published var pixels: [[Pixel]]
-    @Published var width = 8 {
+    @Published var width = 32 {
         didSet {
             buildMatrix()
         }
@@ -50,9 +50,7 @@ class PixelGridViewModel: ObservableObject {
         pixels = newPixels
     }
     
-    func togglePixel(x: Int, y: Int) {
-        pixels[y][x].isOn.toggle()
-    }
+
     
     func setPixel(x: Int, y: Int, isOn: Bool) {
         pixels[y][x].isOn = isOn
@@ -110,22 +108,17 @@ class PixelGridViewModel: ObservableObject {
 }
 
 struct PixelEditorView: View {
-    @StateObject private var viewModel = PixelGridViewModel()
-    @ObservedObject var bluetoothManager: LEDBadgeManager
+    @ObservedObject var viewModel: PixelGridViewModel
     @State private var drawMode: Bool = true  // true = drawing, false = erasing
     
     var body: some View {
-        VStack(spacing: 10) {
-            Text("11px Tall Pixel Editor")
-                .font(.title)
-            
-            GeometryReader { geometry in
-                ScrollView([.horizontal, .vertical]) {
+                ScrollView([.horizontal]) {
                     VStack(spacing: 1) {
                         ForEach(0..<viewModel.height, id: \.self) { y in
                             HStack(spacing: 1) {
                                 ForEach(0..<viewModel.width, id: \.self) { x in
                                     PixelView(isOn: viewModel.pixels[y][x].isOn)
+                                        .frame(width: 20, height: 20)
                                 }
                             }
                         }
@@ -150,23 +143,7 @@ struct PixelEditorView: View {
                             }
                     )
                 }
-            }
             .frame(maxHeight: 400)
-            
-            HStack {
-                Button("Clear All") {
-                    viewModel.clearAll()
-                }
-                .padding()
-                TextField("Width", value: $viewModel.width, format: .number)
-                Button("Send to Badge") {
-                    let hexStrings = viewModel.toHexStrings()
-                    print("Sending hex strings: \(hexStrings)")
-                    bluetoothManager.sendBitmaps(bitmaps: hexStrings, speed: 7)
-                }
-                .padding()
-            }
-        }
     }
 }
 
@@ -174,9 +151,8 @@ struct PixelView: View {
     let isOn: Bool
     
     var body: some View {
-        Rectangle()
+        RoundedRectangle(cornerRadius: 5, style: .continuous)
             .fill(isOn ? Color.blue : Color.gray.opacity(0.3))
-            .frame(width: 20, height: 20)
             .border(Color.black.opacity(0.2), width: 1)
     }
 }

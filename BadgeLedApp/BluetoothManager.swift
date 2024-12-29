@@ -10,7 +10,7 @@ class LEDBadgeManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBP
     
     // Published properties for UI updates
     @Published var isScanning = false
-    @Published var connectionStatus = "Disconnected"
+    @Published var isConnected = false
     
     // Constants matching TypeScript implementation
     private let HEADER = "77616E670000"
@@ -301,7 +301,7 @@ class LEDBadgeManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBP
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        connectionStatus = "Connected"
+        isConnected = true
         print("Connected to LED Badge")
         peripheral.discoverServices([serviceUUID])
     }
