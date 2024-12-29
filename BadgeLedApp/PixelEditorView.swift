@@ -156,3 +156,80 @@ struct PixelView: View {
             .border(Color.black.opacity(0.2), width: 1)
     }
 }
+
+
+extension PixelGridViewModel {
+    // Convert ASCII art string to 2D boolean array
+    private func parseAsciiArt(_ input: String) -> [[Bool]] {
+        let lines = input.components(separatedBy: .newlines)
+        
+        return lines.map { line in
+            line.map { char in
+                char == "0" // true for '0', false for any other character
+            }
+        }
+    }
+    
+    // Find the first available position where the pattern can fit
+    private func findFirstAvailablePosition(for pattern: [[Bool]]) -> (x: Int, y: Int)? {
+        let patternWidth = pattern[0].count
+        let patternHeight = pattern.count
+        
+        // Check each possible position in the grid
+        for y in 0...(height - patternHeight) {
+            for x in 0...(width - patternWidth) {
+                var canFit = true
+                
+                // Check if the pattern can fit at this position
+                // without overlapping existing pixels
+                for py in 0..<patternHeight {
+                    for px in 0..<patternWidth {
+                        if pattern[py][px] && pixels[y + py][x + px].isOn {
+                            canFit = false
+                            break
+                        }
+                    }
+                    if !canFit { break }
+                }
+                
+                if canFit {
+                    return (x, y)
+                }
+            }
+        }
+        
+        return nil
+    }
+    
+    // Place the pattern at the specified position
+    private func placePattern(_ pattern: [[Bool]], at position: (x: Int, y: Int)) {
+        for (y, row) in pattern.enumerated() {
+            for (x, isOn) in row.enumerated() {
+                if isOn {
+                    pixels[position.y + y][position.x + x].isOn = true
+                }
+            }
+        }
+    }
+    
+    // Main function to import ASCII art
+    func importAsciiArt(_ input: String) {
+        let pattern = parseAsciiArt(input)
+        
+        // Validate pattern
+        guard !pattern.isEmpty && !pattern[0].isEmpty else { return }
+        
+        // Check if pattern can fit in the grid
+        guard pattern.count <= height && pattern[0].count <= width else {
+            print("Pattern is too large for the grid")
+            return
+        }
+        
+        // Find position and place pattern
+        if let position = findFirstAvailablePosition(for: pattern) {
+            placePattern(pattern, at: position)
+        } else {
+            print("No available space to place the pattern")
+        }
+    }
+}

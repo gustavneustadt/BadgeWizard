@@ -5,6 +5,7 @@ struct ContentView: View {
     @StateObject private var pixelGridViewModel = PixelGridViewModel()
     @State var text: String = ""
     @State var speed: Double = 7
+    @State private var asciiArt: String = ""
     
     var body: some View {
         VStack(spacing: 0) {
@@ -39,6 +40,15 @@ struct ContentView: View {
                     Text("Speed:")
                 }
                 
+                Section("Import ASCII Art") {
+                    TextEditor(text: $asciiArt)
+                        .frame(height: 100)
+                    Button("Import") {
+                        pixelGridViewModel.importAsciiArt(asciiArt)
+                        asciiArt = "" // Clear the input after import
+                    }
+                    .disabled(asciiArt.isEmpty)
+                }
             }
             .formStyle(.grouped)
             .frame(width: 400)
