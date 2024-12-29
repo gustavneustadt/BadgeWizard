@@ -257,6 +257,9 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "We need it to find devices";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "We need it to find devices";
+				INFOPLIST_KEY_NSBluetoothWhileInUseUsageDescription = "We need it to find devices";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -284,6 +287,9 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "We need it to find devices";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "We need it to find devices";
+				INFOPLIST_KEY_NSBluetoothWhileInUseUsageDescription = "We need it to find devices";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
