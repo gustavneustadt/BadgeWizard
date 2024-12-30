@@ -11,6 +11,7 @@ struct ContentView: View {
     @State var mode: Int = 0
     @State var fontName: String = "Apple MacOS 8.0"
     @State var fontSize: Double = 11
+    @State var kerning: Double = 1
     
     // Get text representation of the pixel grid
     var textRepresentation: String {
@@ -33,7 +34,7 @@ struct ContentView: View {
     }
     
     func updateText() {
-        let pixelData = textToPixels(text: text, font: fontName, size: fontSize)
+        let pixelData = textToPixels(text: text, font: fontName, size: fontSize, kerning: kerning)
         pixelGridViewModel.width = pixelData.width == 0 ? 1 : pixelData.width
         pixelGridViewModel.pixels = pixelData.pixels
     }
@@ -52,19 +53,10 @@ struct ContentView: View {
                     Toggle(isOn: $flashing) {
                         Text("Flashing")
                     }
-                    
+                    TextField("Kerning:", value: $kerning, format: .number)
                     TextField("Font Size:", value: $fontSize, format: .number)
                     TextField(text: $text) {
                         Text("Set text to:")
-                    }
-                    .onChange(of: text) {
-                        updateText()
-                    }
-                    .onChange(of: fontSize) {
-                        updateText()
-                    }
-                    .onChange(of: fontName) {
-                        updateText()
                     }
                     FontNameSelector(selectedFontName: $fontName)
                     Picker("Mode:", selection: $mode) {
@@ -169,6 +161,18 @@ struct ContentView: View {
             }
             .padding(8)
             .background(.thinMaterial)
+            .onChange(of: text) {
+                updateText()
+            }
+            .onChange(of: fontSize) {
+                updateText()
+            }
+            .onChange(of: fontName) {
+                updateText()
+            }
+            .onChange(of: kerning) {
+                updateText()
+            }
         }
     }
 }

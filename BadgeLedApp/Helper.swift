@@ -6,7 +6,7 @@ struct PixelData {
     let height: Int
 }
 
-func textToPixels(text: String, font: String, size: CGFloat) -> PixelData {
+func textToPixels(text: String, font: String, size: CGFloat, kerning: CGFloat = 1) -> PixelData {
     guard let font = NSFont(name: font, size: size) else {
         print("Failed to load font: \(font)")
         return PixelData(pixels: [], width: 0, height: 0)
@@ -14,7 +14,12 @@ func textToPixels(text: String, font: String, size: CGFloat) -> PixelData {
     
     let attributes: [NSAttributedString.Key: Any] = [
         .font: font,
-        .foregroundColor: NSColor.black
+        .ligature: 2,
+        .foregroundColor: NSColor.black,
+        .underlineStyle: NSUnderlineStyle.single.rawValue,
+        .kern: kerning,
+        
+        
     ]
     
     let attributedString = NSAttributedString(string: text, attributes: attributes)
