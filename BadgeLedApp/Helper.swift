@@ -67,7 +67,7 @@ func textToPixels(text: String, font: String, size: CGFloat) -> PixelData {
         for x in 0..<width {
             guard let color = bitmap.colorAt(x: x, y: y) else { continue }
             let brightness = color.brightnessComponent
-            if brightness < 0.5 {
+            if brightness < 0.8 {
                 firstNonEmptyRow = min(firstNonEmptyRow, y)
                 lastNonEmptyRow = max(lastNonEmptyRow, y)
                 firstNonEmptyCol = min(firstNonEmptyCol, x)
@@ -83,15 +83,14 @@ func textToPixels(text: String, font: String, size: CGFloat) -> PixelData {
     let contentHeight = lastNonEmptyRow - firstNonEmptyRow + 1
     let trimmedWidth = lastNonEmptyCol - firstNonEmptyCol + 1
     
-    // Ensure minimum height of 11 pixels
-    let finalHeight = max(11, contentHeight)
-    let extraRows = finalHeight - contentHeight
+    // Calculate how many rows we'll actually use (max 11)
+    let finalHeight = 11
+    let rowsToUse = min(contentHeight, finalHeight)
     
-    // Create pixel array with the required height
     var pixelArray = Array(repeating: Array(repeating: Pixel(x: 0, y: 0, isOn: false), count: trimmedWidth), count: finalHeight)
     
-    // Fill the array with actual content
-    for y in 0..<contentHeight {
+    // Fill the array with actual content (up to 11 rows)
+    for y in 0..<rowsToUse {
         for x in 0..<trimmedWidth {
             let sourceY = y + firstNonEmptyRow
             let sourceX = x + firstNonEmptyCol
@@ -101,9 +100,9 @@ func textToPixels(text: String, font: String, size: CGFloat) -> PixelData {
         }
     }
     
-    // If we need extra rows, add them as empty rows
-    if extraRows > 0 {
-        for y in contentHeight..<finalHeight {
+    // If we need extra rows to reach 11, add them as empty rows
+    if rowsToUse < finalHeight {
+        for y in rowsToUse..<finalHeight {
             for x in 0..<trimmedWidth {
                 pixelArray[y][x] = Pixel(x: x, y: y, isOn: false)
             }

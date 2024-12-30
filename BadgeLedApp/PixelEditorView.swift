@@ -166,7 +166,7 @@ extension PixelGridViewModel {
                 for checkY in startY...endY {
                     for checkX in startX...endX {
                         if checkY >= y && checkY < y + patternHeight &&
-                           checkX >= x && checkX < x + patternWidth {
+                            checkX >= x && checkX < x + patternWidth {
                             continue
                         }
                         
@@ -232,37 +232,30 @@ struct PixelEditorView: View {
     @State private var drawMode: Bool = true
     
     var body: some View {
-
-                
-                    VStack(spacing: 1) {
-                        ForEach(viewModel.pixels, id: \.self) { y in
-                            HStack(spacing: 1) {
-                                ForEach(y) { pixel in
-                                    PixelView(isOn: pixel.isOn)
-                                        .frame(width: 20, height: 20)
-                                }
-                            }
+        
+        
+        PixelGridImage(pixels: viewModel.pixels)
+            .frame(width: CGFloat(viewModel.pixels[0].count * 20),
+                   height: CGFloat(viewModel.pixels.count * 20))
+        .padding()
+        .gesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { value in
+                    let pixelSize: CGFloat = 20// 20px + 1px spacing
+                    let padding: CGFloat = 15 // padding value
+                    
+                    let x = Int((value.location.x - padding) / pixelSize)
+                    let y = Int((value.location.y - padding) / pixelSize)
+                    
+                    if x >= 0 && x < viewModel.width && y >= 0 && y < viewModel.height {
+                        if value.translation == .zero {
+                            // This is the start of the drag - set mode based on initial pixel
+                            drawMode = !viewModel.pixels[y][x].isOn
                         }
+                        viewModel.setPixel(x: x, y: y, isOn: drawMode)
                     }
-                    .padding()
-                    .gesture(
-                        DragGesture(minimumDistance: 0)
-                            .onChanged { value in
-                                let pixelSize: CGFloat = 21 // 20px + 1px spacing
-                                let padding: CGFloat = 16   // padding value
-                                
-                                let x = Int((value.location.x - padding) / pixelSize)
-                                let y = Int((value.location.y - padding) / pixelSize)
-                                
-                                if x >= 0 && x < viewModel.width && y >= 0 && y < viewModel.height {
-                                    if value.translation == .zero {
-                                        // This is the start of the drag - set mode based on initial pixel
-                                        drawMode = !viewModel.pixels[y][x].isOn
-                                    }
-                                    viewModel.setPixel(x: x, y: y, isOn: drawMode)
-                                }
-                            }
-                    )
+                }
+        )
     }
 }
 
@@ -273,5 +266,52 @@ struct PixelView: View {
         RoundedRectangle(cornerRadius: 5, style: .continuous)
             .fill(isOn ? Color.blue : Color.gray.opacity(0.3))
             .border(Color.black.opacity(0.2), width: 1)
+    }
+}
+
+struct PixelGridImage: View {
+    let pixels: [[Pixel]]
+    
+    var body: some View {
+        Canvas { context, size in
+            let pixelWidth: CGFloat = size.width / CGFloat(pixels[0].count)
+            let pixelHeight: CGFloat = size.height / CGFloat(pixels.count)
+            
+            // Create symbol once and reuse
+            guard let itemOn = context.resolveSymbol(id: "itemOn") else { return }
+            guard let itemOff = context.resolveSymbol(id: "itemOff") else { return }
+            
+            for (y, row) in pixels.enumerated() {
+                for (x, pixel) in row.enumerated() {
+                    if pixel.isOn {
+                        context.draw(
+                            itemOn,
+                            at: CGPoint(
+                                x: CGFloat(x) * pixelWidth + pixelWidth/2,
+                                y: CGFloat(y) * pixelHeight + pixelHeight/2
+                            )
+                        )
+                    } else {
+                        context.draw(
+                            itemOff,
+                            at: CGPoint(
+                                x: CGFloat(x) * pixelWidth + pixelWidth/2,
+                                y: CGFloat(y) * pixelHeight + pixelHeight/2
+                            )
+                        )
+                    }
+                }
+            }
+        } symbols: {
+            RoundedRectangle(cornerRadius: 3, style: .continuous)
+                .fill(Color.accentColor)
+                .frame(width: 19, height: 19)
+                .tag("itemOn")
+            
+            RoundedRectangle(cornerRadius: 3, style: .continuous)
+                .fill(Color.secondary.opacity(0.3))
+                .frame(width: 19, height: 19)
+                .tag("itemOff")
+        }
     }
 }

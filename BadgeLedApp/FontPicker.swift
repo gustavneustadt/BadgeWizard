@@ -11,11 +11,11 @@ struct FontNameSelector: View {
     @Binding var selectedFontName: String
     
     var fontNames: [String] {
-        var names = NSFontManager.shared.availableFontFamilies.sorted()
+        var names = NSFontManager.shared.availableFontFamilies
         
         names.append("Apple MacOS 8.0")
         
-        return names
+        return names.sorted()
         
     }
     
