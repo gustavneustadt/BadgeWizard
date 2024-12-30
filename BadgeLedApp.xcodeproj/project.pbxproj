@@ -10,9 +10,22 @@
 		6F5FE2032D21A3CA00F15C6D /* BadgeLedApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BadgeLedApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		6F360A4A2D2212FF00C19E1F /* Exceptions for "BadgeLedApp" folder in "BadgeLedApp" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 6F5FE2022D21A3CA00F15C6D /* BadgeLedApp */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		6F5FE2052D21A3CA00F15C6D /* BadgeLedApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				6F360A4A2D2212FF00C19E1F /* Exceptions for "BadgeLedApp" folder in "BadgeLedApp" target */,
+			);
 			path = BadgeLedApp;
 			sourceTree = "<group>";
 		};
@@ -257,6 +270,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BadgeLedApp/Info.plist;
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "We need it to find devices";
 				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "We need it to find devices";
 				INFOPLIST_KEY_NSBluetoothWhileInUseUsageDescription = "We need it to find devices";
@@ -287,6 +301,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BadgeLedApp/Info.plist;
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "We need it to find devices";
 				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "We need it to find devices";
 				INFOPLIST_KEY_NSBluetoothWhileInUseUsageDescription = "We need it to find devices";
