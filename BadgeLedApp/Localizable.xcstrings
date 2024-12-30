@@ -2,6 +2,7 @@
   "sourceLanguage" : "en",
   "strings" : {
     "%lld Columns" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "variations" : {
@@ -22,6 +23,9 @@
           }
         }
       }
+    },
+    "%lld Columns in Total" : {
+
     },
     "%lld Messages" : {
       "localizations" : {
@@ -45,31 +49,13 @@
         }
       }
     },
-    "Eraser" : {
-
-    },
-    "Export as ASCII" : {
+    "Add" : {
 
     },
     "Flashing" : {
 
     },
     "Font" : {
-
-    },
-    "Font Size:" : {
-
-    },
-    "Import" : {
-
-    },
-    "Import ASCII Art" : {
-
-    },
-    "Import…" : {
-
-    },
-    "Kerning:" : {
 
     },
     "Marquee" : {
@@ -79,12 +65,6 @@
 
     },
     "Mode:" : {
-
-    },
-    "More" : {
-
-    },
-    "Set text to:" : {
 
     },
     "Speed:" : {

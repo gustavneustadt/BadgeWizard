@@ -19,27 +19,38 @@ struct PixelGridImage: View {
             guard let itemOn = context.resolveSymbol(id: "itemOn") else { return }
             guard let itemOff = context.resolveSymbol(id: "itemOff") else { return }
             
-            for (y, row) in pixels.enumerated() {
-                for (x, pixel) in row.enumerated() {
-                    if pixel.isOn {
-                        context.draw(
-                            itemOn,
-                            at: CGPoint(
-                                x: CGFloat(x) * pixelWidth + pixelWidth/2,
-                                y: CGFloat(y) * pixelHeight + pixelHeight/2
-                            )
-                        )
-                    } else {
-                        context.draw(
-                            itemOff,
-                            at: CGPoint(
-                                x: CGFloat(x) * pixelWidth + pixelWidth/2,
-                                y: CGFloat(y) * pixelHeight + pixelHeight/2
-                            )
-                        )
-                    }
+            let onPixels: [Pixel] = pixels.compactMap { row in
+                row.compactMap { pixel in
+                    pixel.isOn ? pixel : nil
                 }
+            }.flatMap { $0 }
+            
+            for pixel in onPixels {
+                context.draw(
+                    itemOn,
+                    at: CGPoint(
+                        x: CGFloat(pixel.x) * pixelWidth + pixelWidth/2,
+                        y: CGFloat(pixel.y) * pixelHeight + pixelHeight/2
+                    )
+                )
             }
+            
+            let offPixels: [Pixel] = pixels.compactMap { row in
+                row.compactMap { pixel in
+                    pixel.isOn == false ? pixel : nil
+                }
+            }.flatMap { $0 }
+            
+            for pixel in offPixels {
+                context.draw(
+                    itemOff,
+                    at: CGPoint(
+                        x: CGFloat(pixel.x) * pixelWidth + pixelWidth/2,
+                        y: CGFloat(pixel.y) * pixelHeight + pixelHeight/2
+                    )
+                )
+            }
+            
         } symbols: {
             RoundedRectangle(cornerRadius: 3, style: .continuous)
                 .fill(Color.accentColor)

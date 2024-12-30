@@ -29,7 +29,7 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 0) {
             ScrollView(.vertical) {
                 VStack(spacing: 0) {
-                    ForEach($messages) { message in
+                    ForEach(messages) { message in
                             MessageView(message: message)
                         Divider()
                     }

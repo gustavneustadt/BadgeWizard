@@ -8,19 +8,18 @@
 import Foundation
 
 // Swift equivalent of the Flutter code
-class Message: Identifiable, Equatable {
+class Message: ObservableObject, Identifiable, Equatable {
     static func == (lhs: Message, rhs: Message) -> Bool {
         lhs.id == rhs.id
     }
     
-    
     var id: Identifier<Message> = .init()
     // var pixelGridModel:
     var bitmap: [String]
-    var flash: Bool
-    var marquee: Bool
-    var speed: Speed
-    var mode: Mode
+    @Published var flash: Bool
+    @Published var marquee: Bool
+    @Published var speed: Speed
+    @Published var mode: Mode
     
     init(bitmap: [String], flash: Bool, marquee: Bool, speed: Speed, mode: Mode) {
         self.bitmap = bitmap

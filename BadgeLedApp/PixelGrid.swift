@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct Pixel: Identifiable, Hashable {
+struct Pixel: Identifiable, Hashable, Equatable {
     let id = UUID()
     var x: Int
     var y: Int
@@ -11,19 +11,38 @@ struct Pixel: Identifiable, Hashable {
     }
 }
 
-class PixelGridViewModel: ObservableObject {
-    @Published var pixels: [[Pixel]]
-    @Published var width = 44 {
+class PixelGrid: ObservableObject, Identifiable, Equatable {
+    static func == (lhs: PixelGrid, rhs: PixelGrid) -> Bool {
+        // Compare the relevant properties
+        return lhs.pixels == rhs.pixels &&
+        lhs.width == rhs.width &&
+        lhs.height == rhs.height &&
+        lhs.patternGap == rhs.patternGap
+    }
+    
+    @Published var pixels: [[Pixel]] {
+        willSet {
+            parent.objectWillChange.send()
+        }
+    }
+    @Published var width = 20 {
+        willSet {
+            parent.objectWillChange.send()
+        }
         didSet {
             buildMatrix()
         }
     }
+    
+    unowned var parent: GridState
+    
     let height = 11
     
     // Add the gap property here
     @Published var patternGap: Int = 1
     
-    init() {
+    init(parent: GridState) {
+        self.parent = parent
         pixels = []
         for y in 0..<height {
             var row: [Pixel] = []
@@ -42,7 +61,26 @@ class PixelGridViewModel: ObservableObject {
         }
     }
     
-    func stringToPixelGrid(text: String) {
+    func getAsciiArt() -> String {
+        var result = ""
+        var lastRow = 0
+        for (i, row) in self.pixels.enumerated() {
+            if lastRow != i {
+                result.append("\n")
+                lastRow = i
+            }
+            for pixel in row {
+                if pixel.isOn {
+                    result.append("0")
+                } else {
+                    result.append("-")
+                }
+            }
+        }
+        return result
+    }
+    
+    func pixelFromString(text: String) {
         // Split the string into rows
         let rows = text.components(separatedBy: "\n")
         
@@ -58,7 +96,7 @@ class PixelGridViewModel: ObservableObject {
                 let pixel = Pixel(
                     x: x,
                     y: y,
-                    isOn: (char == "O")
+                    isOn: (char == "0")
                 )
                 pixelRow.append(pixel)
             }
@@ -74,22 +112,19 @@ class PixelGridViewModel: ObservableObject {
     
     func buildMatrix() {
         let oldPixels = pixels
-        let oldWidth = oldPixels.isEmpty ? 0 : oldPixels[0].count
+        let oldWidth = oldPixels.isEmpty ? 1 : oldPixels[0].count
         
-        // Create new matrix with updated width
-        var newPixels: [[Pixel]] = []
-        for y in 0..<height {
-            var row: [Pixel] = []
+        // Create array of the correct size
+        var newPixels = Array(repeating: Array(repeating: Pixel(x: 0, y: 0, isOn: false), count: width), count: height)
+        
+        DispatchQueue.concurrentPerform(iterations: height) { y in
             for x in 0..<width {
                 if x < oldWidth && !oldPixels.isEmpty {
-                    // Preserve existing pixel state
-                    row.append(Pixel(x: x, y: y, isOn: oldPixels[y][x].isOn))
+                    newPixels[y][x] = Pixel(x: x, y: y, isOn: oldPixels[y][x].isOn)
                 } else {
-                    // Add new pixel with default state
-                    row.append(Pixel(x: x, y: y, isOn: false))
+                    newPixels[y][x] = Pixel(x: x, y: y, isOn: false)
                 }
             }
-            newPixels.append(row)
         }
         
         pixels = newPixels
@@ -141,88 +176,6 @@ class PixelGridViewModel: ObservableObject {
         }
         
         return hexStrings
-    }
-}
-
-// ASCII Art Import Extension
-extension PixelGridViewModel {
-    func getAsciiArt() -> String {
-        var result = ""
-        var lastRow = 0
-        for (i, row) in self.pixels.enumerated() {
-            if lastRow != i {
-                result.append("\n")
-                lastRow = i
-            }
-            for pixel in row {
-                if pixel.isOn {
-                    result.append("0")
-                } else {
-                    result.append("-")
-                }
-            }
-        }
-        return result
-    }
-    
-    private func parseAsciiArt(_ input: String) -> [[Bool]] {
-        // Split into lines and remove empty lines
-        let lines = input.components(separatedBy: .newlines)
-            .filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
-        
-        // Convert to boolean grid and handle trailing empty items
-        let boolGrid = lines.map { line -> [Bool] in
-            let trimmedLine = line.trimmingCharacters(in: .whitespaces)
-            return trimmedLine.map { char in char == "0" }
-        }
-        
-        return boolGrid
-    }
-    
-    private func findFirstAvailablePosition(for pattern: [[Bool]]) -> (x: Int, y: Int) {
-        // Always start at 0,0 since we'll adjust the grid if needed
-        return (x: 0, y: 0)
-    }
-    
-    private func ensureGridCapacity(for pattern: [[Bool]]) {
-        let patternWidth = pattern[0].count
-        
-        // If pattern is wider than current grid, adjust the width
-        if patternWidth > width {
-            width = patternWidth
-        }
-    }
-    
-    private func placePattern(_ pattern: [[Bool]], at position: (x: Int, y: Int)) {
-        for (y, row) in pattern.enumerated() {
-            guard y < height else { break } // Don't exceed grid height
-            
-            for (x, isOn) in row.enumerated() {
-                guard x < width else { break } // Don't exceed grid width
-                
-                if isOn {
-                    pixels[position.y + y][position.x + x].isOn = true
-                }
-            }
-        }
-    }
-    
-    func importAsciiArt(_ input: String) {
-        let pattern = parseAsciiArt(input)
-        
-        guard !pattern.isEmpty && !pattern[0].isEmpty else {
-            print("Empty pattern")
-            return
-        }
-        
-        // Ensure grid can accommodate the pattern
-        ensureGridCapacity(for: pattern)
-        
-        // Get starting position (always 0,0 in this implementation)
-        let position = findFirstAvailablePosition(for: pattern)
-        
-        // Place the pattern
-        placePattern(pattern, at: position)
     }
 }
 

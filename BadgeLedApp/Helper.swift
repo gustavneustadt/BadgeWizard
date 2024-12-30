@@ -58,28 +58,29 @@ func textToPixels(text: String, font: String, size: CGFloat, kerning: CGFloat = 
     let height = Int(textSize.height)
     let width = Int(textSize.width)
     
+    // Initialize to maximum possible values
     var firstNonEmptyRow = height
-    var lastNonEmptyRow = 0
+    var lastNonEmptyRow = -1
     var firstNonEmptyCol = width
-    var lastNonEmptyCol = 0
+    var lastNonEmptyCol = -1
     
-    // Find content bounds
+    // Find content bounds with more strict brightness check
     for y in 0..<height {
-        var rowHasContent = false
         for x in 0..<width {
             guard let color = bitmap.colorAt(x: x, y: y) else { continue }
             let brightness = color.brightnessComponent
-            if brightness < 0.8 {
+            if brightness < 0.5 { // Made threshold consistent with pixel creation
                 firstNonEmptyRow = min(firstNonEmptyRow, y)
                 lastNonEmptyRow = max(lastNonEmptyRow, y)
                 firstNonEmptyCol = min(firstNonEmptyCol, x)
                 lastNonEmptyCol = max(lastNonEmptyCol, x)
-                rowHasContent = true
             }
         }
-        if rowHasContent && firstNonEmptyRow == height {
-            firstNonEmptyRow = y
-        }
+    }
+    
+    // Guard against invalid bounds
+    guard firstNonEmptyRow <= lastNonEmptyRow && firstNonEmptyCol <= lastNonEmptyCol else {
+        return PixelData(pixels: [], width: 0, height: 0)
     }
     
     let contentHeight = lastNonEmptyRow - firstNonEmptyRow + 1
@@ -91,7 +92,7 @@ func textToPixels(text: String, font: String, size: CGFloat, kerning: CGFloat = 
     
     var pixelArray = Array(repeating: Array(repeating: Pixel(x: 0, y: 0, isOn: false), count: trimmedWidth), count: finalHeight)
     
-    // Fill the array with actual content (up to 11 rows)
+    // Fill the array with actual content
     for y in 0..<rowsToUse {
         for x in 0..<trimmedWidth {
             let sourceY = y + firstNonEmptyRow
