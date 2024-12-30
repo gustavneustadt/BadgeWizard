@@ -83,8 +83,14 @@ class PixelGridViewModel: ObservableObject {
         pixels = newPixels
     }
     
-    func setPixel(x: Int, y: Int, isOn: Bool) {
+    func setPixel(x: Int, y: Int, isOn: Bool, undoManager: UndoManager?) {
+        guard pixels[y][x].isOn != isOn else { return }
+        
         pixels[y][x].isOn = isOn
+        
+        undoManager?.registerUndo(withTarget: self, handler: { _ in
+            self.pixels[y][x].isOn = !isOn
+        })
     }
     
     func clearAll() {
@@ -230,6 +236,7 @@ extension PixelGridViewModel {
 struct PixelEditorView: View {
     @ObservedObject var viewModel: PixelGridViewModel
     @State private var drawMode: Bool = true
+    @Environment(\.undoManager) var undo
     
     var body: some View {
         
@@ -252,7 +259,7 @@ struct PixelEditorView: View {
                             // This is the start of the drag - set mode based on initial pixel
                             drawMode = !viewModel.pixels[y][x].isOn
                         }
-                        viewModel.setPixel(x: x, y: y, isOn: drawMode)
+                        viewModel.setPixel(x: x, y: y, isOn: drawMode, undoManager: undo)
                     }
                 }
         )
