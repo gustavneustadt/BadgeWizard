@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct Pixel: Identifiable {
+struct Pixel: Identifiable, Hashable {
     let id = UUID()
     var x: Int
     var y: Int
@@ -25,6 +25,36 @@ class PixelGridViewModel: ObservableObject {
             }
             pixels.append(row)
         }
+    }
+    
+    func stringToPixelGrid(text: String) {
+        // Split the string into rows
+        let rows = text.components(separatedBy: "\n")
+        
+        // Create the pixel grid
+        var pixelGrid: [[Pixel]] = []
+        
+        // Process each row
+        for (y, row) in rows.enumerated() {
+            var pixelRow: [Pixel] = []
+            
+            // Process each character in the row
+            for (x, char) in row.enumerated() {
+                let pixel = Pixel(
+                    x: x,
+                    y: y,
+                    isOn: (char == "O")
+                )
+                pixelRow.append(pixel)
+            }
+            
+            // Only append non-empty rows to handle any trailing newlines
+            if !pixelRow.isEmpty {
+                pixelGrid.append(pixelRow)
+            }
+        }
+        width = pixelGrid.isEmpty ? 0 : pixelGrid[0].count
+        pixels = pixelGrid
     }
     
     func buildMatrix() {
@@ -112,12 +142,12 @@ struct PixelEditorView: View {
     @State private var drawMode: Bool = true  // true = drawing, false = erasing
     
     var body: some View {
-                ScrollView([.horizontal]) {
+                
                     VStack(spacing: 1) {
-                        ForEach(0..<viewModel.height, id: \.self) { y in
+                        ForEach(viewModel.pixels, id: \.self) { y in
                             HStack(spacing: 1) {
-                                ForEach(0..<viewModel.width, id: \.self) { x in
-                                    PixelView(isOn: viewModel.pixels[y][x].isOn)
+                                ForEach(y) { pixel in
+                                    PixelView(isOn: pixel.isOn)
                                         .frame(width: 20, height: 20)
                                 }
                             }
@@ -142,8 +172,6 @@ struct PixelEditorView: View {
                                 }
                             }
                     )
-                }
-            .frame(maxHeight: 400)
     }
 }
 

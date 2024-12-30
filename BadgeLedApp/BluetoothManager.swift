@@ -137,7 +137,7 @@ class LEDBadgeManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBP
         centralManager = CBCentralManager(delegate: self, queue: nil)
     }
     
-    func sendBitmaps(bitmaps: [String], speed: Int = 1, flash: Bool = false, marquee: Bool = false) {
+    func sendBitmaps(bitmaps: [String], speed: Int = 1, flash: Bool = false, marquee: Bool = false, mode: Int) {
         guard let peripheral = badge, let characteristic = characteristic else {
             print("Badge not connected")
             return
@@ -146,7 +146,7 @@ class LEDBadgeManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBP
         // Build packet components
         let flashValue = getFlashValue(flash)
         let marqueeValue = getMarqueeValue(marquee)
-        let modes = getModeString(speed)
+        let modes = getModeString(speed, mode: mode)
         let size = getSize(bitmaps)
         let timestamp = getTimestamp()
         let payload = bitmaps.joined()
@@ -180,7 +180,7 @@ class LEDBadgeManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBP
         // Get bitmaps for the text
         let bitmaps = getLetterBitmaps(text)
      
-        self.sendBitmaps(bitmaps: bitmaps, speed: speed, flash: flash, marquee: marquee)
+        self.sendBitmaps(bitmaps: bitmaps, speed: speed, flash: flash, marquee: marquee, mode: 0)
     }
     
     private func getLetterBitmaps(_ text: String) -> [String] {
@@ -195,8 +195,8 @@ class LEDBadgeManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBP
         return isMarquee ? "01" : "00"
     }
     
-    private func getModeString(_ speed: Int) -> String {
-        return "\(speed)0" + "00" + "00" + "00" + "00" + "00" + "00" + "00"
+    private func getModeString(_ speed: Int, mode: Int) -> String {
+        return "\(speed)\(mode)" + "00" + "00" + "00" + "00" + "00" + "00" + "00"
     }
     
     private func getSize(_ letters: String) -> String {
@@ -326,8 +326,6 @@ class LEDBadgeManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBP
             if characteristic.uuid == characteristicUUID {
                 print("Found FEE1 characteristic")
                 self.characteristic = characteristic
-                
-                // self.sendText("00000000000000000", speed: 7, flash: false, marquee: true)
             }
         }
     }
