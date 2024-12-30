@@ -17,7 +17,7 @@ class PixelGridViewModel: ObservableObject {
     let height = 11
     
     // Add the gap property here
-    @Published var patternGap: Int = 2
+    @Published var patternGap: Int = 1
     
     init() {
         pixels = []
