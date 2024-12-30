@@ -8,8 +8,14 @@
 import Foundation
 
 // Swift equivalent of the Flutter code
-class Message: Identifiable {
+class Message: Identifiable, Equatable {
+    static func == (lhs: Message, rhs: Message) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    
     var id: Identifier<Message> = .init()
+    // var pixelGridModel:
     var bitmap: [String]
     var flash: Bool
     var marquee: Bool
@@ -24,25 +30,3 @@ class Message: Identifiable {
         self.mode = mode
     }
 }
-
-
-struct Identifier<Value>: Hashable, Codable {
-    
-    let value: UUID
-    
-    init() {
-        self.value = UUID()
-    }
-    
-    init(_ uuid: UUID) {
-        self.value = uuid
-    }
-    
-    static func fromString(_ string: String) -> Identifier<Value>? {
-        guard let uuid = UUID(uuidString: string) else {
-            return nil
-        }
-        return self.init(uuid)
-    }
-}
-

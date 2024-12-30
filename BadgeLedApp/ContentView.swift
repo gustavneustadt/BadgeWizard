@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var bluetoothManager = LEDBadgeManager()
-    
+    @State var messagesCount: Int = 1
     @State var messages: [Message] = [
         Message(
             bitmap: [],
@@ -84,9 +84,26 @@ struct ContentView: View {
             }
             Divider()
             HStack {
-                Button("Add Message") {
-                    appendNewMessage()
+                Picker("Messages:", selection: $messagesCount) {
+                    ForEach(1..<9) { i in
+                        Text("\(i) Messages")
+                            .tag(i)
+                    }
                 }
+                .labelsHidden()
+                .frame(maxWidth: 150)
+                .onChange(of: messagesCount) {
+                    Task {
+                        while messages.count < messagesCount {
+                            appendNewMessage()
+                        }
+                        while messages.count > messagesCount {
+                            _ = messages.popLast()
+                        }                        
+                    }
+                }
+                
+                Spacer()
                 Spacer()
                 BadgeSendButton(badgeManager: bluetoothManager, messages: messages)
             }

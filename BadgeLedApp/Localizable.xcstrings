@@ -1,0 +1,95 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%lld Columns" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Column"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "new",
+                  "value" : "%lld Columns"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld Messages" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Message"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "new",
+                  "value" : "%lld Messages"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Eraser" : {
+
+    },
+    "Export as ASCII" : {
+
+    },
+    "Flashing" : {
+
+    },
+    "Font" : {
+
+    },
+    "Font Size:" : {
+
+    },
+    "Import" : {
+
+    },
+    "Import ASCII Art" : {
+
+    },
+    "Import…" : {
+
+    },
+    "Kerning:" : {
+
+    },
+    "Marquee" : {
+
+    },
+    "Messages:" : {
+
+    },
+    "Mode:" : {
+
+    },
+    "More" : {
+
+    },
+    "Set text to:" : {
+
+    },
+    "Speed:" : {
+
+    }
+  },
+  "version" : "1.0"
+}

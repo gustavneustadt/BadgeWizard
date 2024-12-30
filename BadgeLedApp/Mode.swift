@@ -41,7 +41,7 @@ extension Message {
             case .fixed:     return "Static Display"
             case .snowflake: return "Snowflake Effect"
             case .picture:   return "Picture Mode"
-            case .animation: return "Wiper Animation"
+            case .animation: return "Animation"
             case .laser:     return "Laser Effect"
             }
         }

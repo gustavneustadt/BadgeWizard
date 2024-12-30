@@ -11,6 +11,7 @@ struct MessageView: View {
     @Binding var message: Message
     @StateObject var pixelGridViewModel: PixelGridViewModel = .init()
     @State private var showingForm = false
+    @State var scrollViewSize: CGSize = .zero
     
     var body: some View {
         VStack(spacing: 8) {
@@ -30,51 +31,65 @@ struct MessageView: View {
                                     }
                             )
                             .pointerStyle(.frameResize(position: .trailing))
+                        Spacer()
                     }
                     .padding(.trailing, 300)
-                    Text("\(pixelGridViewModel.width.formatted()) columns")
-                        .monospaced()
-                        .foregroundStyle(.secondary)
-                        .padding(.bottom)
+                    .frame(minWidth: scrollViewSize.width)
                 }
+                .getSize($scrollViewSize)
                 HStack {
-                    Divider()
-                    MessageFormView(message: $message, pixelGridViewModel: pixelGridViewModel)
+                    HStack {
+                        Spacer()
+                        VStack {
+                            Text("\(pixelGridViewModel.width) Columns")
+                                .monospaced()
+                                .foregroundStyle(.secondary)
+                                .padding(.top, 8)
+                            Spacer()
+                        }
+                        
+                        Spacer()
+                    }
+                    HStack {
+                        Divider()
+                        MessageFormView(message: $message, pixelGridViewModel: pixelGridViewModel)
+                    }
+                    .background(.thinMaterial)
                 }
-                .background(.thinMaterial)
             }
-            // .padding(.horizontal)
         }
         .onChange(of: pixelGridViewModel.pixels) {
             message.bitmap = pixelGridViewModel.toHexStrings()
         }
-        // .popover(
-        //     isPresented: $showingForm,
-        //     attachmentAnchor: .point(.top),
-        //     arrowEdge: .top,
-        //     content: {
-        //         MessageFormView(message: $message, pixelGridViewModel: pixelGridViewModel)
-        //     })
     }
 }
 
 struct MessageFormView: View {
-    @Binding var message: Message    
+    @Binding var message: Message
     @ObservedObject var pixelGridViewModel: PixelGridViewModel
     @State var fontName: String = "Apple MacOS 8.0"
     @State var fontSize: Double = 11
     @State var kerning: Double = 0
     @State var text: String = ""
     
+    @State private var asciiArt: String = ""
+    @State private var showImportSheet = false
+    
     func updateText() {
         let pixelData = textToPixels(text: text, font: fontName, size: fontSize, kerning: kerning)
         pixelGridViewModel.width = pixelData.width == 0 ? 1 : pixelData.width
-        pixelGridViewModel.pixels = pixelData.pixels
+        
+        if pixelData.width >= 1 {
+            pixelGridViewModel.pixels = pixelData.pixels
+        } else {
+            pixelGridViewModel.erase()
+        }
     }
     
     var body: some View {
-        Form {
+        VStack {
             
+            Form {
                 
                 Slider(value: .init(get: {
                     Double(message.speed.rawValue)
@@ -89,26 +104,65 @@ struct MessageFormView: View {
                 Toggle(isOn: $message.flash) {
                     Text("Flashing")
                 }
-            
-                    .padding(.bottom)
-                        TextField("Kerning:", value: $kerning, format: .number)
-                        TextField("Font Size:", value: $fontSize, format: .number)
-                        TextField(text: $text) {
-                            Text("Set text to:")
-                        }
-                        FontNameSelector(selectedFontName: $fontName)
-                        Picker("Mode:", selection: $message.mode) {
-                            ForEach(Message.Mode.allCases, id: \.self) { mode in
-                                Text(mode.description).tag(mode)
-                            }
-                        }
-                    
-                    
+                
+                Picker("Mode:", selection: $message.mode) {
+                    ForEach(Message.Mode.allCases, id: \.self) { mode in
+                        Text(mode.description).tag(mode)
+                    }
+                }
+                .padding(.bottom)
+                TextField("Kerning:", value: $kerning, format: .number)
+                TextField("Font Size:", value: $fontSize, format: .number)
+                TextField(text: $text) {
+                    Text("Set text to:")
+                }
+                FontNameSelector(selectedFontName: $fontName)
+            }
             Spacer()
+            Divider()
+            HStack {
+                Button {
+                    pixelGridViewModel.erase()
+                } label: {
+                    Image(systemName: "eraser")
+                    Text("Eraser")
+                }
+
+                Spacer()
+                Menu("More") {
+                    Button("Export as ASCII") {
+                        let pasteboard = NSPasteboard.general
+                        pasteboard.clearContents()
+                        pasteboard.setString(pixelGridViewModel.getAsciiArt(), forType: .string)
+                    }
+                    Button("Import…") {
+                        showImportSheet = true
+                    }
+                }
+                .frame(width: 70)
+                .foregroundStyle(Color.accentColor)
+            }
         }
         
         .frame(width: 200)
         .padding()
+        .sheet(isPresented: $showImportSheet) {
+            Section("Import ASCII Art") {
+                VStack(alignment: .leading) {
+                    TextEditor(text: $asciiArt)
+                        .frame(height: 100)
+                        .monospaced()
+                    Button("Import") {
+                        pixelGridViewModel.importAsciiArt(asciiArt)
+                        // print(pixelGridViewModel.pixels)
+                        asciiArt = "" // Clear the
+                        showImportSheet = false
+                    }
+                    .disabled(asciiArt.isEmpty)
+                }
+                .padding()
+            }
+        }
         .onChange(of: text) {
             updateText()
         }
