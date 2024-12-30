@@ -16,6 +16,9 @@ class PixelGridViewModel: ObservableObject {
     }
     let height = 11
     
+    // Add the gap property here
+    @Published var patternGap: Int = 1
+    
     init() {
         pixels = []
         for y in 0..<height {
@@ -80,13 +83,9 @@ class PixelGridViewModel: ObservableObject {
         pixels = newPixels
     }
     
-
-    
     func setPixel(x: Int, y: Int, isOn: Bool) {
         pixels[y][x].isOn = isOn
     }
-    
-    
     
     func clearAll() {
         for y in 0..<height {
@@ -100,7 +99,6 @@ class PixelGridViewModel: ObservableObject {
         var hexString = "" // Leading "00"
         var bytes: [UInt8] = Array(repeating: 0, count: 11) // Changed to 11 to match height
         
-        // Process each row (11 pixels high)
         for y in 0..<height {
             // Process 8 pixels in this row starting from startX
             for x in 0..<8 {
@@ -137,11 +135,104 @@ class PixelGridViewModel: ObservableObject {
     }
 }
 
+// ASCII Art Import Extension
+extension PixelGridViewModel {
+    private func parseAsciiArt(_ input: String) -> [[Bool]] {
+        let lines = input.components(separatedBy: .newlines)
+            .filter { !$0.isEmpty }
+        
+        return lines.map { line in
+            line.map { char in
+                char == "0"
+            }
+        }
+    }
+    
+    private func findFirstAvailablePosition(for pattern: [[Bool]]) -> (x: Int, y: Int)? {
+        let patternWidth = pattern[0].count
+        let patternHeight = pattern.count
+        
+        for y in 0...(height - patternHeight) {
+            for x in 0...(width - patternWidth) {
+                var canFit = true
+                
+                // Check the pattern area plus the gap area around it
+                let startY = max(0, y - patternGap)
+                let endY = min(height - 1, y + patternHeight + patternGap)
+                let startX = max(0, x - patternGap)
+                let endX = min(width - 1, x + patternWidth + patternGap)
+                
+                // Check if there are any active pixels in the expanded area
+                for checkY in startY...endY {
+                    for checkX in startX...endX {
+                        if checkY >= y && checkY < y + patternHeight &&
+                           checkX >= x && checkX < x + patternWidth {
+                            continue
+                        }
+                        
+                        if pixels[checkY][checkX].isOn {
+                            canFit = false
+                            break
+                        }
+                    }
+                    if !canFit { break }
+                }
+                
+                if canFit {
+                    for py in 0..<patternHeight {
+                        for px in 0..<patternWidth {
+                            if pattern[py][px] && pixels[y + py][x + px].isOn {
+                                canFit = false
+                                break
+                            }
+                        }
+                        if !canFit { break }
+                    }
+                }
+                
+                if canFit {
+                    return (x, y)
+                }
+            }
+        }
+        
+        return nil
+    }
+    
+    private func placePattern(_ pattern: [[Bool]], at position: (x: Int, y: Int)) {
+        for (y, row) in pattern.enumerated() {
+            for (x, isOn) in row.enumerated() {
+                if isOn {
+                    pixels[position.y + y][position.x + x].isOn = true
+                }
+            }
+        }
+    }
+    
+    func importAsciiArt(_ input: String) {
+        let pattern = parseAsciiArt(input)
+        
+        guard !pattern.isEmpty && !pattern[0].isEmpty else { return }
+        
+        guard pattern.count <= height && pattern[0].count <= width else {
+            print("Pattern is too large for the grid")
+            return
+        }
+        
+        if let position = findFirstAvailablePosition(for: pattern) {
+            placePattern(pattern, at: position)
+        } else {
+            print("No available space to place the pattern")
+        }
+    }
+}
+
 struct PixelEditorView: View {
     @ObservedObject var viewModel: PixelGridViewModel
-    @State private var drawMode: Bool = true  // true = drawing, false = erasing
+    @State private var drawMode: Bool = true
     
     var body: some View {
+
                 
                     VStack(spacing: 1) {
                         ForEach(viewModel.pixels, id: \.self) { y in

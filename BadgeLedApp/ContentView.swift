@@ -5,6 +5,7 @@ struct ContentView: View {
     @StateObject private var pixelGridViewModel = PixelGridViewModel()
     @State var text: String = ""
     @State var speed: Double = 7
+    @State private var asciiArt: String = ""
     @State var flashing: Bool = false
     @State var marquee: Bool = false
     @State var mode: Int = 0
@@ -32,6 +33,7 @@ struct ContentView: View {
     }
     
     var body: some View {
+        
         VStack(spacing: 0) {
                 Form {
                     
@@ -74,6 +76,15 @@ struct ContentView: View {
                             .tag(7)
                         Text("Laser")
                             .tag(8)
+                    }
+                    Section("Import ASCII Art") {
+                        TextEditor(text: $asciiArt)
+                            .frame(height: 100)
+                        Button("Import") {
+                            pixelGridViewModel.importAsciiArt(asciiArt)
+                            asciiArt = "" // Clear the input after import
+                        }
+                        .disabled(asciiArt.isEmpty)
                     }
                 }
                 .formStyle(.grouped)
