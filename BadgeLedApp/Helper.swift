@@ -16,10 +16,7 @@ func textToPixels(text: String, font: String, size: CGFloat, kerning: CGFloat = 
         .font: font,
         .ligature: 2,
         .foregroundColor: NSColor.black,
-        .underlineStyle: NSUnderlineStyle.single.rawValue,
         .kern: kerning,
-        
-        
     ]
     
     let attributedString = NSAttributedString(string: text, attributes: attributes)
