@@ -9,6 +9,7 @@ struct ContentView: View {
     @State var marquee: Bool = false
     @State var mode: Int = 0
     @State var fontName: String = "Apple MacOS 8.0"
+    @State var fontSize: Double = 11
     
     // Get text representation of the pixel grid
     var textRepresentation: String {
@@ -43,11 +44,13 @@ struct ContentView: View {
                     Toggle(isOn: $flashing) {
                         Text("Flashing")
                     }
+                    
+                    TextField("Font Size:", value: $fontSize, format: .number)
                     TextField(text: $text) {
                         Text("Set text to:")
                     }
                     .onSubmit {
-                        let pixelData = textToPixels(text: text, font: fontName, size: 11)
+                        let pixelData = textToPixels(text: text, font: fontName, size: fontSize)
                         pixelGridViewModel.width = pixelData.width
                         pixelGridViewModel.pixels = pixelData.pixels
                     }
