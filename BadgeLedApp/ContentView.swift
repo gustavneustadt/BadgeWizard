@@ -32,6 +32,12 @@ struct ContentView: View {
         return result
     }
     
+    func updateText() {
+        let pixelData = textToPixels(text: text, font: fontName, size: fontSize)
+        pixelGridViewModel.width = pixelData.width == 0 ? 1 : pixelData.width
+        pixelGridViewModel.pixels = pixelData.pixels
+    }
+    
     var body: some View {
         
         VStack(spacing: 0) {
@@ -51,10 +57,14 @@ struct ContentView: View {
                     TextField(text: $text) {
                         Text("Set text to:")
                     }
-                    .onSubmit {
-                        let pixelData = textToPixels(text: text, font: fontName, size: fontSize)
-                        pixelGridViewModel.width = pixelData.width
-                        pixelGridViewModel.pixels = pixelData.pixels
+                    .onChange(of: text) {
+                        updateText()
+                    }
+                    .onChange(of: fontSize) {
+                        updateText()
+                    }
+                    .onChange(of: fontName) {
+                        updateText()
                     }
                     FontNameSelector(selectedFontName: $fontName)
                     Picker("Mode:", selection: $mode) {

@@ -234,9 +234,9 @@ struct PixelEditorView: View {
     var body: some View {
         
         
-        PixelGridImage(pixels: viewModel.pixels)
-            .frame(width: CGFloat(viewModel.pixels[0].count * 20),
-                   height: CGFloat(viewModel.pixels.count * 20))
+        PixelGridImage(width: viewModel.width, pixels: viewModel.pixels)
+            .frame(width: CGFloat(viewModel.width * 20),
+                   height: CGFloat(11 * 20))
         .padding()
         .gesture(
             DragGesture(minimumDistance: 0)
@@ -270,12 +270,13 @@ struct PixelView: View {
 }
 
 struct PixelGridImage: View {
+    let width: Int
     let pixels: [[Pixel]]
     
     var body: some View {
         Canvas { context, size in
-            let pixelWidth: CGFloat = size.width / CGFloat(pixels[0].count)
-            let pixelHeight: CGFloat = size.height / CGFloat(pixels.count)
+            let pixelWidth: CGFloat = size.width / CGFloat(width)
+            let pixelHeight: CGFloat = size.height / 11
             
             // Create symbol once and reuse
             guard let itemOn = context.resolveSymbol(id: "itemOn") else { return }
