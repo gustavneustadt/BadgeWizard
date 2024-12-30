@@ -25,52 +25,6 @@ struct ContentView: View {
         )
     }
     
-    // Get text representation of the pixel grid
-    // var textRepresentation: String {
-    //     var result = ""
-    //     var lastRow = 0
-    //     for (i, row) in pixelGridViewModel.pixels.enumerated() {
-    //         if lastRow != i {
-    //             result.append("\n")
-    //             lastRow = i
-    //         }
-    //         for pixel in row {
-    //             if pixel.isOn {
-    //                 result.append("O")
-    //             } else {
-    //                 result.append("-")
-    //             }
-    //         }
-    //     }
-    //     return result
-    // }
-    
-    // func updateText() {
-    //     let pixelData = textToPixels(text: text, font: fontName, size: fontSize, kerning: kerning)
-    //     pixelGridViewModel.width = pixelData.width == 0 ? 1 : pixelData.width
-    //     pixelGridViewModel.pixels = pixelData.pixels
-    // }
-    //
-    // func getMessage() -> Message {
-    //     Message(
-    //         bitmap: pixelGridViewModel.toHexStrings(),
-    //         flash: flashing,
-    //         marquee: marquee,
-    //         speed: speed,
-    //         mode: mode
-    //     )
-    // }
-    //
-    // func getDifferentMessage() -> Message {
-    //     Message(
-    //         bitmap: pixelGridViewModel.toHexStrings(),
-    //         flash: flashing,
-    //         marquee: marquee,
-    //         speed: speed,
-    //         mode: .snowflake
-    //     )
-    // }
-    
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             ScrollView(.vertical) {
