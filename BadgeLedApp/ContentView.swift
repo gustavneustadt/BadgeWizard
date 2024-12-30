@@ -33,6 +33,7 @@ struct ContentView: View {
     }
     
     var body: some View {
+        
         VStack(spacing: 0) {
                 Form {
                     
@@ -76,6 +77,15 @@ struct ContentView: View {
                         Text("Laser")
                             .tag(8)
                     }
+                    Section("Import ASCII Art") {
+                        TextEditor(text: $asciiArt)
+                            .frame(height: 100)
+                        Button("Import") {
+                            pixelGridViewModel.importAsciiArt(asciiArt)
+                            asciiArt = "" // Clear the input after import
+                        }
+                        .disabled(asciiArt.isEmpty)
+                    }
                 }
                 .formStyle(.grouped)
                 .frame(width: 400)
@@ -102,16 +112,6 @@ struct ContentView: View {
                         .monospaced()
                         .foregroundStyle(.secondary)
                     Spacer()
-                }
-                
-                Section("Import ASCII Art") {
-                    TextEditor(text: $asciiArt)
-                        .frame(height: 100)
-                    Button("Import") {
-                        pixelGridViewModel.importAsciiArt(asciiArt)
-                        asciiArt = "" // Clear the input after import
-                    }
-                    .disabled(asciiArt.isEmpty)
                 }
             }
             .background(.thickMaterial)
