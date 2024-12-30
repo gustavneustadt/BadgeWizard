@@ -34,13 +34,16 @@ class PixelGridViewModel: ObservableObject {
         let oldPixels = pixels
         let oldWidth = oldPixels.isEmpty ? 0 : oldPixels[0].count
         
+        // Create new matrix with updated width
         var newPixels: [[Pixel]] = []
         for y in 0..<height {
             var row: [Pixel] = []
             for x in 0..<width {
                 if x < oldWidth && !oldPixels.isEmpty {
+                    // Preserve existing pixel state
                     row.append(Pixel(x: x, y: y, isOn: oldPixels[y][x].isOn))
                 } else {
+                    // Add new pixel with default state
                     row.append(Pixel(x: x, y: y, isOn: false))
                 }
             }
@@ -63,28 +66,36 @@ class PixelGridViewModel: ObservableObject {
     }
     
     private func chunkToHex(startX: Int) -> String {
-        var hexString = ""
-        var bytes: [UInt8] = Array(repeating: 0, count: 11)
+        var hexString = "" // Leading "00"
+        var bytes: [UInt8] = Array(repeating: 0, count: 11) // Changed to 11 to match height
         
         for y in 0..<height {
+            // Process 8 pixels in this row starting from startX
             for x in 0..<8 {
                 let actualX = startX + x
                 if actualX < width && pixels[y][actualX].isOn {
+                    // For 90-degree counterclockwise rotation:
+                    // - The x position becomes the bit position (y in the output)
+                    // - The y position becomes the byte index from right to left
                     bytes[y] |= (1 << (7 - x))
                 }
             }
         }
         
+        // Convert bytes to hex
         for byte in bytes {
             hexString += String(format: "%02X", byte)
         }
         
+        // hexString += "00" // Trailing "00"
         return hexString
     }
     
+    // Convert all pixels to an array of hex strings
     func toHexStrings() -> [String] {
         var hexStrings: [String] = []
         
+        // Process the grid in chunks of 8 pixels wide
         for startX in stride(from: 0, to: width, by: 8) {
             let chunk = chunkToHex(startX: startX)
             hexStrings.append(chunk)
