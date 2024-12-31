@@ -17,7 +17,9 @@ class GridState: ObservableObject {
     }
     
     func addGrid() {
-        pixelGrids.append(.init(parent: self))
+        let lastPixelGrid = pixelGrids.last?.duplicate()
+        
+        pixelGrids.append(lastPixelGrid ?? .init(parent: self, width: lastPixelGrid?.width))
     }
 }
 
@@ -31,21 +33,6 @@ struct MessageView: View {
         gridState.pixelGrids.reduce(0) { $0 + $1.width }
     }
     
-    func combineGrids(_ grids: [[String]]) -> [String] {
-        guard !grids.isEmpty else { return [] }
-        
-        let numberOfRows = grids[0].count
-        var result: [String] = []
-        
-        for rowIndex in 0..<numberOfRows {
-            // Combine each row across all grids
-            let combinedRow = grids.map { $0[rowIndex] }.joined()
-            result.append(combinedRow)
-        }
-        
-        return result
-    }
-    
     var body: some View {
         VStack(spacing: 8) {
             ZStack(alignment: .trailing) {
@@ -53,16 +40,17 @@ struct MessageView: View {
                     HStack(spacing: 2) {
                         HStack {
                             ForEach (gridState.pixelGrids) { grid in
-                                GridView(pixelGrid: grid) { val in
+                                GridView(pixelGrid: grid, onWidthChanged: { val in
                                     grid.width = val
-                                }
-                                .onChange(of: grid) {
-                                    message.bitmap = combineGrids(
-                                        gridState.pixelGrids.compactMap({ grid in
-                                            grid.toHexStrings()
-                                        })
-                                    )
-                                }
+                                }, onPixelChanged: {
+                                    let pixels = gridState.pixelGrids.map({ grid in
+                                        grid.pixels
+                                    })
+                                    let combinedPixel = Message.combinePixelArrays(pixels)
+                                    let pixelHexStrings = Message.pixelsToHexStrings(pixels: combinedPixel)
+                                    
+                                    message.bitmap = pixelHexStrings
+                                })
                             }
                         }
                         .background(
@@ -75,6 +63,7 @@ struct MessageView: View {
                         .controlSize(.large)
                         Spacer()
                     }
+                    .padding(.trailing, 300)
                     .frame(minWidth: scrollViewSize.width * 2)
                     .padding(.horizontal)
                     .padding(.vertical, 32)

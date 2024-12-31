@@ -7,9 +7,11 @@
 import SwiftUI
 
 struct GridView: View {
-    var pixelGrid: PixelGrid
+    @ObservedObject var pixelGrid: PixelGrid
     
-    var onWidthChange: (Int) -> Void = { _ in }
+    var onWidthChanged: (Int) -> Void = { _ in }
+    var onPixelChanged: () -> Void = { }
+    
     
     var body: some View {
         PixelEditorView(model: pixelGrid)
@@ -32,7 +34,7 @@ struct GridView: View {
                         .gesture(
                             DragGesture()
                                 .onChanged { value in
-                                    onWidthChange(
+                                    onWidthChanged(
                                         max(1, pixelGrid.width + Int(value.translation.width / 20))
                                     )
                                 }
@@ -40,6 +42,9 @@ struct GridView: View {
                 }
                 // .border(.pink)
                 .padding(5)
+                .onChange(of: pixelGrid.pixels) {
+                    onPixelChanged()
+                }
             }
         }
     }

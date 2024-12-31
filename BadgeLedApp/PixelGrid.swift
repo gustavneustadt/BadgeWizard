@@ -1,31 +1,12 @@
 import SwiftUI
 
-struct Pixel: Identifiable, Hashable, Equatable {
-    let id = UUID()
-    var x: Int
-    var y: Int
-    var isOn: Bool
-    
-    mutating func set(_ state: Bool) {
-        self.isOn = state
-    }
-}
-
-class PixelGrid: ObservableObject, Identifiable, Equatable {
-    static func == (lhs: PixelGrid, rhs: PixelGrid) -> Bool {
-        // Compare the relevant properties
-        return lhs.pixels == rhs.pixels &&
-        lhs.width == rhs.width &&
-        lhs.height == rhs.height &&
-        lhs.patternGap == rhs.patternGap
-    }
-    
+class PixelGrid: ObservableObject, Identifiable {
     @Published var pixels: [[Pixel]] {
         willSet {
             parent.objectWillChange.send()
         }
     }
-    @Published var width = 20 {
+    @Published var width: Int {
         willSet {
             parent.objectWillChange.send()
         }
@@ -41,15 +22,18 @@ class PixelGrid: ObservableObject, Identifiable, Equatable {
     // Add the gap property here
     @Published var patternGap: Int = 1
     
-    init(parent: GridState) {
+    init(parent: GridState, pixels: [[Pixel]] = [], width: Int? = nil) {
         self.parent = parent
-        pixels = []
+        self.width = width ?? 20
+        self.pixels = pixels
+        
+        guard pixels.isEmpty else { return }
         for y in 0..<height {
             var row: [Pixel] = []
-            for x in 0..<width {
+            for x in 0..<self.width {
                 row.append(Pixel(x: x, y: y, isOn: false))
             }
-            pixels.append(row)
+            self.pixels.append(row)
         }
     }
     
@@ -176,6 +160,10 @@ class PixelGrid: ObservableObject, Identifiable, Equatable {
         }
         
         return hexStrings
+    }
+    
+    func duplicate() -> PixelGrid {
+        PixelGrid(parent: self.parent, pixels: self.pixels, width: self.width)
     }
 }
 
