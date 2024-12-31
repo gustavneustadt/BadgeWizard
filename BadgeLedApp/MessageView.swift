@@ -11,7 +11,6 @@ import SwiftUI
 class GridState: ObservableObject {
     
     @Published var pixelGrids: [PixelGrid] = []
-    
     init() {
         self.addGrid()
     }
@@ -33,6 +32,16 @@ struct MessageView: View {
         gridState.pixelGrids.reduce(0) { $0 + $1.width }
     }
     
+    func updateMessageBitmap() {
+        let pixels = gridState.pixelGrids.map({ grid in
+            grid.pixels
+        })
+        let combinedPixel = Message.combinePixelArrays(pixels)
+        let pixelHexStrings = Message.pixelsToHexStrings(pixels: combinedPixel)
+        
+        message.bitmap = pixelHexStrings
+    }
+    
     var body: some View {
         VStack(spacing: 8) {
             ZStack(alignment: .trailing) {
@@ -42,15 +51,7 @@ struct MessageView: View {
                             ForEach (gridState.pixelGrids) { grid in
                                 GridView(pixelGrid: grid, onWidthChanged: { val in
                                     grid.width = val
-                                }, onPixelChanged: {
-                                    let pixels = gridState.pixelGrids.map({ grid in
-                                        grid.pixels
-                                    })
-                                    let combinedPixel = Message.combinePixelArrays(pixels)
-                                    let pixelHexStrings = Message.pixelsToHexStrings(pixels: combinedPixel)
-                                    
-                                    message.bitmap = pixelHexStrings
-                                })
+                                }, onPixelChanged: updateMessageBitmap)
                             }
                         }
                         .background(
@@ -102,6 +103,9 @@ struct MessageView: View {
                         //     speed: $message.speed
                         // )
                     }
+                    .onChange(of: gridState.pixelGrids, {
+                        updateMessageBitmap()
+                    })
                     .background(.thinMaterial)
                 }
             }

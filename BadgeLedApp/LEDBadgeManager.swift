@@ -1,41 +1,9 @@
 import Foundation
 import CoreBluetooth
 
-enum BadgeConnectionState: Equatable {
-    case ready          // Initial state, ready to start
-    case searching      // Looking for the badge
-    case connecting    // Found badge, establishing connection
-    case sending       // Connected, sending data
-    case error(String) // Error occurred, contains error message
-    
-    var buttonText: String {
-        switch self {
-        case .ready:      return "Send to Badge"
-        case .searching:  return "Searching..."
-        case .connecting: return "Connecting..."
-        case .sending:    return "Sending..."
-        case .error:      return "Retry"
-        }
-    }
-    
-    // Add custom equality comparison for the error case
-    static func == (lhs: BadgeConnectionState, rhs: BadgeConnectionState) -> Bool {
-        switch (lhs, rhs) {
-        case (.ready, .ready),
-            (.searching, .searching),
-            (.connecting, .connecting),
-            (.sending, .sending):
-            return true
-        case let (.error(lhsMessage), .error(rhsMessage)):
-            return lhsMessage == rhsMessage
-        default:
-            return false
-        }
-    }
-}
-
 /// Manages communication with an LED badge device over Bluetooth
 /// Handles device discovery, connection, and data transmission
+@MainActor
 class LEDBadgeManager: NSObject, ObservableObject {
     // MARK: - Properties
     
@@ -75,6 +43,7 @@ class LEDBadgeManager: NSObject, ObservableObject {
     
     /// Initiates the connection and sending process
     /// - Parameter messages: Array of Message objects to send to the badge
+    @MainActor
     func connectAndSend(messages: [Message]) {
         guard centralManager.state == .poweredOn else {
             connectionState = .error("Bluetooth is not available")
@@ -86,19 +55,20 @@ class LEDBadgeManager: NSObject, ObservableObject {
         startScanning()
     }
     
+    // MARK: - Private Methods
+    
     /// Creates and sends a payload to the connected LED badge
     /// - Parameter messages: Array of Message objects containing display information
-    private func createPayload(messages: [Message]) {
+    @MainActor
+    private func createPayload(messages: [Message]) async {
         guard let peripheral = badge, let characteristic = characteristic else {
             connectionState = .error("Badge not connected")
             return
         }
         
         let hexString = buildHexString(from: messages)
-        sendBitmaps(hexString, peripheral: peripheral, characteristic: characteristic)
+        await sendBitmaps(hexString, peripheral: peripheral, characteristic: characteristic)
     }
-    
-    // MARK: - Private Helper Methods
     
     /// Starts scanning for LED badge devices
     private func startScanning() {
@@ -193,23 +163,32 @@ class LEDBadgeManager: NSObject, ObservableObject {
     // MARK: - Data Transmission Methods
     
     /// Sends bitmap data to the LED badge in chunks
-    private func sendBitmaps(_ hexString: String, peripheral: CBPeripheral, characteristic: CBCharacteristic) {
+    @MainActor
+    private func sendBitmaps(_ hexString: String, peripheral: CBPeripheral, characteristic: CBCharacteristic) async {
         connectionState = .sending
         let chunks = splitHexStringIntoChunks(hexString)
-        print("Sending bitmaps to LED badge …")
-        for chunk in chunks {
-            let bytes = hexStringToByteArray(chunk)
-            let data = Data(bytes)
-            let base64String = data.base64EncodedString()
-            print(chunk)
-            
-            if let base64Data = Data(base64Encoded: base64String) {
-                peripheral.writeValue(base64Data, for: characteristic, type: .withResponse)
-                Thread.sleep(forTimeInterval: 0.1)
-            }
-        }
         
-        connectionState = .ready
+        print("Sending bitmaps to LED badge …")
+        
+        do {
+            for chunk in chunks {
+                let bytes = hexStringToByteArray(chunk)
+                let data = Data(bytes)
+                let base64String = data.base64EncodedString()
+                print(chunk)
+                
+                if let base64Data = Data(base64Encoded: base64String) {
+                    try await withCheckedThrowingContinuation { continuation in
+                        peripheral.writeValue(base64Data, for: characteristic, type: .withResponse)
+                        continuation.resume()
+                    }
+                    try await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+                }
+            }
+            connectionState = .ready
+        } catch {
+            connectionState = .error("Failed to send data: \(error.localizedDescription)")
+        }
     }
     
     /// Splits a hex string into chunks of 32 characters
@@ -248,53 +227,55 @@ class LEDBadgeManager: NSObject, ObservableObject {
 
 // MARK: - CBCentralManagerDelegate
 
-extension LEDBadgeManager: CBCentralManagerDelegate {
-    /// Called when the central manager's state updates
+extension LEDBadgeManager: @preconcurrency CBCentralManagerDelegate {
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        if central.state == .poweredOn {
-            print("Bluetooth is powered on")
-        } else {
-            print("Bluetooth is not available: \(central.state)")
-            connectionState = .error("Bluetooth is not available")
+        Task { @MainActor in
+            if central.state == .poweredOn {
+                print("Bluetooth is powered on")
+            } else {
+                print("Bluetooth is not available: \(central.state)")
+                connectionState = .error("Bluetooth is not available")
+            }
         }
     }
     
-    /// Called when a peripheral is discovered
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         guard let name = peripheral.name, name == "LSLED" else { return }
         
         print("Found LED Badge: \(peripheral)")
         stopScanning()
         
-        connectionState = .connecting
-        self.badge = peripheral
-        self.badge?.delegate = self
-        centralManager.connect(peripheral, options: nil)
+        Task { @MainActor in
+            connectionState = .connecting
+            self.badge = peripheral
+            self.badge?.delegate = self
+            centralManager.connect(peripheral, options: nil)
+        }
     }
     
-    /// Called when successfully connected to a peripheral
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         print("Connected to LED Badge")
         peripheral.discoverServices([serviceUUID])
     }
     
-    /// Called when connection to a peripheral fails
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
-        connectionState = .error("Failed to connect: \(error?.localizedDescription ?? "Unknown error")")
+        Task { @MainActor in
+            connectionState = .error("Failed to connect: \(error?.localizedDescription ?? "Unknown error")")
+        }
     }
     
-    /// Called when a peripheral disconnects
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
-        if connectionState != .ready {
-            connectionState = .error("Disconnected: \(error?.localizedDescription ?? "Unknown error")")
+        Task { @MainActor in
+            if connectionState != .ready {
+                connectionState = .error("Disconnected: \(error?.localizedDescription ?? "Unknown error")")
+            }
         }
     }
 }
 
 // MARK: - CBPeripheralDelegate
 
-extension LEDBadgeManager: CBPeripheralDelegate {
-    /// Called when services are discovered on the peripheral
+extension LEDBadgeManager: @preconcurrency CBPeripheralDelegate {
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         guard let services = peripheral.services else { return }
         
@@ -306,7 +287,6 @@ extension LEDBadgeManager: CBPeripheralDelegate {
         }
     }
     
-    /// Called when characteristics are discovered for a service
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         guard let characteristics = service.characteristics else { return }
         
@@ -317,8 +297,10 @@ extension LEDBadgeManager: CBPeripheralDelegate {
                 
                 // Now that we're fully connected, send the pending messages
                 if let messages = pendingMessages {
-                    createPayload(messages: messages)
-                    pendingMessages = nil
+                    Task { @MainActor in
+                        await createPayload(messages: messages)
+                        pendingMessages = nil
+                    }
                 }
             }
         }
