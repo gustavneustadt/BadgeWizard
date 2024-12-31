@@ -95,7 +95,6 @@ class LEDBadgeManager: NSObject, ObservableObject {
         }
         
         let hexString = buildHexString(from: messages)
-        print("Full hex string: \(hexString)")
         sendBitmaps(hexString, peripheral: peripheral, characteristic: characteristic)
     }
     
@@ -197,7 +196,7 @@ class LEDBadgeManager: NSObject, ObservableObject {
     private func sendBitmaps(_ hexString: String, peripheral: CBPeripheral, characteristic: CBCharacteristic) {
         connectionState = .sending
         let chunks = splitHexStringIntoChunks(hexString)
-        
+        print("Sending bitmaps to LED badge …")
         for chunk in chunks {
             let bytes = hexStringToByteArray(chunk)
             let data = Data(bytes)
