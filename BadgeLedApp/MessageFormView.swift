@@ -40,8 +40,6 @@ struct MessageFormView: View {
     // }
     
     var body: some View {
-        Self._logChanges()
-        
         return VStack {
             Form {
                 Slider(value: .init(get: {
@@ -71,7 +69,6 @@ struct MessageFormView: View {
                 // }
                 // FontNameSelector(selectedFontName: $fontName)
             }
-            Spacer()
             // HStack {
             //     Button {
             //         erasePixels()
@@ -95,8 +92,7 @@ struct MessageFormView: View {
             //     .foregroundStyle(Color.accentColor)
             // }
         }
-        .frame(width: 200)
-        .padding()
+        // .frame(width: 200)
         // .sheet(isPresented: $showImportSheet) {
         //     Section("Import ASCII Art") {
         //         VStack(alignment: .leading) {

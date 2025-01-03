@@ -34,12 +34,29 @@ struct MessageView: View {
     
     func updateMessageBitmap() {
         let pixels = gridState.pixelGrids.map({ grid in
-            grid.pixels
+            
+            if message.mode == .picture {
+                return Message.combinePixelArrays([grid.pixels, self.createPadding()])
+            }
+            
+            return grid.pixels
         })
+        
+        print(pixels[0][0].count)
         let combinedPixel = Message.combinePixelArrays(pixels)
         let pixelHexStrings = Message.pixelsToHexStrings(pixels: combinedPixel)
         
         message.bitmap = pixelHexStrings
+    }
+    
+    func createPadding() -> [[Pixel]] {
+        let width = 4
+        let height = 11
+        return (0..<height).map { y in
+            (0..<width).map { x in
+                Pixel(x: x, y: y, isOn: false)
+            }
+        }
     }
     
     var body: some View {
@@ -82,14 +99,34 @@ struct MessageView: View {
                         }
                         Spacer()
                     }
-                    HStack {
+                    HStack(spacing: 0) {
                         Divider()
-                        MessageFormView(
-                            mode: $message.mode,
-                            marquee: $message.marquee,
-                            flash: $message.flash,
-                            speed: $message.speed
-                        )
+                        VStack(alignment: .leading) {
+                            VStack(alignment: .leading) {
+                                Text("Preview")
+                                LEDPreviewView(
+                                    pixels: Message.combinePixelArrays(
+                                        gridState.pixelGrids.map({ grid in
+                                            grid.pixels
+                                        })
+                                    ),
+                                    mode: message.mode,
+                                    speed: message.speed,
+                                    flash: message.flash,
+                                    marquee: message.marquee
+                                )
+                            }
+                            
+                            MessageFormView(
+                                mode: $message.mode,
+                                marquee: $message.marquee,
+                                flash: $message.flash,
+                                speed: $message.speed
+                            )
+                            Spacer()
+                        }
+                        .padding()
+                        .frame(maxWidth: 300)
                         // MessageFormView(
                         //     updatePixels: { pixels, width in
                         //                 pixelGrid.pixels = pixels

@@ -1,0 +1,574 @@
+import SwiftUI
+
+struct LEDPreviewView: View {
+    let pixels: [[Pixel]]
+    let mode: Message.Mode
+    let speed: Message.Speed
+    let flash: Bool
+    let marquee: Bool
+    
+    @State private var currentPosition: Double = 0
+    @State var size: CGSize = .zero
+    
+    // Display buffer - represents the actual LED state
+    @State private var displayBuffer: [[Bool]] = Array(repeating: Array(repeating: false, count: 44), count: 11)
+    @State private var animationStep: Int = 0
+    
+    private let timer = Timer.publish(every: 0.05, on: .main, in: .common).autoconnect()
+    
+    private var speedMultiplier: Double {
+        switch speed {
+        case .verySlow: return 0.126
+        case .slow: return 0.188
+        case .relaxed: return 0.257
+        case .medium: return 0.329
+        case .steady: return 0.466
+        case .quick: return 0.797
+        case .fast: return 1.125
+        case .veryFast: return 2.444
+        }
+    }
+    
+    
+    private var ledSize: CGFloat {
+        size.width / CGFloat(44)
+    }
+    
+    private var ledSpacing: CGFloat {
+        ledSize / 4
+    }
+    
+    var body: some View {
+        Canvas { context, size in
+            // Draw background
+            context.fill(
+                Path(roundedRect: CGRect(origin: .zero, size: size),
+                     cornerRadius: (ledSize / 2) - ledSpacing),
+                with: .color(.black)
+            )
+            
+            // Draw LED matrix
+            for y in 0..<11 {
+                for x in 0..<44 {
+                    let rect = CGRect(
+                        x: CGFloat(x) * (ledSize) + ledSpacing / 2,
+                        y: CGFloat(y) * (ledSize) + ledSpacing / 2,
+                        width: ledSize - ledSpacing,
+                        height: ledSize - ledSpacing
+                    )
+                    
+                    let path = Path(roundedRect: rect, cornerRadius: ledSize/2)
+                    
+                    if displayBuffer[y][x] {
+                        // LED dot (on)
+                        context.fill(path, with: .color(.accentColor))
+                    } else {
+                        // LED dot (off)
+                        context.fill(path, with: .color(.accentColor.opacity(0.2)))
+                    }
+                }
+            }
+        }
+        .frame(height: 11 * ledSize)
+        .getSize($size)
+        .onReceive(timer) { _ in
+            updateAnimation()
+        }
+        // .onChange(of: mode) {
+        //     animationStep = 0
+        // }
+        // .onChange(of: speed) {
+        //     animationStep = 0
+        // }
+        // .onChange(of: flash) { _ in
+        //     animationStep = 0
+        // }
+        // .onChange(of: marquee) { _ in
+        //     animationStep = 0
+        // }
+        // .onChange(of: pixels.map { row in row.map(\.isOn) }) { _ in
+        //     animationStep = 0
+        // }
+    }
+    
+    private func updateAnimation() {
+        // Increment position based on speed
+        currentPosition += speedMultiplier
+        
+        // Create a new buffer for this frame
+        var newBuffer = Array(repeating: Array(repeating: false, count: 44), count: 11)
+        
+        switch mode {
+        case .left:
+            scrollLeft(&newBuffer)
+        case .right:
+            scrollRight(&newBuffer)
+        case .up:
+            scrollUp(&newBuffer)
+        case .down:
+            scrollDown(&newBuffer)
+        case .fixed:
+            displayFixed(&newBuffer)
+        case .picture:
+            displayPicture(&newBuffer)
+        case .snowflake:
+            displaySnowflake(&newBuffer)
+        case .animation:
+            displayAnimation(&newBuffer)
+        case .laser:
+            displayLaser(&newBuffer)
+        }
+        
+        // Store the main content before applying effects
+        var contentBuffer = newBuffer
+        
+        // Apply flash effect to main content if enabled
+        if flash && (animationStep % 20) < 10 {
+            contentBuffer = Array(repeating: Array(repeating: false, count: 44), count: 11)
+        }
+        
+        // Apply marquee effect if enabled
+        if marquee {
+            // Start with the flashed or unflashed content
+            newBuffer = contentBuffer
+            applyMarquee(&newBuffer)
+        } else {
+            // If no marquee, just use the content with flash applied
+            newBuffer = contentBuffer
+        }
+        
+        displayBuffer = newBuffer
+        animationStep += 1
+    }
+    
+    private func scrollLeft(_ buffer: inout [[Bool]]) {
+        let totalWidth = pixels[0].count + 44
+        let offset = Int(currentPosition) % totalWidth
+        
+        for y in 0..<11 {
+            for x in 0..<44 {
+                let sourceX = x + offset - 44
+                if sourceX >= 0 && sourceX < pixels[0].count {
+                    buffer[y][x] = pixels[y][sourceX].isOn
+                } else {
+                    buffer[y][x] = false
+                }
+            }
+        }
+    }
+    
+    private func scrollRight(_ buffer: inout [[Bool]]) {
+        let totalWidth = pixels[0].count + 44
+        let offset = Int(currentPosition) % totalWidth
+        
+        for y in 0..<11 {
+            for x in 0..<44 {
+                let sourceX = pixels[0].count - 1 - (offset - x)
+                if sourceX >= 0 && sourceX < pixels[0].count {
+                    buffer[y][x] = pixels[y][sourceX].isOn
+                } else {
+                    buffer[y][x] = false
+                }
+            }
+        }
+    }
+    
+    private func scrollUp(_ buffer: inout [[Bool]]) {
+        let totalSteps = 11 * 3 // Total animation cycle length
+        let currentStep = Int(currentPosition) % totalSteps
+        
+        if currentStep < 11 { // Scrolling in
+            for y in 0..<11 {
+                for x in 0..<44 {
+                    let sourceY = y + (11 - currentStep)
+                    if sourceY >= 0 && sourceY < 11 && x < pixels[0].count {
+                        buffer[y][x] = pixels[sourceY][x].isOn
+                    }
+                }
+            }
+        } else if currentStep < 22 { // Still
+            for y in 0..<11 {
+                for x in 0..<44 {
+                    if x < pixels[0].count {
+                        buffer[y][x] = pixels[y][x].isOn
+                    }
+                }
+            }
+        } else { // Scrolling out
+            for y in 0..<11 {
+                for x in 0..<44 {
+                    let sourceY = y - (currentStep - 22)
+                    if sourceY >= 0 && sourceY < 11 && x < pixels[0].count {
+                        buffer[y][x] = pixels[sourceY][x].isOn
+                    }
+                }
+            }
+        }
+    }
+    
+    private func scrollDown(_ buffer: inout [[Bool]]) {
+        let totalSteps = 11 * 3
+        let currentStep = Int(currentPosition) % totalSteps
+        
+        if currentStep < 11 { // Scrolling in
+            for y in 0..<11 {
+                for x in 0..<44 {
+                    let sourceY = y - (11 - currentStep)
+                    if sourceY >= 0 && sourceY < 11 && x < pixels[0].count {
+                        buffer[y][x] = pixels[sourceY][x].isOn
+                    }
+                }
+            }
+        } else if currentStep < 22 { // Still
+            for y in 0..<11 {
+                for x in 0..<44 {
+                    if x < pixels[0].count {
+                        buffer[y][x] = pixels[y][x].isOn
+                    }
+                }
+            }
+        } else { // Scrolling out
+            for y in 0..<11 {
+                for x in 0..<44 {
+                    let sourceY = y + (currentStep - 22)
+                    if sourceY >= 0 && sourceY < 11 && x < pixels[0].count {
+                        buffer[y][x] = pixels[sourceY][x].isOn
+                    }
+                }
+            }
+        }
+    }
+    
+    private func displayFixed(_ buffer: inout [[Bool]]) {
+        let badgeWidth = 44
+        let newGridWidth = pixels[0].count
+        
+        // Center the image in fixed mode to match badge behavior
+        let offset = (badgeWidth - newGridWidth) / 2
+        
+        for y in 0..<11 {
+            for x in 0..<44 {
+                let sourceX = x - offset
+                if sourceX >= 0 && sourceX < newGridWidth {
+                    buffer[y][x] = pixels[y][sourceX].isOn
+                } else {
+                    buffer[y][x] = false
+                }
+            }
+        }
+    }
+    
+    private func displayPicture(_ buffer: inout [[Bool]]) {
+        let badgeHeight = 11
+        let badgeWidth = 44
+        let newGridWidth = pixels[0].count
+        
+        // For images smaller than the badge width, display left-aligned to match badge behavior
+        if newGridWidth <= badgeWidth {
+            for i in 0..<badgeHeight {
+                for j in 0..<badgeWidth {
+                    if j < newGridWidth {
+                        buffer[i][j] = pixels[i][j].isOn
+                    } else {
+                        buffer[i][j] = false
+                    }
+                }
+            }
+            return
+        }
+        
+        // For larger images, we scroll through the content
+        // Calculate how many complete frames we can make from the input width
+        let framesCount = Int(ceil(Double(newGridWidth) / Double(badgeWidth)))
+        
+        // Use currentPosition directly for frame selection
+        let currentFrameIndex = Int(currentPosition) % framesCount
+        
+        // Calculate the starting column for the current frame
+        let startCol = (currentFrameIndex * badgeWidth) % newGridWidth
+        
+        for i in 0..<badgeHeight {
+            for j in 0..<badgeWidth {
+                let sourceCol = (startCol + j) % newGridWidth
+                if sourceCol < newGridWidth {
+                    buffer[i][j] = pixels[i][sourceCol].isOn
+                } else {
+                    buffer[i][j] = false
+                }
+            }
+        }
+    }
+    
+    private func displaySnowflake(_ buffer: inout [[Bool]]) {
+        let badgeHeight = 11
+        let badgeWidth = 44
+        let totalAnimationLength = badgeHeight * 16
+        let currentStep = Int(currentPosition) % totalAnimationLength
+        
+        let horizontalOffset = (badgeWidth - pixels[0].count) / 2
+        
+        let phase1 = currentStep < badgeHeight * 4
+        let phase2 = currentStep >= badgeHeight * 4 && currentStep < badgeHeight * 8
+        
+        if phase1 {
+            for row in (0..<badgeHeight).reversed() {
+                let fallPosition = currentStep - (badgeHeight - 1 - row) * 2
+                let stoppingPosition = row
+                let actualFallPosition = fallPosition >= stoppingPosition ? stoppingPosition : fallPosition
+                
+                if actualFallPosition >= 0 && actualFallPosition < badgeHeight {
+                    for col in 0..<badgeWidth {
+                        let sourceCol = col - horizontalOffset
+                        if sourceCol >= 0 && sourceCol < pixels[0].count {
+                            buffer[actualFallPosition][col] = pixels[row][sourceCol].isOn
+                        }
+                    }
+                }
+            }
+        } else if phase2 {
+            for row in (0..<badgeHeight).reversed() {
+                let fallOutStartFrame = (badgeHeight - 1 - row) * 2
+                let fallOutPosition = row + (currentStep - badgeHeight * 4 - fallOutStartFrame)
+                
+                if fallOutPosition < row {
+                    for col in 0..<badgeWidth {
+                        let sourceCol = col - horizontalOffset
+                        if sourceCol >= 0 && sourceCol < pixels[0].count {
+                            buffer[row][col] = pixels[row][sourceCol].isOn
+                        }
+                    }
+                }
+                
+                if fallOutPosition >= row && fallOutPosition < badgeHeight {
+                    for col in 0..<badgeWidth {
+                        buffer[row][col] = false
+                        
+                        let sourceCol = col - horizontalOffset
+                        if sourceCol >= 0 && sourceCol < pixels[0].count && fallOutPosition < badgeHeight {
+                            buffer[fallOutPosition][col] = pixels[row][sourceCol].isOn
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    private func displayAnimation(_ buffer: inout [[Bool]]) {
+        let badgeHeight = 11
+        let badgeWidth = 44
+        let displayWidth = min(pixels[0].count, badgeWidth)
+        let horizontalOffset = (badgeWidth - displayWidth) / 2
+        
+        // Add pause phase: total length is now badge width + pause length
+        let pauseLength = 20
+        let totalAnimationLength = badgeWidth + pauseLength
+        let currentStep = Int(currentPosition) % totalAnimationLength
+        
+        let revealPhase = currentStep < badgeWidth / 2
+        let pausePhase = currentStep >= badgeWidth / 2 && currentStep < badgeWidth / 2 + pauseLength
+        let hidePhase = currentStep >= badgeWidth / 2 + pauseLength
+        
+        let leftCenterCol = badgeWidth / 2 - 1
+        let rightCenterCol = badgeWidth / 2
+        let maxDistance = leftCenterCol
+        
+        let currentAnimationIndex = if hidePhase {
+            currentStep - (badgeWidth / 2 + pauseLength)
+        } else {
+            currentStep % (maxDistance + 1)
+        }
+        
+        var leftColPos = leftCenterCol - currentAnimationIndex
+        var rightColPos = rightCenterCol + currentAnimationIndex
+        
+        if leftColPos < 0 { leftColPos += badgeWidth }
+        if rightColPos >= badgeWidth { rightColPos -= badgeWidth }
+        
+        for i in 0..<badgeHeight {
+            for j in 0..<badgeWidth {
+                let lineShow = !pausePhase && (j == leftColPos || j == rightColPos)
+                var bitmapShowCenter = false
+                var bitmapShowOut = false
+                
+                let sourceCol = j - horizontalOffset
+                let isWithinNewGrid = sourceCol >= 0 && sourceCol < displayWidth
+                
+                if pausePhase {
+                    if isWithinNewGrid {
+                        buffer[i][j] = pixels[i][sourceCol].isOn
+                    }
+                    continue
+                }
+                
+                if revealPhase {
+                    if isWithinNewGrid && j > leftColPos && j < rightColPos {
+                        bitmapShowCenter = pixels[i][sourceCol].isOn
+                    }
+                }
+                
+                if hidePhase {
+                    if isWithinNewGrid && (j < leftColPos || j > rightColPos) {
+                        bitmapShowOut = pixels[i][sourceCol].isOn
+                    }
+                }
+                
+                buffer[i][j] = lineShow || bitmapShowOut || bitmapShowCenter
+            }
+        }
+    }
+    
+    private func displayLaser(_ buffer: inout [[Bool]]) {
+        let frameSteps = 44 * 3  // LED_COLS * 3 for in-still-out
+        let currentStep = Int(currentPosition) % frameSteps
+        let maxWidth = pixels[0].count
+        let badgeWidth = 44
+        
+        // Calculate centering offset
+        let offset = (badgeWidth - maxWidth) / 2
+        
+        if currentStep < 44 {  // Laser in
+            let c = min(currentStep, badgeWidth - 1)
+            for y in 0..<11 {
+                for x in 0..<44 {
+                    let sourceX = x - offset
+                    if x < currentStep {
+                        buffer[y][x] = sourceX >= 0 && sourceX < maxWidth ? pixels[y][sourceX].isOn : false
+                    } else {
+                        let laserX = c - offset
+                        buffer[y][x] = laserX >= 0 && laserX < maxWidth ? pixels[y][laserX].isOn : false
+                    }
+                }
+            }
+        } else if currentStep < 88 {  // Still
+            displayFixed(&buffer)
+        } else {  // Laser out
+            let c = min(currentStep - 88, badgeWidth - 1)
+            for y in 0..<11 {
+                for x in 0..<44 {
+                    let sourceX = x - offset
+                    if x < c {
+                        let laserX = c - offset
+                        buffer[y][x] = laserX >= 0 && laserX < maxWidth ? pixels[y][laserX].isOn : false
+                    } else {
+                        buffer[y][x] = sourceX >= 0 && sourceX < maxWidth ? pixels[y][sourceX].isOn : false
+                    }
+                }
+            }
+        }
+    }
+    
+    private func applyMarquee(_ buffer: inout [[Bool]]) {
+        // Cap the speed multiplier for marquee to match hardware limitations (speed 5)
+        let cappedSpeedMultiplier = min(speedMultiplier, 0.797) // speed 5 (quick) value
+        let step = Int((Double(animationStep) * cappedSpeedMultiplier).rounded()) / 2 % 4
+        
+        // Create a new buffer just for the display content, excluding border
+        var innerBuffer = Array(repeating: Array(repeating: false, count: 44), count: 11)
+        
+        // Copy the non-border content to the inner buffer
+        for i in 1..<10 {
+            for j in 1..<43 {
+                innerBuffer[i][j] = buffer[i][j]
+            }
+        }
+        
+        // Clear the original buffer
+        buffer = Array(repeating: Array(repeating: false, count: 44), count: 11)
+        
+        // Copy back the inner content
+        for i in 1..<10 {
+            for j in 1..<43 {
+                buffer[i][j] = innerBuffer[i][j]
+            }
+        }
+        
+        // Apply marquee effect on the borders (counterclockwise)
+        for i in 0..<11 {
+            for j in 0..<44 {
+                let isOnBorder = i == 0 || j == 0 || i == 10 || j == 43
+                if isOnBorder {
+                    var shouldLight = false
+                    
+                    // Top edge: right to left
+                    if i == 0 {
+                        shouldLight = (43 - j) % 4 == step
+                    }
+                    // Left edge: top to bottom
+                    else if j == 0 {
+                        shouldLight = i % 4 == step
+                    }
+                    // Bottom edge: left to right
+                    else if i == 10 {
+                        shouldLight = j % 4 == step
+                    }
+                    // Right edge: bottom to top
+                    else if j == 43 {
+                        shouldLight = (10 - i) % 4 == step
+                    }
+                    
+                    buffer[i][j] = shouldLight
+                }
+            }
+        }
+    }
+}
+
+struct LEDPreviewView_Previews: PreviewProvider {
+    static var previews: some View {
+        LEDPreviewView(
+            pixels: AnimationPatternGenerator.createMovingCircle(),
+            mode: .picture,
+            speed: .veryFast,
+            flash: false,
+            marquee: false
+        )
+        .padding()
+        .background(Color.gray.opacity(0.2))
+    }
+}
+
+
+class AnimationPatternGenerator {
+    static func createMovingCircle() -> [[Pixel]] {
+        let height = 11
+        let frameWidth = 44
+        let frames = 8  // Number of distinct positions
+        let totalWidth = frameWidth * frames
+        var pixels: [[Pixel]] = []
+        
+        // Initialize empty grid
+        for y in 0..<height {
+            var row: [Pixel] = []
+            for x in 0..<totalWidth {
+                row.append(Pixel(x: x, y: y, isOn: false))
+            }
+            pixels.append(row)
+        }
+        
+        // Create the moving circle pattern
+        for frame in 0..<frames {
+            let isMovingRight = frame < frames/2
+            let position = if isMovingRight {
+                frame * (frameWidth / (frames/2 - 1))
+            } else {
+                (frames - 1 - frame) * (frameWidth / (frames/2 - 1))
+            }
+            
+            let centerX = (frame * frameWidth) + Int(position)
+            let centerY = 5  // Vertical center
+            let radius = 3   // Circle radius
+            
+            // Draw circle in current frame position
+            for y in 0..<height {
+                for x in (frame * frameWidth)..<((frame + 1) * frameWidth) {
+                    let dx = Double(x - centerX)
+                    let dy = Double(y - centerY)
+                    let distance = sqrt(dx * dx + dy * dy)
+                    pixels[y][x].isOn = distance <= Double(radius)
+                }
+            }
+        }
+        
+        return pixels
+    }
+}
