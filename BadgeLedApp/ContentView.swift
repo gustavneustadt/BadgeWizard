@@ -13,6 +13,9 @@ struct ContentView: View {
             mode: .left
         )
     ]
+    @State var gridStates: [GridState] = [
+        .init()
+    ]
     
     func appendNewMessage() {
         messages.append(
@@ -24,16 +27,18 @@ struct ContentView: View {
                 mode: .left
             )
         )
+        gridStates.append(.init())
     }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             ScrollView(.vertical) {
-                VStack(spacing: 0) {
+                LazyVStack(spacing: 0) {
                     ForEach(messages.indices, id: \.self) { index in
-
                         MessageView(
                             message: messages[index],
+                            messageNumber: index+1,
+                            gridState: gridStates[index],
                             previewTimer: sharedPreviewTimer
                         )
                         Divider()

@@ -24,7 +24,8 @@ class GridState: ObservableObject {
 
 struct MessageView: View {
     @ObservedObject var message: Message
-    @StateObject var gridState: GridState = .init()
+    let messageNumber: Int
+    @ObservedObject var gridState: GridState
     @State private var showingForm = false
     @State var scrollViewSize: CGSize = .zero
     
@@ -77,8 +78,6 @@ struct MessageView: View {
                                         onPixelChanged: updateMessageBitmap)
                                 }
                                 VStack {
-                                    
-                                    
                                     Button {
                                         gridState.addGrid()
                                     } label: {
@@ -97,13 +96,14 @@ struct MessageView: View {
                         .padding(.trailing, 300)
                         .frame(minWidth: scrollViewSize.width * 2)
                         .padding(.horizontal)
-                        .padding(.vertical, 32)
+                        .padding(.top, 48)
+                        .padding(.bottom)
                     }
                     .getSize($scrollViewSize)
                 HStack(spacing: 0) {
                     HStack {
                         VStack {
-                            Text("Message ")
+                            Text("Message \(messageNumber)")
                                 .monospaced()
                                 .foregroundStyle(.secondary)
                             Spacer()
@@ -116,7 +116,7 @@ struct MessageView: View {
                             Spacer()
                         }
                     }
-                    .padding(8)
+                    .padding()
                     HStack(spacing: 0) {
                         Divider()
                         VStack(alignment: .leading) {
@@ -179,7 +179,10 @@ struct MessageView: View {
             marquee: false,
             speed: .medium,
             mode: .animation
-        ), previewTimer: timer
+        ),
+        messageNumber: 1,
+        gridState: .init(),
+        previewTimer: timer
     )
     
 }
