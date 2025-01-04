@@ -42,6 +42,12 @@ struct MessageFormView: View {
     var body: some View {
         return VStack {
             Form {
+                Picker("Mode:", selection: $mode) {
+                    ForEach(Message.Mode.allCases, id: \.self) { mode in
+                        Text(mode.description).tag(mode)
+                    }
+                }
+                
                 Slider(value: .init(get: {
                     Double(speed.rawValue)
                 }, set: { val in
@@ -49,16 +55,14 @@ struct MessageFormView: View {
                 }), in: 0...7, step: 1) {
                     Text("Speed:")
                 }
-                Toggle(isOn: $marquee) {
-                    Text("Marquee")
-                }
-                Toggle(isOn: $flash) {
-                    Text("Flashing")
-                }
                 
-                Picker("Mode:", selection: $mode) {
-                    ForEach(Message.Mode.allCases, id: \.self) { mode in
-                        Text(mode.description).tag(mode)
+                
+                HStack {
+                    Toggle(isOn: $marquee) {
+                        Text("Marquee")
+                    }
+                    Toggle(isOn: $flash) {
+                        Text("Flashing")
                     }
                 }
                 // .padding(.bottom)
@@ -69,6 +73,7 @@ struct MessageFormView: View {
                 // }
                 // FontNameSelector(selectedFontName: $fontName)
             }
+            .padding(.top)
             // HStack {
             //     Button {
             //         erasePixels()

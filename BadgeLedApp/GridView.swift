@@ -9,51 +9,87 @@ import SwiftUI
 struct GridView: View {
     @ObservedObject var pixelGrid: PixelGrid
     
-    var onWidthChanged: (Int) -> Void = { _ in }
+    var onTrailingWidthChanged: (Int) -> Void = { _ in }
+    var onLeadingWidthChanged: (Int) -> Void = { _ in }
     var onPixelChanged: () -> Void = { }
     
     
     var body: some View {
         PixelEditorView(model: pixelGrid)
-        .padding()
-        .padding(.trailing, 8)
+            .padding([.top, .bottom, .leading])
+            .padding(.trailing, 19)
         .overlay {
-            HStack {
-                Spacer()
-                VStack {
-                    Button {
-                        
-                    } label: {
-                        Image(systemName: "ellipsis.circle.fill")
+                ZStack {
+                    VStack {
+                        HStack {
+                            Spacer()
+                            Button {
+                                
+                            } label: {
+                                Image(systemName: "ellipsis.circle.fill")
+                            }
+                            .buttonStyle(.borderless)
+                            .frame(width: 20, height: 20)
+                        }
+                        Spacer()
                     }
-                    .buttonStyle(.borderless)
-                    RoundedRectangle(cornerRadius: 6, style: .continuous)
-                        .frame(width: 4, height:80)
-                        .foregroundStyle(.secondary.opacity(0.5))
-                        .pointerStyle(.frameResize(position: .trailing))
-                        .gesture(
-                            DragGesture()
-                                .onChanged { value in
-                                    onWidthChanged(
-                                        max(1, pixelGrid.width + Int(value.translation.width / 20))
-                                    )
-                                }
-                        )
+                    .padding(.top)
+                    HStack {
+                        Spacer()
+                        dragHandleTrailing
+                    }
                 }
-                // .border(.pink)
-                .padding(5)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .onChange(of: pixelGrid.pixels) {
                     onPixelChanged()
                 }
-            }
         }
+        .padding(.trailing, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(.background)
+        )
+    }
+
+    var dragHandleTrailing: some View {
+        ZStack {
+            UnevenRoundedRectangle(
+                cornerRadii:
+                        .init(
+                            topLeading: 3,
+                            bottomLeading: 3,
+                            bottomTrailing: 10,
+                            topTrailing: 10
+                        ),
+                style: .continuous)
+            .frame(width: 18, height:59)
+            .foregroundStyle(.tertiary)
+            HStack(spacing: 2) {
+                Rectangle()
+                    .frame(width: 1)
+                Rectangle()
+                    .frame(width: 1)
+                Rectangle()
+                    .frame(width: 1)
+            }
+            .foregroundStyle(.black.opacity(0.4))
+            .frame(height: 30)
+        }
+        .pointerStyle(.frameResize(position: .trailing))
+        .gesture(
+            DragGesture()
+                .onChanged { value in
+                    onTrailingWidthChanged(
+                        max(1, pixelGrid.width + Int(value.translation.width / 20))
+                    )
+                }
+        )
     }
 }
-// 
-// #Preview {
-//     @Previewable @State var pixelGrid: PixelGrid = .init()
-//     GridView(
-//         pixelGrid: pixelGrid
-//     )
-//         .padding()
-// }
+#Preview {
+    @Previewable @State var pixelGrid: PixelGrid = .init(parent: .init())
+    GridView(
+        pixelGrid: pixelGrid
+    )
+        .padding()
+}

@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import SwiftUI
+import Combine
 
 class GridState: ObservableObject {
     
@@ -28,6 +28,8 @@ struct MessageView: View {
     @State private var showingForm = false
     @State var scrollViewSize: CGSize = .zero
     
+    let previewTimer: Publishers.Autoconnect<Timer.TimerPublisher>
+    
     var columnSum: Int {
         gridState.pixelGrids.reduce(0) { $0 + $1.width }
     }
@@ -41,8 +43,6 @@ struct MessageView: View {
             
             return grid.pixels
         })
-        
-        print(pixels[0][0].count)
         let combinedPixel = Message.combinePixelArrays(pixels)
         let pixelHexStrings = Message.pixelsToHexStrings(pixels: combinedPixel)
         
@@ -62,43 +62,61 @@ struct MessageView: View {
     var body: some View {
         VStack(spacing: 8) {
             ZStack(alignment: .trailing) {
-                ScrollView([.horizontal]) {
-                    HStack(spacing: 2) {
-                        HStack {
-                            ForEach (gridState.pixelGrids) { grid in
-                                GridView(pixelGrid: grid, onWidthChanged: { val in
-                                    grid.width = val
-                                }, onPixelChanged: updateMessageBitmap)
+                    ScrollView([.horizontal]) {
+                        HStack(spacing: 0) {
+                            HStack(spacing: 8) {
+                                ForEach (gridState.pixelGrids) { grid in
+                                    GridView(
+                                        pixelGrid: grid,
+                                        onTrailingWidthChanged: { val in
+                                            grid.resizeFromTrailingEdge(to: val)
+                                        },
+                                        onLeadingWidthChanged: { val in
+                                            grid.resizeFromLeadingEdge(to: val)
+                                        },
+                                        onPixelChanged: updateMessageBitmap)
+                                }
+                                VStack {
+                                    
+                                    
+                                    Button {
+                                        gridState.addGrid()
+                                    } label: {
+                                        Label {
+                                            Text("Add Grid")
+                                        } icon: {
+                                            Image("square.plus")
+                                        }
+
+                                    }
+                                    .controlSize(.extraLarge)
+                                }
                             }
+                            Spacer()
                         }
-                        .background(
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .fill(.background)
-                        )
-                        Button("Add", systemImage: "plus") {
-                            gridState.addGrid()
-                        }
-                        .controlSize(.large)
-                        Spacer()
+                        .padding(.trailing, 300)
+                        .frame(minWidth: scrollViewSize.width * 2)
+                        .padding(.horizontal)
+                        .padding(.vertical, 32)
                     }
-                    .padding(.trailing, 300)
-                    .frame(minWidth: scrollViewSize.width * 2)
-                    .padding(.horizontal)
-                    .padding(.vertical, 32)
-                }
-                .getSize($scrollViewSize)
-                HStack {
+                    .getSize($scrollViewSize)
+                HStack(spacing: 0) {
                     HStack {
+                        VStack {
+                            Text("Message ")
+                                .monospaced()
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                        }
                         Spacer()
                         VStack {
                             Text("\(columnSum) Columns in Total")
                                 .monospaced()
                                 .foregroundStyle(.secondary)
-                                .padding(.top, 8)
                             Spacer()
                         }
-                        Spacer()
                     }
+                    .padding(8)
                     HStack(spacing: 0) {
                         Divider()
                         VStack(alignment: .leading) {
@@ -113,7 +131,8 @@ struct MessageView: View {
                                     mode: message.mode,
                                     speed: message.speed,
                                     flash: message.flash,
-                                    marquee: message.marquee
+                                    marquee: message.marquee,
+                                    timer: previewTimer
                                 )
                             }
                             
@@ -151,6 +170,8 @@ struct MessageView: View {
 }
 
 #Preview {
+    let timer = Timer.publish(every: 0.05, on: .main, in: .common).autoconnect()
+    
     MessageView(
         message: .init(
             bitmap: [],
@@ -158,7 +179,7 @@ struct MessageView: View {
             marquee: false,
             speed: .medium,
             mode: .animation
-        )
+        ), previewTimer: timer
     )
     
 }

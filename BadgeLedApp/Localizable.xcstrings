@@ -49,7 +49,7 @@
         }
       }
     },
-    "Add" : {
+    "Add Grid" : {
 
     },
     "Flashing" : {
@@ -59,6 +59,9 @@
 
     },
     "Marquee" : {
+
+    },
+    "Message " : {
 
     },
     "Messages:" : {

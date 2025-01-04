@@ -1,0 +1,12 @@
+{
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  },
+  "symbols" : [
+    {
+      "filename" : "custom.square.grid.4x3.fill.badge.plus.svg",
+      "idiom" : "universal"
+    }
+  ]
+}

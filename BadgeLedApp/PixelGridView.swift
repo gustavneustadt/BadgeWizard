@@ -58,7 +58,7 @@ struct PixelGridImage: View {
                 .tag("itemOn")
             
             RoundedRectangle(cornerRadius: 3, style: .continuous)
-                .fill(Color.secondary.opacity(0.3))
+                .fill(.tertiary)
                 .frame(width: 19, height: 19)
                 .tag("itemOff")
         }

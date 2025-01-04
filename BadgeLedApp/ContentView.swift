@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var bluetoothManager = LEDBadgeManager()
+    private let sharedPreviewTimer = Timer.publish(every: 0.05, on: .main, in: .common).autoconnect()
     @State var messagesCount: Int = 1
     @State var messages: [Message] = [
         Message(
@@ -29,8 +30,12 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 0) {
             ScrollView(.vertical) {
                 VStack(spacing: 0) {
-                    ForEach(messages) { message in
-                            MessageView(message: message)
+                    ForEach(messages.indices, id: \.self) { index in
+
+                        MessageView(
+                            message: messages[index],
+                            previewTimer: sharedPreviewTimer
+                        )
                         Divider()
                     }
                 }
