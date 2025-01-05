@@ -52,7 +52,7 @@ struct LEDPreviewView: View {
                      cornerRadius: (ledSize / 2) - ledSpacing),
                 with: .color(.black)
             )
-            let ledPath = Path(ellipseIn: CGRect(origin: .zero, size: .init(width: ledSize, height: ledSize)))
+            let ledPath = Path(ellipseIn: CGRect(origin: .zero, size: .init(width: ledSize-2, height: ledSize-2)))
             
             
             // Draw LED matrix
@@ -132,8 +132,12 @@ struct LEDPreviewView: View {
     }
     
     private func scrollLeft(_ buffer: inout [[Bool]]) {
-        let totalWidth = pixels[0].count + 44
-        let offset = Int(currentPosition) % totalWidth
+        // reset position when all the pixels scrolled through
+        if Int(currentPosition) > pixels[0].count + 44 {
+            currentPosition = 0
+        }
+        
+        let offset = Int(currentPosition)
         
         for y in 0..<11 {
             for x in 0..<44 {
@@ -148,8 +152,12 @@ struct LEDPreviewView: View {
     }
     
     private func scrollRight(_ buffer: inout [[Bool]]) {
-        let totalWidth = pixels[0].count + 44
-        let offset = Int(currentPosition) % totalWidth
+        // reset position when all the pixels scrolled through
+        if Int(currentPosition) > pixels[0].count + 44 {
+            currentPosition = 0
+        }
+        
+        let offset = Int(currentPosition)
         
         for y in 0..<11 {
             for x in 0..<44 {
