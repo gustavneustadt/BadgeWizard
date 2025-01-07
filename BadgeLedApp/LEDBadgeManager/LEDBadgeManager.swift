@@ -8,29 +8,29 @@ class LEDBadgeManager: NSObject, ObservableObject {
     // MARK: - Properties
     
     /// The current state of the badge connection and data transfer process
-    @Published private(set) var connectionState: BadgeConnectionState = .ready
+    @Published var connectionState: BadgeConnectionState = .ready
     
     /// Core Bluetooth manager for handling Bluetooth operations
-    private var centralManager: CBCentralManager!
+    internal var centralManager: CBCentralManager!
     /// Currently connected badge peripheral
-    private var badge: CBPeripheral?
+    internal var badge: CBPeripheral?
     /// Characteristic used for writing data to the badge
-    private var characteristic: CBCharacteristic?
+    internal var characteristic: CBCharacteristic?
     /// Messages waiting to be sent
-    private var pendingMessages: [Message]?
+    internal var pendingMessages: [Message]?
     
     // MARK: - Constants
     
     /// UUID for the LED badge service
-    private let serviceUUID = CBUUID(string: "FEE0")
+    internal let serviceUUID = CBUUID(string: "FEE0")
     /// UUID for the write characteristic
-    private let characteristicUUID = CBUUID(string: "FEE1")
+    internal let characteristicUUID = CBUUID(string: "FEE1")
     
     /// Protocol constants for packet construction
-    private let HEADER = "77616E670000"
-    private let PADDING1 = "000000000000"
-    private let PADDING2 = "00000000"
-    private let SEPARATOR = "00000000000000000000000000000000"
+    internal let HEADER = "77616E670000"
+    internal let PADDING1 = "000000000000"
+    internal let PADDING2 = "00000000"
+    internal let SEPARATOR = "00000000000000000000000000000000"
     
     // MARK: - Initialization
     
@@ -60,7 +60,7 @@ class LEDBadgeManager: NSObject, ObservableObject {
     /// Creates and sends a payload to the connected LED badge
     /// - Parameter messages: Array of Message objects containing display information
     @MainActor
-    private func createPayload(messages: [Message]) async {
+    internal func createPayload(messages: [Message]) async {
         guard let peripheral = badge, let characteristic = characteristic else {
             connectionState = .error("Badge not connected")
             return
@@ -76,7 +76,7 @@ class LEDBadgeManager: NSObject, ObservableObject {
     }
     
     /// Stops scanning for LED badge devices
-    private func stopScanning() {
+    internal func stopScanning() {
         centralManager.stopScan()
     }
     
@@ -225,84 +225,6 @@ class LEDBadgeManager: NSObject, ObservableObject {
     }
 }
 
-// MARK: - CBCentralManagerDelegate
 
-extension LEDBadgeManager: @preconcurrency CBCentralManagerDelegate {
-    func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        Task { @MainActor in
-            if central.state == .poweredOn {
-                print("Bluetooth is powered on")
-            } else {
-                print("Bluetooth is not available: \(central.state)")
-                connectionState = .error("Bluetooth is not available")
-            }
-        }
-    }
-    
-    func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
-        guard let name = peripheral.name, name == "LSLED" else { return }
-        
-        print("Found LED Badge: \(peripheral)")
-        stopScanning()
-        
-        Task { @MainActor in
-            connectionState = .connecting
-            self.badge = peripheral
-            self.badge?.delegate = self
-            centralManager.connect(peripheral, options: nil)
-        }
-    }
-    
-    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        print("Connected to LED Badge")
-        peripheral.discoverServices([serviceUUID])
-    }
-    
-    func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
-        Task { @MainActor in
-            connectionState = .error("Failed to connect: \(error?.localizedDescription ?? "Unknown error")")
-        }
-    }
-    
-    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
-        Task { @MainActor in
-            if connectionState != .ready {
-                connectionState = .error("Disconnected: \(error?.localizedDescription ?? "Unknown error")")
-            }
-        }
-    }
-}
 
-// MARK: - CBPeripheralDelegate
 
-extension LEDBadgeManager: @preconcurrency CBPeripheralDelegate {
-    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
-        guard let services = peripheral.services else { return }
-        
-        for service in services {
-            if service.uuid == serviceUUID {
-                print("Found FEE0 service")
-                peripheral.discoverCharacteristics([characteristicUUID], for: service)
-            }
-        }
-    }
-    
-    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
-        guard let characteristics = service.characteristics else { return }
-        
-        for characteristic in characteristics {
-            if characteristic.uuid == characteristicUUID {
-                print("Found FEE1 characteristic")
-                self.characteristic = characteristic
-                
-                // Now that we're fully connected, send the pending messages
-                if let messages = pendingMessages {
-                    Task { @MainActor in
-                        await createPayload(messages: messages)
-                        pendingMessages = nil
-                    }
-                }
-            }
-        }
-    }
-}

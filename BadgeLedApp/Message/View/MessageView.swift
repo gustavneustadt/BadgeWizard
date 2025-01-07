@@ -8,19 +8,7 @@
 import SwiftUI
 import Combine
 
-class GridState: ObservableObject {
-    
-    @Published var pixelGrids: [PixelGrid] = []
-    init() {
-        self.addGrid()
-    }
-    
-    func addGrid() {
-        let lastPixelGrid = pixelGrids.last?.duplicate()
-        
-        pixelGrids.append(lastPixelGrid ?? .init(parent: self, width: lastPixelGrid?.width))
-    }
-}
+
 
 struct MessageView: View {
     @ObservedObject var message: Message
@@ -104,14 +92,12 @@ struct MessageView: View {
                     HStack {
                         VStack {
                             Text("Message \(messageNumber)")
-                                .monospaced()
                                 .foregroundStyle(.secondary)
                             Spacer()
                         }
                         Spacer()
                         VStack {
                             Text("\(columnSum) Columns in Total")
-                                .monospaced()
                                 .foregroundStyle(.secondary)
                             Spacer()
                         }
