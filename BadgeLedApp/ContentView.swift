@@ -6,28 +6,22 @@ struct ContentView: View {
     @State var messagesCount: Int = 1
     @State var messages: [Message] = [
         Message(
-            bitmap: [],
             flash: false,
             marquee: false,
             speed: .steady,
             mode: .left
         )
     ]
-    @State var gridStates: [GridState] = [
-        .init()
-    ]
     
     func appendNewMessage() {
         messages.append(
             Message(
-                bitmap: [],
                 flash: false,
                 marquee: false,
                 speed: .steady,
                 mode: .left
             )
         )
-        gridStates.append(.init())
     }
     
     var body: some View {
@@ -38,7 +32,6 @@ struct ContentView: View {
                         MessageView(
                             message: messages[index],
                             messageNumber: index+1,
-                            gridState: gridStates[index],
                             previewTimer: sharedPreviewTimer
                         )
                         Divider()

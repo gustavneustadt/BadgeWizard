@@ -65,4 +65,13 @@ extension Message {
         
         return combined
     }
+    
+    static func createPadding(width: Int) -> [[Pixel]] {
+        let height = 11
+        return (0..<height).map { y in
+            (0..<width).map { x in
+                Pixel(x: x, y: y, isOn: false)
+            }
+        }
+    }
 }

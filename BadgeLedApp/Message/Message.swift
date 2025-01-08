@@ -14,18 +14,47 @@ class Message: ObservableObject, Identifiable, Equatable {
     }
     
     var id: Identifier<Message> = .init()
-    // var pixelGridModel:
-    var bitmap: [String]
+    @Published var pixelGrids: [PixelGrid] = []
     @Published var flash: Bool
     @Published var marquee: Bool
     @Published var speed: Speed
     @Published var mode: Mode
     
-    init(bitmap: [String], flash: Bool, marquee: Bool, speed: Speed, mode: Mode) {
-        self.bitmap = bitmap
+    init(flash: Bool, marquee: Bool, speed: Speed, mode: Mode) {
         self.flash = flash
         self.marquee = marquee
         self.speed = speed
         self.mode = mode
+        addGrid()
+    }
+    
+    func getBitmap() -> [String] {
+        let pixels = pixelGrids.map { grid in
+            if self.mode == .picture {
+                return Message.combinePixelArrays(
+                    [
+                        grid.pixels,
+                        Message.createPadding(width: 4)
+                    ]
+                )
+            }
+            return grid.pixels
+        }
+        let combinedPixel = Message.combinePixelArrays(pixels)
+        return Message.pixelsToHexStrings(pixels: combinedPixel)
+    }
+    
+    func addGrid() {
+        let lastPixelGrid = pixelGrids.last?.duplicate()
+        
+        pixelGrids.append(lastPixelGrid ?? .init(width: lastPixelGrid?.width))
+    }
+    
+    func getCombinedPixelArrays() -> [[Pixel]] {
+        Self.combinePixelArrays(
+            pixelGrids.map {
+                $0.pixels
+            }
+        )
     }
 }

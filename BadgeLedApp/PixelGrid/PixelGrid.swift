@@ -1,29 +1,19 @@
 import SwiftUI
 
 class PixelGrid: ObservableObject, Identifiable {
-    @Published var pixels: [[Pixel]] {
-        willSet {
-            parent.objectWillChange.send()
-        }
-    }
+    @Published var pixels: [[Pixel]]
     @Published var width: Int {
-        willSet {
-            parent.objectWillChange.send()
-        }
         didSet {
             buildMatrix()
         }
     }
-    
-    unowned var parent: GridState
-    
+
     let height = 11
     
     // Add the gap property here
     @Published var patternGap: Int = 1
     
-    init(parent: GridState, pixels: [[Pixel]] = [], width: Int? = nil) {
-        self.parent = parent
+    init(pixels: [[Pixel]] = [], width: Int? = nil) {
         self.width = width ?? 20
         self.pixels = pixels
         
@@ -34,14 +24,6 @@ class PixelGrid: ObservableObject, Identifiable {
                 row.append(Pixel(x: x, y: y, isOn: false))
             }
             self.pixels.append(row)
-        }
-    }
-    
-    func erase() {
-        for row in 0..<pixels.count {
-            for column in 0..<pixels[row].count {
-                pixels[row][column].set(false)
-            }
         }
     }
     
@@ -114,14 +96,29 @@ class PixelGrid: ObservableObject, Identifiable {
         pixels = newPixels
     }
     
+    
+    
     func setPixel(x: Int, y: Int, isOn: Bool, undoManager: UndoManager?) {
         guard pixels[y][x].isOn != isOn else { return }
         
-        pixels[y][x].isOn = isOn
+        var newPixels = pixels
+        newPixels[y][x] = Pixel(x: x, y: y, isOn: isOn)
+        pixels = newPixels
         
-        undoManager?.registerUndo(withTarget: self, handler: { _ in
-            self.pixels[y][x].isOn = !isOn
-        })
+        undoManager?.registerUndo(withTarget: self) { grid in
+            grid.setPixel(x: x, y: y, isOn: !isOn, undoManager: undoManager)
+        }
+        
+    }
+    
+    func erase() {
+        var newPixels = pixels
+        for y in 0..<height {
+            for x in 0..<width {
+                newPixels[y][x] = Pixel(x: x, y: y, isOn: false)
+            }
+        }
+        pixels = newPixels
     }
     
     private func chunkToHex(startX: Int) -> String {
@@ -163,7 +160,7 @@ class PixelGrid: ObservableObject, Identifiable {
     }
     
     func duplicate() -> PixelGrid {
-        PixelGrid(parent: self.parent, pixels: self.pixels, width: self.width)
+        PixelGrid(pixels: self.pixels, width: self.width)
     }
 }
 

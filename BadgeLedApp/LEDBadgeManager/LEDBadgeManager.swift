@@ -82,16 +82,19 @@ class LEDBadgeManager: NSObject, ObservableObject {
     
     /// Builds the complete hex string payload from the provided messages
     private func buildHexString(from messages: [Message]) -> String {
-        HEADER +
+        let payload = messages.map { $0.getBitmap() }
+        
+        
+        return HEADER +
         getFlashByte(messages) +
         getMarqueeByte(messages) +
         getModesString(messages) +
-        getSizesString(messages) +
+        getSizesString(payload) +
         PADDING1 +
         getTimestamp() +
         PADDING2 +
         SEPARATOR +
-        getMessagePayload(messages)
+        getMessagePayload(payload)
     }
     
     /// Generates a byte representing flash settings for all messages
@@ -129,21 +132,21 @@ class LEDBadgeManager: NSObject, ObservableObject {
     
     /// Generates size information for all messages
     /// Each message size uses two bytes in big-endian format
-    private func getSizesString(_ messages: [Message]) -> String {
-        let sizesString = messages.map { message -> String in
-            let length = message.bitmap.count
+    private func getSizesString(_ messagesPayloads: [[String]]) -> String {
+        let sizesString = messagesPayloads.map { message in
+            let length = message.count
             let highByte = (length >> 8) & 0xFF
             let lowByte = length & 0xFF
             return String(format: "%02X%02X", highByte, lowByte)
         }.joined()
         
-        let remainingBytes = 32 - (messages.count * 4)
+        let remainingBytes = 32 - (messagesPayloads.count * 4)
         return sizesString + String(repeating: "0", count: remainingBytes)
     }
     
     /// Combines all message bitmaps into a single string
-    private func getMessagePayload(_ messages: [Message]) -> String {
-        messages.map { $0.bitmap.joined() }.joined()
+    private func getMessagePayload(_ messagesPayload: [[String]]) -> String {
+        messagesPayload.map { $0.joined() }.joined()
     }
     
     /// Generates timestamp bytes for the current time

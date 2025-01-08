@@ -4,15 +4,11 @@
 //
 //  Created by Gustav on 31.12.24.
 //
+import SwiftUI
 
-
-struct Pixel: Identifiable, Hashable, Equatable {
+struct Pixel: Hashable, Identifiable, Equatable {
     let id: Identifier<Pixel> = .init()
-    var x: Int
-    var y: Int
-    var isOn: Bool
-    
-    mutating func set(_ state: Bool) {
-        self.isOn = state
-    }
+    let x: Int
+    let y: Int
+    let isOn: Bool
 }
