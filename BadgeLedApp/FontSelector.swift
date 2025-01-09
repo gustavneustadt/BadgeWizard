@@ -43,7 +43,6 @@ struct FontSelector: View {
     }
     
     var body: some View {
-        VStack {
             Picker("Font", selection: $selectedFontName) {
                 ForEach(fontNames, id: \.self) { fontName in
                     Text(fontName)
@@ -59,7 +58,7 @@ struct FontSelector: View {
                     }
                 }
             }
-        }
+        
     }
     
     func weightName(for weight: NSFont.Weight) -> String {

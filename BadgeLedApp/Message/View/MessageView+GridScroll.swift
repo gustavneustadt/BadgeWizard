@@ -20,7 +20,7 @@ extension MessageView {
                 HStack(spacing: 0) {
                     HStack(spacing: 8) {
                         ForEach(message.pixelGrids) { grid in
-                            GridView(
+                            PixelGridView(
                                 pixelGrid: grid,
                                 onTrailingWidthChanged: { val in
                                     grid.resizeFromTrailingEdge(to: val)

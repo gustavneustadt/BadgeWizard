@@ -52,10 +52,28 @@
     "Add Grid" : {
 
     },
+    "Clear Grid" : {
+
+    },
+    "Fill Grid" : {
+
+    },
     "Flashing" : {
 
     },
     "Font" : {
+
+    },
+    "Font Size:" : {
+
+    },
+    "Grid Actions" : {
+
+    },
+    "Invert Grid" : {
+
+    },
+    "Kerning:" : {
 
     },
     "Marquee" : {
@@ -71,6 +89,9 @@
 
     },
     "Preview" : {
+
+    },
+    "Set text to:" : {
 
     },
     "Speed:" : {
