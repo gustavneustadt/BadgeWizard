@@ -8,7 +8,7 @@
 import SwiftUI
 
 @main
-struct BadgeLedAppApp: App {
+struct BadgeLedApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()

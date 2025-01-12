@@ -55,7 +55,7 @@ struct BadgeSendButton: View {
         ], id: \.buttonText) { state in
             BadgeSendButton(
                 badgeManager: LEDBadgeManager(),
-                messages: [Message(bitmap: ["TEST"], flash: false, marquee: false, speed: .medium, mode: .left)],
+                messages: [Message(flash: false, marquee: false, speed: .medium, mode: .left)],
                 previewState: state
             )
         }

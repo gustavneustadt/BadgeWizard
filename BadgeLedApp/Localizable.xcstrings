@@ -2,6 +2,7 @@
   "sourceLanguage" : "en",
   "strings" : {
     "%lld Columns" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "variations" : {
@@ -22,6 +23,9 @@
           }
         }
       }
+    },
+    "%lld Columns in Total" : {
+
     },
     "%lld Messages" : {
       "localizations" : {
@@ -45,10 +49,13 @@
         }
       }
     },
-    "Eraser" : {
+    "Add Grid" : {
 
     },
-    "Export as ASCII" : {
+    "Clear Grid" : {
+
+    },
+    "Fill Grid" : {
 
     },
     "Flashing" : {
@@ -60,13 +67,10 @@
     "Font Size:" : {
 
     },
-    "Import" : {
+    "Grid Actions" : {
 
     },
-    "Import ASCII Art" : {
-
-    },
-    "Import…" : {
+    "Invert Grid" : {
 
     },
     "Kerning:" : {
@@ -75,19 +79,25 @@
     "Marquee" : {
 
     },
+    "Message %lld" : {
+
+    },
     "Messages:" : {
 
     },
     "Mode:" : {
 
     },
-    "More" : {
+    "Preview" : {
 
     },
     "Set text to:" : {
 
     },
     "Speed:" : {
+
+    },
+    "Weight" : {
 
     }
   },
