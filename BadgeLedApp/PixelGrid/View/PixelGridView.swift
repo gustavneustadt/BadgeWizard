@@ -13,30 +13,35 @@ struct PixelGridView: View {
     var onTrailingWidthChanged: (Int) -> Void = { _ in }
     var onLeadingWidthChanged: (Int) -> Void = { _ in }
     var onPixelChanged: () -> Void = { }
+    @FocusState private var isFocused: Bool
     
     @State private var drawMode: Bool = true
     @Environment(\.undoManager) var undo
+    
+    var dragGesture: some Gesture {
+        DragGesture(minimumDistance: 0)
+            .onChanged { value in
+                let pixelSize: CGFloat = 20 // 20px + 1px spacing
+                
+                let x = Int(value.location.x / pixelSize)
+                let y = Int(value.location.y / pixelSize)
+                
+                if x >= 0 && x < pixelGrid.width && y >= 0 && y < pixelGrid.height {
+                    if value.translation == .zero {
+                        // This is the start of the drag - set mode based on initial pixel
+                        drawMode = !pixelGrid.pixels[y][x].isOn
+                    }
+                    pixelGrid.setPixel(x: x, y: y, isOn: drawMode, undoManager: undo)
+                }
+            }
+    }
     
     var body: some View {
         PixelGridImage(pixelGrid: pixelGrid)
             .frame(width: CGFloat(pixelGrid.width * 20),
                    height: CGFloat(11 * 20))
             .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { value in
-                        let pixelSize: CGFloat = 20 // 20px + 1px spacing
-                        
-                        let x = Int(value.location.x / pixelSize)
-                        let y = Int(value.location.y / pixelSize)
-                        
-                        if x >= 0 && x < pixelGrid.width && y >= 0 && y < pixelGrid.height {
-                            if value.translation == .zero {
-                                // This is the start of the drag - set mode based on initial pixel
-                                drawMode = !pixelGrid.pixels[y][x].isOn
-                            }
-                            pixelGrid.setPixel(x: x, y: y, isOn: drawMode, undoManager: undo)
-                        }
-                    }
+                dragGesture
             )
             .padding([.top, .bottom, .leading])
             .padding(.trailing, 19)
@@ -69,8 +74,13 @@ struct PixelGridView: View {
             .padding(.trailing, 8)
             .background(
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(.background)
+                    .foregroundStyle(.background)
             )
+            .contentShape(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+            )
+            .focusable()
+            .focused($isFocused)
             .popover(isPresented: $showPopover, attachmentAnchor: .point(UnitPoint.bottomLeading), arrowEdge: .bottom, content: {
                 GridControlsPopover(pixelGrid: pixelGrid)
             })

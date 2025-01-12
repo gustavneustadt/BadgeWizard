@@ -37,6 +37,8 @@ extension PixelGrid {
             bytesPerRow: 0,
             bitsPerPixel: 0
         ) else {
+            self.pixels = [[]]
+            self.width = 1
             print("Failed to create bitmap")
             return
         }
@@ -45,6 +47,8 @@ extension PixelGrid {
         NSGraphicsContext.saveGraphicsState()
         
         guard let context = NSGraphicsContext(bitmapImageRep: bitmap) else {
+            self.pixels = [[]]
+            self.width = 1
             print("Failed to create graphics context")
             return
         }
@@ -103,6 +107,12 @@ extension PixelGrid {
                 let brightness = color.brightnessComponent
                 pixelArray[y][x] = Pixel(x: x, y: y, isOn: brightness < 0.5)
             }
+        }
+        
+        guard trimmedWidth > 0 else {
+            self.pixels = [[]]
+            self.width = 1
+            return
         }
         
         // If we need extra rows to reach 11, add them as empty rows
