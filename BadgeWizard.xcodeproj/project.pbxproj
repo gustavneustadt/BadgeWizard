@@ -11,7 +11,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		6F360A4A2D2212FF00C19E1F /* Exceptions for "BadgeLedApp" folder in "BadgeWizard" target */ = {
+		6F360A4A2D2212FF00C19E1F /* Exceptions for "BadgeWizard" folder in "BadgeWizard" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -21,12 +21,12 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		6F5FE2052D21A3CA00F15C6D /* BadgeLedApp */ = {
+		6F5FE2052D21A3CA00F15C6D /* BadgeWizard */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				6F360A4A2D2212FF00C19E1F /* Exceptions for "BadgeLedApp" folder in "BadgeWizard" target */,
+				6F360A4A2D2212FF00C19E1F /* Exceptions for "BadgeWizard" folder in "BadgeWizard" target */,
 			);
-			path = BadgeLedApp;
+			path = BadgeWizard;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -45,7 +45,7 @@
 		6F5FE1FA2D21A3CA00F15C6D = {
 			isa = PBXGroup;
 			children = (
-				6F5FE2052D21A3CA00F15C6D /* BadgeLedApp */,
+				6F5FE2052D21A3CA00F15C6D /* BadgeWizard */,
 				6F5FE2042D21A3CA00F15C6D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -74,7 +74,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				6F5FE2052D21A3CA00F15C6D /* BadgeLedApp */,
+				6F5FE2052D21A3CA00F15C6D /* BadgeWizard */,
 			);
 			name = BadgeWizard;
 			packageProductDependencies = (
@@ -263,16 +263,17 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = BadgeLedApp/BadgeLedApp.entitlements;
+				CODE_SIGN_ENTITLEMENTS = BadgeWizard/BadgeLedApp.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"BadgeLedApp/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"BadgeWizard/Preview Content\"";
 				DEVELOPMENT_TEAM = 8A74777946;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = BadgeLedApp/Info.plist;
+				INFOPLIST_FILE = BadgeWizard/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = BadgeWizard;
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "We need it to find devices";
 				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "We need it to find devices";
@@ -295,16 +296,17 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = BadgeLedApp/BadgeLedApp.entitlements;
+				CODE_SIGN_ENTITLEMENTS = BadgeWizard/BadgeLedApp.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"BadgeLedApp/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"BadgeWizard/Preview Content\"";
 				DEVELOPMENT_TEAM = 8A74777946;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = BadgeLedApp/Info.plist;
+				INFOPLIST_FILE = BadgeWizard/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = BadgeWizard;
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "We need it to find devices";
 				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "We need it to find devices";
