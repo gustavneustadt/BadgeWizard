@@ -8,6 +8,7 @@ import SwiftUI
 
 
 struct PixelGridView: View {
+    @EnvironmentObject var messageStore: MessageStore
     @ObservedObject var pixelGrid: PixelGrid
     @State private var showPopover = false
     var onTrailingWidthChanged: (Int) -> Void = { _ in }
@@ -81,6 +82,10 @@ struct PixelGridView: View {
             )
             .focusable()
             .focused($isFocused)
+            .onChange(of: isFocused, initial: true, { oldValue, newValue in
+                messageStore.selectedGridId = newValue ? pixelGrid.id : nil
+                messageStore.selectedMessageId = newValue ? pixelGrid.message.id : messageStore.selectedMessageId
+            })
             .popover(isPresented: $showPopover, attachmentAnchor: .point(UnitPoint.bottomLeading), arrowEdge: .bottom, content: {
                 GridControlsPopover(pixelGrid: pixelGrid)
             })

@@ -13,9 +13,12 @@ class PixelGrid: ObservableObject, Identifiable {
     // Add the gap property here
     @Published var patternGap: Int = 1
     
-    init(pixels: [[Pixel]] = [], width: Int? = nil) {
+    unowned var message: Message
+    
+    init(pixels: [[Pixel]] = [], width: Int? = nil, message: Message) {
         self.width = width ?? 20
         self.pixels = pixels
+        self.message = message
         
         guard pixels.isEmpty else { return }
         for y in 0..<height {
@@ -25,6 +28,7 @@ class PixelGrid: ObservableObject, Identifiable {
             }
             self.pixels.append(row)
         }
+        
     }
     
     func getAsciiArt() -> String {
@@ -160,7 +164,7 @@ class PixelGrid: ObservableObject, Identifiable {
     }
     
     func duplicate() -> PixelGrid {
-        PixelGrid(pixels: self.pixels, width: self.width)
+        PixelGrid(pixels: self.pixels, width: self.width, message: self.message)
     }
 }
 

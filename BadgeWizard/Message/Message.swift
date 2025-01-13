@@ -47,7 +47,7 @@ class Message: ObservableObject, Identifiable, Equatable {
     func addGrid() {
         let lastPixelGrid = pixelGrids.last?.duplicate()
         
-        pixelGrids.append(lastPixelGrid ?? .init(width: lastPixelGrid?.width))
+        pixelGrids.append(lastPixelGrid ?? .init(width: lastPixelGrid?.width, message: self))
     }
     
     func getCombinedPixelArrays() -> [[Pixel]] {

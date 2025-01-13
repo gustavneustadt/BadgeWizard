@@ -17,7 +17,7 @@ struct BadgeLedApp: App {
         WindowGroup {
             ContentView()
                 .inspector(isPresented: .constant(true)) {
-                    // MessageInspector(selectionManager: selectionManager)
+                    MessageInspector()
                 }
                 .environmentObject(messageStore)
         }

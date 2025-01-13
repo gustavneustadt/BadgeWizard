@@ -12,7 +12,6 @@ struct MessageView: View {
     @ObservedObject var message: Message
     let messageNumber: Int
     @State private var scrollViewSize: CGSize = .zero
-    let previewTimer: Publishers.Autoconnect<Timer.TimerPublisher>
     @EnvironmentObject var selectionManager: SelectionManager
     
     
@@ -30,17 +29,17 @@ struct MessageView: View {
                 )
                 .getSize($scrollViewSize)
                 
-                HStack(spacing: 0) {
-                    Header(
-                        messageNumber: messageNumber,
-                        columnSum: columnSum
-                    )
-                    
-                    PreviewSidebar(
-                        message: message,
-                        previewTimer: previewTimer
-                    )
-                }
+                // HStack(spacing: 0) {
+                //     Header(
+                //         messageNumber: messageNumber,
+                //         columnSum: columnSum
+                //     )
+                //     
+                //     PreviewSidebar(
+                //         message: message,
+                //         previewTimer: previewTimer
+                //     )
+                // }
             }
         }
     }
