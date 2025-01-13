@@ -17,8 +17,9 @@ struct FontSelector: View {
     }
     
     func getAvailableWeights(for fontName: String) -> [NSFont.Weight] {
+        // Verify the font exists before proceeding
+        guard NSFont(name: fontName, size: 12) != nil else { return [] }
         let fontManager = NSFontManager.shared
-        guard let font = NSFont(name: fontName, size: 12) else { return [] }
         
         let weights: [NSFont.Weight] = [
             .ultraLight,
@@ -33,32 +34,55 @@ struct FontSelector: View {
         ]
         
         return weights.filter { weight in
-            let descriptor = font.fontDescriptor.addingAttributes([
-                .traits: [
-                    NSFontDescriptor.TraitKey.weight: weight
-                ]
-            ])
-            return NSFont(descriptor: descriptor, size: 12) != nil
+            // Convert weight to the equivalent NSFontManager weight
+            let managerWeight = convertToManagerWeight(weight)
+            // Try to create a font with this weight
+            let weightedFont = fontManager.font(withFamily: fontName, traits: [], weight: Int(managerWeight), size: 12)
+            return weightedFont != nil
+        }
+    }
+    
+    // Convert NSFont.Weight to NSFontManager weight values
+    private func convertToManagerWeight(_ weight: NSFont.Weight) -> Int {
+        switch weight {
+        case .ultraLight: return 2    // NSFontWeightUltraLight
+        case .thin: return 3          // NSFontWeightThin
+        case .light: return 4         // NSFontWeightLight
+        case .regular: return 5       // NSFontWeightRegular
+        case .medium: return 6        // NSFontWeightMedium
+        case .semibold: return 7      // NSFontWeightSemibold
+        case .bold: return 8          // NSFontWeightBold
+        case .heavy: return 9         // NSFontWeightHeavy
+        case .black: return 10        // NSFontWeightBlack
+        default: return 5             // Default to regular
         }
     }
     
     var body: some View {
-            Picker("Font", selection: $selectedFontName) {
-                ForEach(fontNames, id: \.self) { fontName in
-                    Text(fontName)
-                        .tag(fontName)
-                }
+        Picker("Font", selection: $selectedFontName) {
+            ForEach(fontNames, id: \.self) { fontName in
+                Text(fontName)
+                    .tag(fontName)
             }
-            
-            if !selectedFontName.isEmpty {
+        }
+        
+        if !selectedFontName.isEmpty {
+            let availableWeights = getAvailableWeights(for: selectedFontName)
+            if !availableWeights.isEmpty {
                 Picker("Weight", selection: $selectedWeight) {
-                    ForEach(getAvailableWeights(for: selectedFontName), id: \.self) { weight in
+                    ForEach(availableWeights, id: \.self) { weight in
                         Text(weightName(for: weight))
                             .tag(weight)
                     }
                 }
+                .onChange(of: selectedFontName) {
+                    // If the current weight isn't available in the new font, select the first available weight
+                    if !availableWeights.contains(selectedWeight) {
+                        selectedWeight = availableWeights[0]
+                    }
+                }
             }
-        
+        }
     }
     
     func weightName(for weight: NSFont.Weight) -> String {

@@ -39,33 +39,33 @@ struct ContentView: View {
                 }
                 Spacer()
             }
-            Divider()
-            HStack {
-                Picker("Messages:", selection: $messagesCount) {
-                    ForEach(1..<9) { i in
-                        Text("\(i) Messages")
-                            .tag(i)
-                    }
-                }
-                .labelsHidden()
-                .frame(maxWidth: 150)
-                .onChange(of: messagesCount) {
-                    Task {
-                        while messages.count < messagesCount {
-                            appendNewMessage()
-                        }
-                        while messages.count > messagesCount {
-                            _ = messages.popLast()
-                        }                        
-                    }
-                }
-                
-                Spacer()
-                Spacer()
-                BadgeSendButton(badgeManager: bluetoothManager, messages: messages)
-            }
-            .padding()
-            .background(.thinMaterial)
+            // Divider()
+            // HStack {
+            //     Picker("Messages:", selection: $messagesCount) {
+            //         ForEach(1..<9) { i in
+            //             Text("\(i) Messages")
+            //                 .tag(i)
+            //         }
+            //     }
+            //     .labelsHidden()
+            //     .frame(maxWidth: 150)
+            //     .onChange(of: messagesCount) {
+            //         Task {
+            //             while messages.count < messagesCount {
+            //                 appendNewMessage()
+            //             }
+            //             while messages.count > messagesCount {
+            //                 _ = messages.popLast()
+            //             }                        
+            //         }
+            //     }
+            //     
+            //     Spacer()
+            //     Spacer()
+            //     BadgeSendButton(badgeManager: bluetoothManager, messages: messages)
+            // }
+            // .padding()
+            // .background(.thinMaterial)
         }
     }
 }

@@ -13,6 +13,8 @@ struct MessageView: View {
     let messageNumber: Int
     @State private var scrollViewSize: CGSize = .zero
     let previewTimer: Publishers.Autoconnect<Timer.TimerPublisher>
+    @EnvironmentObject var selectionManager: SelectionManager
+    
     
     private var columnSum: Int {
         message.pixelGrids.reduce(0) { $0 + $1.width }

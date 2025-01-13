@@ -57,16 +57,16 @@ extension PixelGridView {
             .onChange(of: text) {
                 updateText()
             }
-            .onChange(of: fontName) {
-                updateText()
-            }
             .onChange(of: kerning) {
+                guard !text.isEmpty else { return }
                 updateText()
             }
             .onChange(of: fontSize) {
+                guard !text.isEmpty else { return }
                 updateText()
             }
             .onChange(of: fontWeight) {
+                guard !text.isEmpty else { return }
                 updateText()
             }
             

@@ -28,6 +28,7 @@
 
     },
     "%lld Messages" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "variations" : {
@@ -80,9 +81,6 @@
 
     },
     "Message %lld" : {
-
-    },
-    "Messages:" : {
 
     },
     "Mode:" : {
