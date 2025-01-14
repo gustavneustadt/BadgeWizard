@@ -12,11 +12,9 @@ import SwiftUI
 struct MessageFormView: View {
     @ObservedObject var message: Message
     
-    // @Binding var mode: Message.Mode
-    // 
-    // @Binding var marquee: Bool
-    // @Binding var flash: Bool
-    // @Binding var speed: Message.Speed
+    init(message: Message?) {
+        self.message = message ?? Message.placeholder()
+    }
     
     var body: some View {
         return VStack {

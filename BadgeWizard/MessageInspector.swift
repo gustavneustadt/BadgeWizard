@@ -10,40 +10,29 @@ import SwiftUI
 struct MessageInspector: View {
     @EnvironmentObject var messageStore: MessageStore
     @State var selectedFontName: String = ""
-    @State var selectedWeight: NSFont.Weight = NSFont.Weight.regular
+    @State var selectedStyle: String = ""
     
     var body: some View {
-        Form {
-            FontSelector(selectedFontName: $selectedFontName, selectedWeight: $selectedWeight)
-            form
-            Spacer()
-        }
-        .padding()
-        .formStyle(.columns)
-    }
-    
-    let previewTimer = Timer.publish(every: 0.05, on: .main, in: .common).autoconnect()
-    
-    var form: some View {
+        VStack(spacing: 0) {
+            
             VStack(alignment: .leading) {
-                VStack(alignment: .leading) {
-                    Text("Preview")
-                    if messageStore.selectedMessage != nil {
-                        LEDPreviewView(
-                            message: messageStore.selectedMessage!,
-                            timer: previewTimer
-                        )
-                    }
-                }
-                
-                if messageStore.selectedMessage != nil {
-                    MessageFormView(
-                        message: messageStore.selectedMessage!
-                    )
-                }
+                Text("Preview")
+                LEDPreviewView(
+                    message: messageStore.selectedMessage
+                )
+            }
+            .padding([.horizontal, .top])
+            Form {
+                MessageFormView(
+                    message: messageStore.selectedMessage
+                )
+                Divider()
+                FontSelector(selectedFontName: $selectedFontName, selectedStyle: $selectedStyle)
                 Spacer()
             }
             .padding()
-            .frame(maxWidth: 300)
+            .formStyle(.columns)
+        }
     }
+    
 }

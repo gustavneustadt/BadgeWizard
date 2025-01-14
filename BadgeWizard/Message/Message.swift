@@ -57,4 +57,8 @@ class Message: ObservableObject, Identifiable, Equatable {
             }
         )
     }
+    
+    static func placeholder () -> Message {
+        Message(flash: false, marquee: false, speed: .medium, mode: .left)
+    }
 }

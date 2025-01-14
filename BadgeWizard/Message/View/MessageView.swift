@@ -28,12 +28,12 @@ struct MessageView: View {
                     onPixelChanged: { }
                 )
                 .getSize($scrollViewSize)
+                    Header(
+                        messageNumber: messageNumber,
+                        columnSum: columnSum
+                    )
                 
                 // HStack(spacing: 0) {
-                //     Header(
-                //         messageNumber: messageNumber,
-                //         columnSum: columnSum
-                //     )
                 //     
                 //     PreviewSidebar(
                 //         message: message,
