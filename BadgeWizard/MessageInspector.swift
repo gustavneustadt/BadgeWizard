@@ -9,8 +9,7 @@ import SwiftUI
 
 struct MessageInspector: View {
     @EnvironmentObject var messageStore: MessageStore
-    @State var selectedFontName: String = ""
-    @State var selectedStyle: String = ""
+    @State var selectedFontPostScript: String = ""
     
     var body: some View {
         VStack(spacing: 0) {
@@ -27,7 +26,7 @@ struct MessageInspector: View {
                     message: messageStore.selectedMessage
                 )
                 Divider()
-                FontSelector(selectedFontName: $selectedFontName, selectedStyle: $selectedStyle)
+                FontSelector(selectedFont: $selectedFontPostScript)
                 Spacer()
             }
             .padding()

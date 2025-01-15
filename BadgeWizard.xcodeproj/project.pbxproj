@@ -6,12 +6,7 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		6F3CA3C82D370F8D0010E614 /* FontStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F3CA3C72D370F8D0010E614 /* FontStyles.swift */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXFileReference section */
-		6F3CA3C72D370F8D0010E614 /* FontStyles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontStyles.swift; sourceTree = "<group>"; };
 		6F5FE2032D21A3CA00F15C6D /* BadgeWizard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BadgeWizard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -50,7 +45,6 @@
 		6F5FE1FA2D21A3CA00F15C6D = {
 			isa = PBXGroup;
 			children = (
-				6F3CA3C72D370F8D0010E614 /* FontStyles.swift */,
 				6F5FE2052D21A3CA00F15C6D /* BadgeWizard */,
 				6F5FE2042D21A3CA00F15C6D /* Products */,
 			);
@@ -138,7 +132,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6F3CA3C82D370F8D0010E614 /* FontStyles.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
