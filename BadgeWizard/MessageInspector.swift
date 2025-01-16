@@ -10,9 +10,10 @@ import SwiftUI
 struct MessageInspector: View {
     @EnvironmentObject var messageStore: MessageStore
     @State var selectedFontPostScript: String = ""
+    @State var showAppleTextPopover: Bool = false
     
     var body: some View {
-        VStack(spacing: 0) {
+        VStack {
             
             VStack(alignment: .leading) {
                 Text("Preview")
@@ -20,18 +21,35 @@ struct MessageInspector: View {
                     message: messageStore.selectedMessage
                 )
             }
-            .padding([.horizontal, .top])
-            Form {
+            GroupBox {
                 MessageFormView(
                     message: messageStore.selectedMessage
                 )
-                Divider()
-                FontSelector(selectedFont: $selectedFontPostScript)
+                .formStyle(.columns)
+                .padding(8)
+            }
+            
+            Toggle(isOn: $showAppleTextPopover) {
+                Spacer()
+                Text("Apple Text")
                 Spacer()
             }
-            .padding()
-            .formStyle(.columns)
+            .toggleStyle(.button)
+            .controlSize(.large)
+            .popover(isPresented: $showAppleTextPopover, attachmentAnchor: .point(.bottom), arrowEdge: .bottom, content: {
+                Form {
+                    FontSelector(selectedFont: $selectedFontPostScript)
+                    Stepper(value: .constant(0), format: .number) {
+                        Text("Kerning:")
+                    }
+                    TextField("Text:", text: .constant(""), prompt: Text("Refugees Welcome"))
+                        .padding(.top)
+                }
+                .padding()
+            })
+            Spacer()
         }
+        .padding()
     }
     
 }

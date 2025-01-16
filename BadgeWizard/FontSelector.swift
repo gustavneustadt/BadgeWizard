@@ -68,19 +68,10 @@ struct FontSelector: View {
     }
     
     var body: some View {
-        VStack {
-            Picker("Font", selection: $selectedFontName) {
-                ForEach(fontNames, id: \.self) { fontName in
-                    Text(fontName).tag(fontName)
-                }
+        Picker("Font:", selection: $selectedFontName) {
+            ForEach(fontNames, id: \.self) { fontName in
+                Text(fontName).tag(fontName)
             }
-            
-            Picker("Style", selection: $styleState.selectedPostscript) {
-                ForEach(styleState.styles, id: \.postscript) { style in
-                    Text(style.display).tag(style.postscript)
-                }
-            }
-            .disabled(styleState.styles.isEmpty)
         }
         .onChange(of: selectedFontName, initial: true) { _, newValue in
             if selectedFontName.isEmpty && !fontNames.isEmpty {
@@ -88,5 +79,12 @@ struct FontSelector: View {
             }
             updateStyleState(for: selectedFontName)
         }
+        
+        Picker("Style:", selection: $styleState.selectedPostscript) {
+            ForEach(styleState.styles, id: \.postscript) { style in
+                Text(style.display).tag(style.postscript)
+            }
+        }
+        .disabled(styleState.styles.isEmpty)
     }
 }

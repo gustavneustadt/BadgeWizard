@@ -43,7 +43,6 @@ struct MessageFormView: View {
                     }
                 }
             }
-            .padding(.top)
         }
     }
 }

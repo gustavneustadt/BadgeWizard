@@ -53,6 +53,9 @@
     "Add Grid" : {
 
     },
+    "Apple Text" : {
+
+    },
     "Clear Grid" : {
 
     },
@@ -62,10 +65,10 @@
     "Flashing" : {
 
     },
-    "Font" : {
+    "Font Size:" : {
 
     },
-    "Font Size:" : {
+    "Font:" : {
 
     },
     "Grid Actions" : {
@@ -89,13 +92,19 @@
     "Preview" : {
 
     },
+    "Refugees Welcome" : {
+
+    },
     "Set text to:" : {
 
     },
     "Speed:" : {
 
     },
-    "Style" : {
+    "Style:" : {
+
+    },
+    "Text:" : {
 
     }
   },

@@ -18,6 +18,7 @@ struct BadgeLedApp: App {
             ContentView()
                 .inspector(isPresented: .constant(true)) {
                     MessageInspector()
+                        .inspectorColumnWidth(300)
                 }
                 .environmentObject(messageStore)
         }
