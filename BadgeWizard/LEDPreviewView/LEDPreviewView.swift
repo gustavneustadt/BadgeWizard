@@ -9,6 +9,7 @@ struct LEDPreviewView: View {
     @ObservedObject var message: Message
     @State internal var currentPosition: Double = 0
     @State var size: CGSize = .zero
+    @Environment(\.isEnabled) private var isEnabled
     
     // Display buffer - represents the actual LED state
     @State internal var displayBuffer: [[Bool]] = Array(repeating: Array(repeating: false, count: 44), count: 11)
@@ -70,8 +71,11 @@ struct LEDPreviewView: View {
             context.fill(
                 Path(roundedRect: CGRect(origin: .zero, size: size),
                      cornerRadius: (ledSize / 2) - ledSpacing),
-                with: .color(.black)
+                with: .color(isEnabled ? .black : .black.opacity(0.4))
             )
+            
+            guard isEnabled else { return }
+            
             let ledPath = Path(ellipseIn: CGRect(origin: .zero, size: .init(width: ledSize-2, height: ledSize-2)))
             
             
@@ -82,6 +86,8 @@ struct LEDPreviewView: View {
                     let offset: CGSize = .init(width: CGFloat(x) * (ledSize) + ledSpacing / 2, height: CGFloat(y) * (ledSize) + ledSpacing / 2)
                     
                     context.translateBy(x: offset.width, y: offset.height)
+                    
+                    
                     if displayBuffer[y][x] {
                         // LED dot (on)
                         context.fill(ledPath, with: .color(.accentColor))
@@ -89,6 +95,7 @@ struct LEDPreviewView: View {
                         // LED dot (off)
                         context.fill(ledPath, with: .color(.accentColor.opacity(0.2)))
                     }
+                    
                     context.translateBy(x: -offset.width, y: -offset.height)
                 }
             }

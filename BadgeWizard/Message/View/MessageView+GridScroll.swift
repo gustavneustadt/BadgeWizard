@@ -13,7 +13,6 @@ extension MessageView {
     struct GridScroll: View {
         @ObservedObject var message: Message
         let scrollViewSize: CGSize
-        let onPixelChanged: () -> Void
         
         var body: some View {
             ScrollView([.horizontal]) {
@@ -27,8 +26,7 @@ extension MessageView {
                                 },
                                 onLeadingWidthChanged: { val in
                                     grid.resizeFromLeadingEdge(to: val)
-                                },
-                                onPixelChanged: onPixelChanged
+                                }
                             )
                         }
                         AddGridButton {

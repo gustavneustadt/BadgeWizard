@@ -13,7 +13,6 @@ struct PixelGridView: View {
     @State private var showPopover = false
     var onTrailingWidthChanged: (Int) -> Void = { _ in }
     var onLeadingWidthChanged: (Int) -> Void = { _ in }
-    var onPixelChanged: () -> Void = { }
     @FocusState private var isFocused: Bool
     
     @State private var drawMode: Bool = true
@@ -35,6 +34,10 @@ struct PixelGridView: View {
                     pixelGrid.setPixel(x: x, y: y, isOn: drawMode, undoManager: undo)
                 }
             }
+    }
+    
+    var messageIsSelected: Bool {
+        messageStore.selectedGridId == pixelGrid.id
     }
     
     var body: some View {
@@ -68,22 +71,24 @@ struct PixelGridView: View {
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .onChange(of: pixelGrid.pixels) {
-                    onPixelChanged()
-                }
             }
             .padding(.trailing, 8)
             .background(
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .foregroundStyle(.background)
+                    .fill(.background)
+                    .stroke(Color.accentColor.secondary, lineWidth: messageIsSelected ? 4 : 0)
             )
             .contentShape(
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
             )
             .focusable()
             .focused($isFocused)
+            .focusEffectDisabled()
             .onChange(of: isFocused, initial: true, { oldValue, newValue in
-                messageStore.selectedGridId = newValue ? pixelGrid.id : nil
+                if !messageIsSelected && newValue == true {
+                    messageStore.selectedGridId = pixelGrid.id
+                }
+                
                 messageStore.selectedMessageId = newValue ? pixelGrid.message.id : messageStore.selectedMessageId
             })
             .popover(isPresented: $showPopover, attachmentAnchor: .point(UnitPoint.bottomLeading), arrowEdge: .bottom, content: {

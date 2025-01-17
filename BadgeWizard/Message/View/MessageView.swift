@@ -12,7 +12,7 @@ struct MessageView: View {
     @ObservedObject var message: Message
     let messageNumber: Int
     @State private var scrollViewSize: CGSize = .zero
-    @EnvironmentObject var selectionManager: SelectionManager
+    @EnvironmentObject var messageStore: MessageStore
     
     
     private var columnSum: Int {
@@ -24,23 +24,18 @@ struct MessageView: View {
             ZStack(alignment: .trailing) {
                 GridScroll(
                     message: message,
-                    scrollViewSize: scrollViewSize,
-                    onPixelChanged: { }
+                    scrollViewSize: scrollViewSize
                 )
                 .getSize($scrollViewSize)
-                    Header(
-                        messageNumber: messageNumber,
-                        columnSum: columnSum
-                    )
-                
-                // HStack(spacing: 0) {
-                //     
-                //     PreviewSidebar(
-                //         message: message,
-                //         previewTimer: previewTimer
-                //     )
-                // }
+                Header(
+                    messageNumber: messageNumber,
+                    columnSum: columnSum,
+                    selected: messageStore.selectedMessageId == message.id
+                )
             }
+        }
+        .onTapGesture {
+            messageStore.selectedMessageId = message.id
         }
     }
 }

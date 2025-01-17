@@ -53,7 +53,7 @@
     "Add Grid" : {
 
     },
-    "Apple Text" : {
+    "Add Text" : {
 
     },
     "Clear Grid" : {
@@ -74,6 +74,12 @@
     "Grid Actions" : {
 
     },
+    "Grid Configuration" : {
+
+    },
+    "Inverse Grid" : {
+
+    },
     "Invert Grid" : {
 
     },
@@ -86,6 +92,9 @@
     "Message %lld" : {
 
     },
+    "Message Configuration" : {
+
+    },
     "Mode:" : {
 
     },
@@ -93,6 +102,9 @@
 
     },
     "Refugees Welcome" : {
+
+    },
+    "Send to Badge" : {
 
     },
     "Set text to:" : {
