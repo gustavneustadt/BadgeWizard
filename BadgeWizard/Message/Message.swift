@@ -20,17 +20,20 @@ class Message: ObservableObject, Identifiable, Equatable {
     @Published var speed: Speed
     @Published var mode: Mode
     
+    unowned var store: MessageStore?
+    
     var width: Int {
         pixelGrids.reduce(0) { partialResult, grid in
             return partialResult + grid.width
         }
     }
     
-    init(flash: Bool, marquee: Bool, speed: Speed, mode: Mode) {
+    init(flash: Bool = false, marquee: Bool = false, speed: Speed = .medium, mode: Mode = .left, store: MessageStore? = nil) {
         self.flash = flash
         self.marquee = marquee
         self.speed = speed
         self.mode = mode
+        self.store = store
         addGrid()
     }
     
@@ -53,7 +56,10 @@ class Message: ObservableObject, Identifiable, Equatable {
     func addGrid() {
         let lastPixelGrid = pixelGrids.last?.duplicate()
         
-        pixelGrids.append(lastPixelGrid ?? .init(width: lastPixelGrid?.width, message: self))
+        let newPixelGrid = lastPixelGrid ?? .init(width: lastPixelGrid?.width, message: self)
+        
+        pixelGrids.append(newPixelGrid)
+        store?.selectedGridId = newPixelGrid.id
     }
     
     func getCombinedPixelArrays() -> [[Pixel]] {
@@ -65,6 +71,6 @@ class Message: ObservableObject, Identifiable, Equatable {
     }
     
     static func placeholder () -> Message {
-        Message(flash: false, marquee: false, speed: .medium, mode: .left)
+        Message()
     }
 }

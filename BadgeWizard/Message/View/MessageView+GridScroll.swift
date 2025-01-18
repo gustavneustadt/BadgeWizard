@@ -35,8 +35,6 @@ extension MessageView {
                     }
                     Spacer()
                 }
-                .padding(.trailing, 300)
-                .frame(minWidth: scrollViewSize.width * 2)
                 .padding(.horizontal)
                 .padding(.top, 48)
                 .padding(.bottom, 24)

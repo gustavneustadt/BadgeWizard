@@ -15,6 +15,9 @@ class MessageStore: ObservableObject {
     
     init(messages: [Message], selectedMessageId: Message.ID? = nil, selectedGridId: PixelGrid.ID? = nil) {
         self.messages = messages
+        self.messages.forEach({ message in
+            message.store = self
+        })
         
         // Pre select a Message and a Grid
         self.selectedMessageId = selectedMessageId ?? messages.first?.id
