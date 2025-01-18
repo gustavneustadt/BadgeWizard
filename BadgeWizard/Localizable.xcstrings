@@ -1,8 +1,7 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "%lld Columns" : {
-      "extractionState" : "stale",
+    "%lld Columns in Total" : {
       "localizations" : {
         "en" : {
           "variations" : {
@@ -10,13 +9,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld Column"
+                  "value" : "%lld Column in Total"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "new",
-                  "value" : "%lld Columns"
+                  "value" : "%lld Columns in Total"
                 }
               }
             }
@@ -24,8 +23,27 @@
         }
       }
     },
-    "%lld Columns in Total" : {
-
+    "%lld Grids" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Grid"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "new",
+                  "value" : "%lld Grids"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "%lld Messages" : {
       "localizations" : {
@@ -71,6 +89,9 @@
 
     },
     "Font:" : {
+
+    },
+    "Grid %lld" : {
 
     },
     "Grid Actions" : {

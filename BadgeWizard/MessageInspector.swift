@@ -11,11 +11,29 @@ struct MessageInspector: View {
     @EnvironmentObject var messageStore: MessageStore
     @State var selectedFontPostScript: String = ""
     @State var showAppleTextPopover: Bool = false
+    @Environment(\.undoManager) var undo
     
+    var selectedMessageIndex: Int? {
+        messageStore.messages.firstIndex { message in
+            message.id == messageStore.selectedMessageId
+        }
+    }
+    
+    var selectedGridIndex: Int? {
+        messageStore.selectedMessage?.pixelGrids.firstIndex(where: { grid in
+            grid.id == messageStore.selectedGridId
+        })
+    }
     var body: some View {
         VStack(alignment: .leading) {
             Group {
-                Text("Message Configuration")
+                HStack {
+                    Text("Message Configuration")
+                    Spacer()
+                    if selectedMessageIndex != nil {
+                        Text("Message \(selectedMessageIndex!+1)")
+                    }
+                }
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 VStack(alignment: .leading) {
@@ -35,20 +53,26 @@ struct MessageInspector: View {
             Divider()
                 .foregroundStyle(.clear)
             Group {
-                Text("Grid Configuration")
+                HStack {
+                    Text("Grid Configuration")
+                    Spacer()
+                    if selectedGridIndex != nil {
+                        Text("Grid \(selectedGridIndex!+1)")
+                    }
+                }
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 
                 HStack {
                     Button {
-                        
+                        messageStore.selectedGrid?.invertPixels(undoManager: undo)
                     } label: {
                         Spacer()
                         Text("Inverse Grid")
                         Spacer()
                     }
                     Button {
-                        
+                        messageStore.selectedGrid?.erase(undoManager: undo)
                     } label: {
                         Spacer()
                         Text("Clear Grid")

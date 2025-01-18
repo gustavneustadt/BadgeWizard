@@ -24,4 +24,9 @@ class MessageStore: ObservableObject {
         guard let id = selectedMessageId else { return nil }
         return messages.first { $0.id == id }
     }
+    
+    var selectedGrid: PixelGrid? {
+        guard let id = selectedGridId else { return nil }
+        return selectedMessage?.pixelGrids.first { $0.id == id }
+    }
 }

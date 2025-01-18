@@ -3,6 +3,9 @@ import SwiftUI
 class PixelGrid: ObservableObject, Identifiable {
     @Published var pixels: [[Pixel]]
     @Published var width: Int {
+        willSet {
+            message.objectWillChange.send()
+        }
         didSet {
             buildMatrix()
         }
@@ -97,31 +100,6 @@ class PixelGrid: ObservableObject, Identifiable {
             }
         }
         
-        pixels = newPixels
-    }
-    
-    
-    
-    func setPixel(x: Int, y: Int, isOn: Bool, undoManager: UndoManager?) {
-        guard pixels[y][x].isOn != isOn else { return }
-        
-        var newPixels = pixels
-        newPixels[y][x] = Pixel(x: x, y: y, isOn: isOn)
-        pixels = newPixels
-        
-        undoManager?.registerUndo(withTarget: self) { grid in
-            grid.setPixel(x: x, y: y, isOn: !isOn, undoManager: undoManager)
-        }
-        
-    }
-    
-    func erase() {
-        var newPixels = pixels
-        for y in 0..<height {
-            for x in 0..<width {
-                newPixels[y][x] = Pixel(x: x, y: y, isOn: false)
-            }
-        }
         pixels = newPixels
     }
     

@@ -14,11 +14,6 @@ struct MessageView: View {
     @State private var scrollViewSize: CGSize = .zero
     @EnvironmentObject var messageStore: MessageStore
     
-    
-    private var columnSum: Int {
-        message.pixelGrids.reduce(0) { $0 + $1.width }
-    }
-    
     var body: some View {
         VStack(spacing: 8) {
             ZStack(alignment: .trailing) {
@@ -29,7 +24,8 @@ struct MessageView: View {
                 .getSize($scrollViewSize)
                 Header(
                     messageNumber: messageNumber,
-                    columnSum: columnSum,
+                    gridSum: message.pixelGrids.count,
+                    columnSum: message.width,
                     selected: messageStore.selectedMessageId == message.id
                 )
             }

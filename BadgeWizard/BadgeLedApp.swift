@@ -13,6 +13,7 @@ struct BadgeLedApp: App {
     @StateObject var messageStore: MessageStore = MessageStore(messages: [
         .init(flash: false, marquee: false, speed: .medium, mode: .left)
     ])
+    @State var showInspector: Bool = true
     var body: some Scene {
         WindowGroup {
             ContentView()
@@ -31,8 +32,17 @@ struct BadgeLedApp: App {
                             }
                         }
                     }
+                    
+                    ToolbarItem {
+                        Button {
+                            showInspector.toggle()
+                        } label: {
+                            Image(systemName: "sidebar.trailing")
+                        }
+                    }
+                    .hidden(showInspector)
                 }
-                .inspector(isPresented: .constant(true)) {
+                .inspector(isPresented: $showInspector) {
                     MessageInspector()
                         .inspectorColumnWidth(300)
                 }

@@ -29,9 +29,29 @@ struct BadgeSendButton: View {
             Button(action: {
                 handleButtonPress()
             }) {
-                Text(currentState.buttonText)
+                switch currentState {
+                case .ready:
+                    Image(systemName: "wand.and.sparkles")
+                    Text(currentState.buttonText)
+                case .searching:
+                    Image(systemName: "magnifyingglass")
+                        .symbolEffect(.pulse)
+                    Text(currentState.buttonText)
+                case .connecting:
+                    Text(currentState.buttonText)
+                case .sending:
+                    Image(systemName: "wave.3.up")
+                        .symbolEffect(.breathe)
+                    Text(currentState.buttonText)
+                case .error:
+                    Image(systemName: "exclamationmark.triangle.fill")
+                    Text(currentState.buttonText)
+                }
             }
-            .disabled(currentState != .ready && currentState != .error(""))
+            .disabled(
+                currentState != .ready &&
+                currentState != .error("")
+            )
             
             if showCancelButton && currentState == .searching {
                 Button(action: {

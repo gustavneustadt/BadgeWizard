@@ -20,6 +20,12 @@ class Message: ObservableObject, Identifiable, Equatable {
     @Published var speed: Speed
     @Published var mode: Mode
     
+    var width: Int {
+        pixelGrids.reduce(0) { partialResult, grid in
+            return partialResult + grid.width
+        }
+    }
+    
     init(flash: Bool, marquee: Bool, speed: Speed, mode: Mode) {
         self.flash = flash
         self.marquee = marquee
