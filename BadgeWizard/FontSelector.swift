@@ -5,6 +5,12 @@ struct FontSelector: View {
     
     @State var selectedFontName: String = ""
     @State var selectedStyle: String = ""
+    @State private var styleState: StyleState = .empty
+    
+    var fontNames: [String] {
+        let names = NSFontManager.shared.availableFontFamilies
+        return names.sorted()
+    }
     
     private struct FontStyle: Equatable {
         let display: String
@@ -18,11 +24,11 @@ struct FontSelector: View {
         static let empty = StyleState(styles: [], selectedPostscript: "")
     }
     
-    @State private var styleState: StyleState = .empty
-    
-    var fontNames: [String] {
-        let names = NSFontManager.shared.availableFontFamilies
-        return names.sorted()
+    init(selectedFont: Binding<String>) {
+        self._selectedFont = selectedFont
+        if let firstFont = NSFontManager.shared.availableFontFamilies.first {
+            self._selectedFontName = State(initialValue: firstFont)
+        }
     }
     
     private func getAvailableStyles(for fontName: String) -> [FontStyle] {
@@ -78,6 +84,8 @@ struct FontSelector: View {
                 selectedFontName = fontNames[0]
             }
             updateStyleState(for: selectedFontName)
+            // Update the binding with the new postscript name
+            selectedFont = styleState.selectedPostscript
         }
         
         Picker("Style:", selection: $styleState.selectedPostscript) {
@@ -86,5 +94,9 @@ struct FontSelector: View {
             }
         }
         .disabled(styleState.styles.isEmpty)
+        .onChange(of: styleState.selectedPostscript) { _, newValue in
+            // Update the binding when style changes
+            selectedFont = newValue
+        }
     }
 }

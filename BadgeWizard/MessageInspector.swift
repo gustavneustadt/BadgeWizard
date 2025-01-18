@@ -9,8 +9,11 @@ import SwiftUI
 
 struct MessageInspector: View {
     @EnvironmentObject var messageStore: MessageStore
-    @State var selectedFontPostScript: String = ""
+    @State var selectedFontPostscriptName: String = ""
     @State var showAppleTextPopover: Bool = false
+    @State var fontSize: Double = 11
+    @State var kerning: Double = 0
+    @State var text: String = ""
     @Environment(\.undoManager) var undo
     
     var selectedMessageIndex: Int? {
@@ -24,6 +27,10 @@ struct MessageInspector: View {
             grid.id == messageStore.selectedGridId
         })
     }
+    
+    func updateText() {
+        messageStore.selectedGrid?.applyText(text, postscriptFontName: selectedFontPostscriptName, size: fontSize, kerning: kerning)
+    }
     var body: some View {
         VStack(alignment: .leading) {
             Group {
@@ -32,6 +39,8 @@ struct MessageInspector: View {
                     Spacer()
                     if selectedMessageIndex != nil {
                         Text("Message \(selectedMessageIndex!+1)")
+                    } else {
+                        Text("No Message selected")
                     }
                 }
                     .font(.caption)
@@ -58,6 +67,8 @@ struct MessageInspector: View {
                     Spacer()
                     if selectedGridIndex != nil {
                         Text("Grid \(selectedGridIndex!+1)")
+                    } else {
+                        Text("No Grid selected")
                     }
                 }
                     .font(.caption)
@@ -68,7 +79,7 @@ struct MessageInspector: View {
                         messageStore.selectedGrid?.invertPixels(undoManager: undo)
                     } label: {
                         Spacer()
-                        Text("Inverse Grid")
+                        Text("Invert Grid")
                         Spacer()
                     }
                     Button {
@@ -88,11 +99,15 @@ struct MessageInspector: View {
                 .toggleStyle(.button)
                 .popover(isPresented: $showAppleTextPopover, attachmentAnchor: .point(.bottom), arrowEdge: .bottom, content: {
                     Form {
-                        FontSelector(selectedFont: $selectedFontPostScript)
-                        Stepper(value: .constant(0), format: .number) {
+                        Text("Font: \(selectedFontPostscriptName)")
+                        FontSelector(selectedFont: $selectedFontPostscriptName)
+                        Stepper(value: $kerning, format: .number) {
                             Text("Kerning:")
                         }
-                        TextField("Text:", text: .constant(""), prompt: Text("Refugees Welcome"))
+                        Stepper(value: $fontSize, format: .number) {
+                            Text("Size:")
+                        }
+                        TextField("Text:", text: $text, prompt: Text("Refugees Welcome"))
                             .padding(.top)
                     }
                     .padding()
@@ -102,6 +117,21 @@ struct MessageInspector: View {
             Spacer()
         }
         .padding()
+        .onChange(of: text) {
+            updateText()
+        }
+        .onChange(of: kerning) {
+            guard !text.isEmpty else { return }
+            updateText()
+        }
+        .onChange(of: fontSize) {
+            guard !text.isEmpty else { return }
+            updateText()
+        }
+        .onChange(of: selectedFontPostscriptName) {
+            guard !text.isEmpty else { return }
+            updateText()
+        }
     }
     
 }

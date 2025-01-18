@@ -15,8 +15,10 @@ class MessageStore: ObservableObject {
     
     init(messages: [Message], selectedMessageId: Message.ID? = nil, selectedGridId: PixelGrid.ID? = nil) {
         self.messages = messages
-        self.selectedMessageId = selectedMessageId
-        self.selectedGridId = selectedGridId
+        
+        // Pre select a Message and a Grid
+        self.selectedMessageId = selectedMessageId ?? messages.first?.id
+        self.selectedGridId = selectedGridId ?? messages.first?.pixelGrids.first?.id
     }
     
     // Computed property for easy access to selected message
