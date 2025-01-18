@@ -28,7 +28,6 @@
 
     },
     "%lld Messages" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "variations" : {
@@ -54,6 +53,9 @@
 
     },
     "Add Text" : {
+
+    },
+    "Cancel" : {
 
     },
     "Clear Grid" : {
@@ -95,6 +97,9 @@
     "Message Configuration" : {
 
     },
+    "Messages" : {
+
+    },
     "Mode:" : {
 
     },
@@ -102,9 +107,6 @@
 
     },
     "Refugees Welcome" : {
-
-    },
-    "Send to Badge" : {
 
     },
     "Set text to:" : {

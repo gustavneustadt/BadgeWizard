@@ -76,7 +76,7 @@ class LEDBadgeManager: NSObject, ObservableObject {
     }
     
     /// Stops scanning for LED badge devices
-    internal func stopScanning() {
+    public func stopScanning() {
         centralManager.stopScan()
     }
     

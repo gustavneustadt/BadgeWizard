@@ -51,20 +51,6 @@ struct PixelGridView: View {
             .padding(.trailing, 19)
             .overlay {
                 ZStack {
-                    VStack {
-                        HStack {
-                            Spacer()
-                            Button {
-                                showPopover.toggle()
-                            } label: {
-                                Image(systemName: "ellipsis.circle.fill")
-                            }
-                            .buttonStyle(.borderless)
-                            .frame(width: 20, height: 20)
-                        }
-                        Spacer()
-                    }
-                    .padding(.top)
                     HStack {
                         Spacer()
                         dragHandleTrailing
@@ -88,11 +74,7 @@ struct PixelGridView: View {
                 if !messageIsSelected && newValue == true {
                     messageStore.selectedGridId = pixelGrid.id
                 }
-                
                 messageStore.selectedMessageId = newValue ? pixelGrid.message.id : messageStore.selectedMessageId
-            })
-            .popover(isPresented: $showPopover, attachmentAnchor: .point(UnitPoint.bottomLeading), arrowEdge: .bottom, content: {
-                GridControlsPopover(pixelGrid: pixelGrid)
             })
     }
     

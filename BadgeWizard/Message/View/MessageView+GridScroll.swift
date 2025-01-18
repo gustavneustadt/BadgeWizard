@@ -39,7 +39,7 @@ extension MessageView {
                 .frame(minWidth: scrollViewSize.width * 2)
                 .padding(.horizontal)
                 .padding(.top, 48)
-                .padding(.bottom)
+                .padding(.bottom, 24)
             }
         }
     }
