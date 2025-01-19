@@ -7,7 +7,7 @@
 import Foundation
 
 extension PixelGrid {
-    func setPixel(x: Int, y: Int, isOn: Bool, undoManager: UndoManager?) {
+    func setPixel(x: Int, y: Int, isOn: Bool, isUndo: Bool = false, undoManager: UndoManager?) {
         guard pixels[y][x].isOn != isOn else { return }
         
         var newPixels = pixels
@@ -15,16 +15,19 @@ extension PixelGrid {
         pixels = newPixels
         
         undoManager?.registerUndo(withTarget: self) { grid in
-            grid.setPixel(x: x, y: y, isOn: !isOn, undoManager: undoManager)
+            grid.setPixel(x: x, y: y, isOn: !isOn, isUndo: true, undoManager: undoManager)
         }
+        undoManager?.setActionName("\(isOn ? isUndo ? "Disable" : "Enable" : isUndo ? "Enable" : "Disable") Pixel")
     }
     
-    func erase(undoManager: UndoManager?) {
+    func clear(undoManager: UndoManager?) {
         
         let previousState = pixels
         undoManager?.registerUndo(withTarget: self) { grid in
             grid.restoreState(previousState, undoManager: undoManager)
         }
+        
+        undoManager?.setActionName("Clear Grid")
         
         var newPixels = pixels
         for y in 0..<height {
@@ -38,7 +41,7 @@ extension PixelGrid {
     }
     
     /// Helper function to restore state from given Pixels
-    private func restoreState(_ state: [[Pixel]], undoManager: UndoManager?) {
+    func restoreState(_ state: [[Pixel]], undoManager: UndoManager?) {
         // Store the current state for redo
         let previousState = pixels
         
@@ -47,11 +50,13 @@ extension PixelGrid {
             grid.restoreState(previousState, undoManager: undoManager)
         }
         
+        undoManager?.setActionName("Restore Grid")
+        
         // Restore the state
         pixels = state
     }
     
-    func invertPixels(undoManager: UndoManager?) {
+    func invert(undoManager: UndoManager?) {
         // Create a new matrix with inverted values
         var newPixels = Array(repeating: Array(repeating: Pixel(x: 0, y: 0, isOn: false), count: width), count: height)
         
@@ -68,8 +73,10 @@ extension PixelGrid {
         }
         
         undoManager?.registerUndo(withTarget: self) { grid in
-            grid.invertPixels(undoManager: undoManager)
+            grid.invert(undoManager: undoManager)
         }
+        
+        undoManager?.setActionName("Invert Grid")
         
         // Update the pixels array with the inverted values
         pixels = newPixels

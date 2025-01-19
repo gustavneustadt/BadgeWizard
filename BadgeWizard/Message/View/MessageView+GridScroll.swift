@@ -13,6 +13,7 @@ extension MessageView {
     struct GridScroll: View {
         @ObservedObject var message: Message
         let scrollViewSize: CGSize
+        @Environment(\.undoManager) var undoManager
         
         var body: some View {
             ScrollView([.horizontal]) {
@@ -22,10 +23,10 @@ extension MessageView {
                             PixelGridView(
                                 pixelGrid: grid,
                                 onTrailingWidthChanged: { val in
-                                    grid.resizeFromTrailingEdge(to: val)
+                                    grid.resizeFromTrailingEdge(to: val, undoManager: undoManager)
                                 },
                                 onLeadingWidthChanged: { val in
-                                    grid.resizeFromLeadingEdge(to: val)
+                                    // grid.resizeFromLeadingEdge(to: val)
                                 }
                             )
                         }

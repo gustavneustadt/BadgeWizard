@@ -76,14 +76,14 @@ struct MessageInspector: View {
                 
                 HStack {
                     Button {
-                        messageStore.selectedGrid?.invertPixels(undoManager: undo)
+                        messageStore.selectedGrid?.invert(undoManager: undo)
                     } label: {
                         Spacer()
                         Text("Invert Grid")
                         Spacer()
                     }
                     Button {
-                        messageStore.selectedGrid?.erase(undoManager: undo)
+                        messageStore.selectedGrid?.clear(undoManager: undo)
                     } label: {
                         Spacer()
                         Text("Clear Grid")
