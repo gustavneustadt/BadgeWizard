@@ -23,8 +23,8 @@ extension PixelGridView {
                 
                 var hoverPixel: (x: Int, y: Int)? = nil
                 if let mousePosition = mousePosition {
-                    let x = Int(mousePosition.x / pixelWidth)
-                    let y = Int(mousePosition.y / pixelHeight)
+                    let x = Int((mousePosition.x - 2) / pixelWidth)
+                    let y = Int((mousePosition.y - 2) / pixelHeight)
                     if x >= 0 && x < pixelGrid.width && y >= 0 && y < 11 {
                         hoverPixel = (x, y)
                     }

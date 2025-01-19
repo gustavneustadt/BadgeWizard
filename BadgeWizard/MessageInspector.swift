@@ -82,15 +82,6 @@ struct MessageInspector: View {
                         Text("Invert Grid")
                         Spacer()
                     }
-                    Button {
-                        messageStore.selectedGrid?.clear(undoManager: undo)
-                    } label: {
-                        Spacer()
-                        Text("Clear Grid")
-                        Spacer()
-                        
-                    }
-
                     Toggle(isOn: $showAppleTextPopover) {
                         Spacer()
                         Text("Add Text")
@@ -112,6 +103,13 @@ struct MessageInspector: View {
                         }
                         .padding()
                     })
+                    Button {
+                        messageStore.selectedGrid?.clear(undoManager: undo)
+                    } label: {
+                        Spacer()
+                        Text("Clear Grid")
+                        Spacer()
+                    }
                     Button {
                         messageStore.deleteGrid(messageStore.selectedGridId!)
                     } label: {

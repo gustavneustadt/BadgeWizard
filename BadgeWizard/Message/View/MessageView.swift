@@ -32,6 +32,10 @@ struct MessageView: View {
         }
         .onTapGesture {
             messageStore.selectedMessageId = message.id
+            
+            guard message.pixelGrids.contains(where: { grid in
+                grid.id == messageStore.selectedGridId
+            }) == false else { return }
             messageStore.selectedGridId = message.pixelGrids.first?.id
         }
         .focusable(false)

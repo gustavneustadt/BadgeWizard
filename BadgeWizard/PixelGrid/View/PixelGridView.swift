@@ -40,8 +40,8 @@ struct PixelGridView: View {
                 
                 let pixelSize: CGFloat = 20 // 20px + 1px spacing
                 
-                let x = Int(value.location.x / pixelSize)
-                let y = Int(value.location.y / pixelSize)
+                let x = Int((value.location.x - 2) / pixelSize)
+                let y = Int((value.location.y - 2) / pixelSize)
                 
                 if x >= 0 && x < pixelGrid.width && y >= 0 && y < pixelGrid.height {
                     if value.translation == .zero {
