@@ -32,8 +32,9 @@ extension MessageView {
                             )
                         }
                         AddGridButton { duplicate in
-                            message.addGrid(duplicate: duplicate ? messageStore.selectedGrid : nil)
+                            message.addGrid(messageStore.selectedGrid, duplicateGrid: duplicate)
                         }
+                        .offset(y: 13)
                     }
                     Spacer()
                 }

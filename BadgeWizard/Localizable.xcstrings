@@ -117,6 +117,7 @@
 
     },
     "Fill Grid" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -137,6 +138,7 @@
       }
     },
     "Font Size:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -156,9 +158,6 @@
         }
       }
     },
-    "Font: %@" : {
-
-    },
     "Grid %lld" : {
       "localizations" : {
         "de" : {
@@ -170,6 +169,7 @@
       }
     },
     "Grid Actions" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -276,6 +276,9 @@
         }
       }
     },
+    "Onion Skinning" : {
+
+    },
     "Preview" : {
       "localizations" : {
         "de" : {
@@ -295,9 +298,6 @@
           }
         }
       }
-    },
-    "Set text to:" : {
-
     },
     "Size:" : {
 

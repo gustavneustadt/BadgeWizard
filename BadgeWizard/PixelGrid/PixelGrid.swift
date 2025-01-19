@@ -146,6 +146,23 @@ class PixelGrid: ObservableObject, Identifiable {
     func duplicate() -> PixelGrid {
         PixelGrid(pixels: self.pixels, width: self.width, message: self.message)
     }
+    
+    static func placeholder() -> PixelGrid {
+        PixelGrid(message: Message.placeholder())
+    }
+    
+    func deleteGrid() {
+        
+        self.message.pixelGrids.removeAll { $0 === self }
+        
+        if self.message.store?.selectedGridId == self.id {
+            message.store?.selectedGridId = nil
+        }
+        
+        if self.message.pixelGrids.count < 1 {
+            message.addGrid()
+        }
+    }
 }
 
 

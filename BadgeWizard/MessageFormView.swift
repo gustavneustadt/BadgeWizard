@@ -33,7 +33,6 @@ struct MessageFormView: View {
                     Text("Speed:")
                 }
                 
-                
                 HStack {
                     Toggle(isOn: $message.marquee) {
                         Text("Marquee")

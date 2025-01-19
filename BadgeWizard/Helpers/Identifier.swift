@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct Identifier<Value>: Hashable, Codable {
+struct Identifier<Value>: Hashable, Codable {    
     
     let value: UUID
     

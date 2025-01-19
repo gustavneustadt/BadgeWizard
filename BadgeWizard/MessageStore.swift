@@ -60,10 +60,15 @@ class MessageStore: ObservableObject {
             if let index = message.pixelGrids.firstIndex(where: { grid in
                 return grid.id == id
             }) {
+                if message.store?.selectedGridId == message.pixelGrids[index].id {
+                    message.store?.selectedGridId = nil
+                }
                 message.pixelGrids.remove(at: index)
+                
                 if message.pixelGrids.isEmpty {
                     message.addGrid()
                 }
+                
                 return
             }
             

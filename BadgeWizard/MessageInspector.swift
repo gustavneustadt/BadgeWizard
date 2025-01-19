@@ -9,11 +9,6 @@ import SwiftUI
 
 struct MessageInspector: View {
     @EnvironmentObject var messageStore: MessageStore
-    @State var selectedFontPostscriptName: String = ""
-    @State var showAppleTextPopover: Bool = false
-    @State var fontSize: Double = 11
-    @State var kerning: Double = 0
-    @State var text: String = ""
     @Environment(\.undoManager) var undo
     
     var selectedMessageIndex: Int? {
@@ -27,10 +22,6 @@ struct MessageInspector: View {
             grid.id == messageStore.selectedGridId
         })
     }
-    
-    func updateText() {
-        messageStore.selectedGrid?.applyText(text, postscriptFontName: selectedFontPostscriptName, size: fontSize, kerning: kerning)
-    }
     var body: some View {
         VStack(alignment: .leading) {
             Group {
@@ -43,8 +34,8 @@ struct MessageInspector: View {
                         Text("No Message selected")
                     }
                 }
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                .font(.caption)
+                .foregroundStyle(.secondary)
                 VStack(alignment: .leading) {
                     Text("Preview")
                     LEDPreviewView(
@@ -71,74 +62,16 @@ struct MessageInspector: View {
                         Text("No Grid selected")
                     }
                 }
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                
-                Group {
-                    Button {
-                        messageStore.selectedGrid?.invert(undoManager: undo)
-                    } label: {
-                        Spacer()
-                        Text("Invert Grid")
-                        Spacer()
-                    }
-                    Toggle(isOn: $showAppleTextPopover) {
-                        Spacer()
-                        Text("Add Text")
-                        Spacer()
-                    }
-                    .toggleStyle(.button)
-                    .popover(isPresented: $showAppleTextPopover, attachmentAnchor: .point(.bottom), arrowEdge: .bottom, content: {
-                        Form {
-                            Text("Font: \(selectedFontPostscriptName)")
-                            FontSelector(selectedFont: $selectedFontPostscriptName)
-                            Stepper(value: $kerning, format: .number) {
-                                Text("Kerning:")
-                            }
-                            Stepper(value: $fontSize, format: .number) {
-                                Text("Size:")
-                            }
-                            TextField("Text:", text: $text, prompt: Text("Refugees Welcome"))
-                                .padding(.top)
-                        }
-                        .padding()
-                    })
-                    Button {
-                        messageStore.selectedGrid?.clear(undoManager: undo)
-                    } label: {
-                        Spacer()
-                        Text("Clear Grid")
-                        Spacer()
-                    }
-                    Button {
-                        messageStore.deleteGrid(messageStore.selectedGridId!)
-                    } label: {
-                        Spacer()
-                        Text("Delete Grid")
-                        Spacer()
-                    }
-                }
-                .frame(maxWidth: .infinity)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                GridForm(grid: messageStore.selectedGrid)
+                    .formStyle(.columns)
             }
+            
             .disabled(selectedGridIndex == nil)
             Spacer()
         }
         .padding()
-        .onChange(of: text) {
-            updateText()
-        }
-        .onChange(of: kerning) {
-            guard !text.isEmpty else { return }
-            updateText()
-        }
-        .onChange(of: fontSize) {
-            guard !text.isEmpty else { return }
-            updateText()
-        }
-        .onChange(of: selectedFontPostscriptName) {
-            guard !text.isEmpty else { return }
-            updateText()
-        }
     }
     
 }

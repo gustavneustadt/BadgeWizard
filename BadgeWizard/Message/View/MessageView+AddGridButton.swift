@@ -19,7 +19,7 @@ extension MessageView {
                     Label {
                         Text(modifierOption ? "Duplicate Grid" : "Add Grid")
                     } icon: {
-                        Image("square.plus")
+                        Image("grid.plus")
                     }
                 }
                 .controlSize(.extraLarge)

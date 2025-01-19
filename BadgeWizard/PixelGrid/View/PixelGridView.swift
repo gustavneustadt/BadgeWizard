@@ -66,20 +66,40 @@ struct PixelGridView: View {
     }
     
     var body: some View {
-        HStack(spacing: 0) {
+        VStack {
+            HStack {
+                Button {
+                    pixelGrid.message.reorderGrid(id: pixelGrid.id, direction: .backward)
+                } label: {
+                    Image(systemName: "arrow.left")
+                }
+                .disabled(pixelGrid.message.isGridAt(id: pixelGrid.id, position: .start))
+                Button {
+                    pixelGrid.message.reorderGrid(id: pixelGrid.id, direction: .forward)
+                } label: {
+                    Image(systemName: "arrow.right")
+                }
+                .disabled(pixelGrid.message.isGridAt(id: pixelGrid.id, position: .end))
+                Spacer()
+            }
+            .controlSize(.small)
+            .opacity(gridIsSelected ? 1 : 0)
+            
+            HStack(spacing: 0) {
                 PixelGridImage(
                     pixelGrid: pixelGrid,
-                    mousePosition: mousePosition
+                    mousePosition: mousePosition,
+                    onionSkinning: pixelGrid.message.onionSkinning
                 )
                 .frame(width: width,
                        height: CGFloat(11 * 20))
                 .onContinuousHover(coordinateSpace: .local, perform: { phase in
                     switch phase {
-                        case .active(let pt):
+                    case .active(let pt):
                         mousePosition = pt
-                        case .ended:
+                    case .ended:
                         mousePosition = nil
-                        }
+                    }
                 })
                 .gesture(
                     dragGesture
@@ -96,34 +116,35 @@ struct PixelGridView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
                 .padding(.trailing, 8)
-            if temporaryWidth != nil {
-                let width = calculateWidth(columns: temporaryWidth!) - self.width
-                if width > 0 {
-                    Color.clear
-                        .frame(
-                            width: width
-                        )
+                if temporaryWidth != nil {
+                    let width = calculateWidth(columns: temporaryWidth!) - self.width
+                    if width > 0 {
+                        Color.clear
+                            .frame(
+                                width: width
+                            )
+                    }
                 }
             }
-        }
-        .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(.background)
-                .stroke(Color.accentColor.secondary, lineWidth: gridIsSelected ? 4 : 0)
-        )
-        .focusable()
-        .focused($isFocused)
-        .focusEffectDisabled()
-        .onTapGesture {
-            isFocused = true
-        }
-        .onChange(of: isFocused, initial: true, { oldValue, newValue in
-            if !gridIsSelected && newValue == true {
-                messageStore.selectedGridId = pixelGrid.id
+            .background(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(.background)
+                    .stroke(Color.accentColor.secondary, lineWidth: gridIsSelected ? 4 : 0)
+            )
+            .focusable()
+            .focused($isFocused)
+            .focusEffectDisabled()
+            .onTapGesture {
+                isFocused = true
             }
-            messageStore.selectedMessageId = newValue ? pixelGrid.message.id : messageStore.selectedMessageId
-            
-        })
+            .onChange(of: isFocused, initial: true, { oldValue, newValue in
+                if !gridIsSelected && newValue == true {
+                    messageStore.selectedGridId = pixelGrid.id
+                }
+                messageStore.selectedMessageId = newValue ? pixelGrid.message.id : messageStore.selectedMessageId
+                
+            })
+        }
     }
     
     var dragHandleTrailing: some View {
