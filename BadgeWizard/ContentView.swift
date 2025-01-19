@@ -14,44 +14,27 @@ struct ContentView: View {
                             message: messageStore.messages[index],
                             messageNumber: index+1
                         )
-                        Divider()
+                        
+                        // if last item, hide divider
+                        if index != messageStore.messages.count-1 {
+                            Divider()
+                        }
                     }
+                    if messageStore.messages.count < 8 {
+                        Divider()
+                        Button {
+                            messageStore.addMessage()
+                        } label: {
+                            Image(systemName: "plus.rectangle")
+                            Text("Add Message")
+                        }
+                        .controlSize(.large)
+                        .padding()
+                    }
+
                 }
                 Spacer()
             }
-            // Divider()
-            // HStack {
-            //     Picker("Messages:", selection: $messagesCount) {
-            //         ForEach(1..<9) { i in
-            //             Text("\(i) Messages")
-            //                 .tag(i)
-            //         }
-            //     }
-            //     .labelsHidden()
-            //     .frame(maxWidth: 150)
-            //     .onChange(of: messagesCount) {
-            //         Task {
-            //             while messages.count < messagesCount {
-            //                 appendNewMessage()
-            //             }
-            //             while messages.count > messagesCount {
-            //                 _ = messages.popLast()
-            //             }                        
-            //         }
-            //     }
-            //     
-            //     Spacer()
-            //     Spacer()
-            //     BadgeSendButton(badgeManager: bluetoothManager, messages: messages)
-            // }
-            // .padding()
-            // .background(.thinMaterial)
         }
     }
-}
-
-
-#Preview {
-    ContentView()
-    // .frame(height: 300)
 }

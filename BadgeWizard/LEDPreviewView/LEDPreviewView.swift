@@ -10,6 +10,8 @@ struct LEDPreviewView: View {
     @State internal var currentPosition: Double = 0
     @State var size: CGSize = .zero
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.colorScheme) var colorScheme
+
     
     // Display buffer - represents the actual LED state
     @State internal var displayBuffer: [[Bool]] = Array(repeating: Array(repeating: false, count: 44), count: 11)
@@ -65,40 +67,61 @@ struct LEDPreviewView: View {
         self.message = message ?? Message.placeholder()
     }
     
+    var ledPath: Path {
+        return Path(ellipseIn: CGRect(origin: .zero, size: .init(width: ledSize-2, height: ledSize-2)))
+    }
+    
     var body: some View {
-        Canvas { context, size in
-            // Draw background
-            context.fill(
-                Path(roundedRect: CGRect(origin: .zero, size: size),
-                     cornerRadius: (ledSize / 2) - ledSpacing),
-                with: .color(isEnabled ? .black : .black.opacity(0.4))
-            )
-            
-            guard isEnabled else { return }
-            
-            let ledPath = Path(ellipseIn: CGRect(origin: .zero, size: .init(width: ledSize-2, height: ledSize-2)))
-            
-            
-            // Draw LED matrix
-            for y in 0..<11 {
-                for x in 0..<44 {
-                    
-                    let offset: CGSize = .init(width: CGFloat(x) * (ledSize) + ledSpacing / 2, height: CGFloat(y) * (ledSize) + ledSpacing / 2)
-                    
-                    context.translateBy(x: offset.width, y: offset.height)
-                    
-                    
-                    if displayBuffer[y][x] {
-                        // LED dot (on)
-                        context.fill(ledPath, with: .color(.accentColor))
-                    } else {
-                        // LED dot (off)
-                        context.fill(ledPath, with: .color(.accentColor.opacity(0.2)))
+        ZStack {
+            Canvas { context, size in
+                guard isEnabled else {
+                    // Draw background when disabled
+                    context.fill(
+                        Path(roundedRect: CGRect(origin: .zero, size: size),
+                             cornerRadius: (ledSize / 2) - ledSpacing),
+                        with: .color(Color(nsColor: NSColor.separatorColor))
+                    )
+                    return
+                }
+                
+                // Draw LED matrix
+                for y in 0..<11 {
+                    for x in 0..<44 {
+                        
+                        let offset: CGSize = .init(width: CGFloat(x) * (ledSize) + ledSpacing / 2, height: CGFloat(y) * (ledSize) + ledSpacing / 2)
+                        
+                        if displayBuffer[y][x] == false {
+                            context.translateBy(x: offset.width, y: offset.height)
+                            // LED dot (off)
+                            context.fill(ledPath, with: .color(.accentColor.opacity(0.2)))
+                            context.translateBy(x: -offset.width, y: -offset.height)
+                        }
+                        
                     }
-                    
-                    context.translateBy(x: -offset.width, y: -offset.height)
                 }
             }
+            
+            Canvas { context, size in
+                guard isEnabled else { return }
+                
+                
+                // Draw LED matrix
+                for y in 0..<11 {
+                    for x in 0..<44 {
+                        
+                        let offset: CGSize = .init(width: CGFloat(x) * (ledSize) + ledSpacing / 2, height: CGFloat(y) * (ledSize) + ledSpacing / 2)
+                        
+                        if displayBuffer[y][x] {
+                            context.translateBy(x: offset.width, y: offset.height)
+                            // LED dot (on)
+                            context.fill(ledPath, with: .color(.accentColor))
+                            context.translateBy(x: -offset.width, y: -offset.height)
+                        }
+                        
+                    }
+                }
+            }
+            .shadow(color: .accentColor.opacity(1), radius: 3, x: 0, y: 0)
         }
         .frame(height: 11 * ledSize)
         // Based on the given width we want to calculate the LED Size and this the height of the badge

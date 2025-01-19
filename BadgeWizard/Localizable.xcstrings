@@ -77,6 +77,9 @@
         }
       }
     },
+    "Add Message" : {
+
+    },
     "Add Text" : {
       "localizations" : {
         "de" : {
@@ -106,6 +109,12 @@
           }
         }
       }
+    },
+    "Delete Grid" : {
+
+    },
+    "Duplicate Grid" : {
+
     },
     "Fill Grid" : {
       "localizations" : {

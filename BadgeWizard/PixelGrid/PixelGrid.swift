@@ -1,6 +1,8 @@
 import SwiftUI
 
 class PixelGrid: ObservableObject, Identifiable {
+    var id: Identifier<PixelGrid> = .init()
+    
     @Published var pixels: [[Pixel]]
     @Published var width: Int {
         willSet {

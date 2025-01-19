@@ -8,9 +8,13 @@
 import Foundation
 
 // Swift equivalent of the Flutter code
-class Message: ObservableObject, Identifiable, Equatable {
+class Message: ObservableObject, Identifiable, Equatable, Hashable {
     static func == (lhs: Message, rhs: Message) -> Bool {
         lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
     
     var id: Identifier<Message> = .init()
@@ -53,13 +57,11 @@ class Message: ObservableObject, Identifiable, Equatable {
         return Message.pixelsToHexStrings(pixels: combinedPixel)
     }
     
-    func addGrid() {
-        let lastPixelGrid = pixelGrids.last?.duplicate()
+    func addGrid(duplicate grid: PixelGrid? = nil) {
+        let duplicated = grid?.duplicate() ?? .init(message: self)
         
-        let newPixelGrid = lastPixelGrid ?? .init(width: lastPixelGrid?.width, message: self)
-        
-        pixelGrids.append(newPixelGrid)
-        store?.selectedGridId = newPixelGrid.id
+        pixelGrids.append(duplicated)
+        store?.selectedGridId = duplicated.id
     }
     
     func getCombinedPixelArrays() -> [[Pixel]] {

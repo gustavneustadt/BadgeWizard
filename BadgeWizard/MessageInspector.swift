@@ -74,7 +74,7 @@ struct MessageInspector: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 
-                HStack {
+                Group {
                     Button {
                         messageStore.selectedGrid?.invert(undoManager: undo)
                     } label: {
@@ -88,32 +88,41 @@ struct MessageInspector: View {
                         Spacer()
                         Text("Clear Grid")
                         Spacer()
+                        
                     }
-                }
 
-                Toggle(isOn: $showAppleTextPopover) {
-                    Spacer()
-                    Text("Add Text")
-                    Spacer()
-                }
-                .toggleStyle(.button)
-                .popover(isPresented: $showAppleTextPopover, attachmentAnchor: .point(.bottom), arrowEdge: .bottom, content: {
-                    Form {
-                        Text("Font: \(selectedFontPostscriptName)")
-                        FontSelector(selectedFont: $selectedFontPostscriptName)
-                        Stepper(value: $kerning, format: .number) {
-                            Text("Kerning:")
-                        }
-                        Stepper(value: $fontSize, format: .number) {
-                            Text("Size:")
-                        }
-                        TextField("Text:", text: $text, prompt: Text("Refugees Welcome"))
-                            .padding(.top)
+                    Toggle(isOn: $showAppleTextPopover) {
+                        Spacer()
+                        Text("Add Text")
+                        Spacer()
                     }
-                    .padding()
-                })
+                    .toggleStyle(.button)
+                    .popover(isPresented: $showAppleTextPopover, attachmentAnchor: .point(.bottom), arrowEdge: .bottom, content: {
+                        Form {
+                            Text("Font: \(selectedFontPostscriptName)")
+                            FontSelector(selectedFont: $selectedFontPostscriptName)
+                            Stepper(value: $kerning, format: .number) {
+                                Text("Kerning:")
+                            }
+                            Stepper(value: $fontSize, format: .number) {
+                                Text("Size:")
+                            }
+                            TextField("Text:", text: $text, prompt: Text("Refugees Welcome"))
+                                .padding(.top)
+                        }
+                        .padding()
+                    })
+                    Button {
+                        messageStore.deleteGrid(messageStore.selectedGridId!)
+                    } label: {
+                        Spacer()
+                        Text("Delete Grid")
+                        Spacer()
+                    }
+                }
+                .frame(maxWidth: .infinity)
             }
-            .disabled(messageStore.selectedGridId == nil)
+            .disabled(selectedGridIndex == nil)
             Spacer()
         }
         .padding()

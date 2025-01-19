@@ -12,16 +12,32 @@ struct PixelGridView: View {
     @State private var showPopover = false
     var onTrailingWidthChanged: (Int) -> Void = { _ in }
     var onLeadingWidthChanged: (Int) -> Void = { _ in }
+    var onIsDrawingChanged: (Bool) -> Void = { _ in }
     @FocusState private var isFocused: Bool
+    @State var isDrawing: Bool = false
     @State var isDragging: Bool = false
     @State var temporaryWidth: Int? = nil
+    @State var hoveringDragHandle: Bool = false
+    
+    @State var mousePosition: CGPoint? = nil
     
     @State private var drawMode: Bool = true
     @Environment(\.undoManager) var undo
     
     var dragGesture: some Gesture {
         DragGesture(minimumDistance: 0)
+            .onEnded { _ in
+                isDrawing = false
+            }
             .onChanged { value in
+                mousePosition = value.location
+                isDrawing = true
+                
+                if messageStore.selectedGridId != pixelGrid.id {
+                    messageStore.selectedGridId = pixelGrid.id
+                    messageStore.selectedMessageId = pixelGrid.message.id
+                }
+                
                 let pixelSize: CGFloat = 20 // 20px + 1px spacing
                 
                 let x = Int(value.location.x / pixelSize)
@@ -37,7 +53,7 @@ struct PixelGridView: View {
             }
     }
     
-    var messageIsSelected: Bool {
+    var gridIsSelected: Bool {
         messageStore.selectedGridId == pixelGrid.id
     }
     
@@ -51,9 +67,20 @@ struct PixelGridView: View {
     
     var body: some View {
         HStack(spacing: 0) {
-            PixelGridImage(pixelGrid: pixelGrid)
+                PixelGridImage(
+                    pixelGrid: pixelGrid,
+                    mousePosition: mousePosition
+                )
                 .frame(width: width,
                        height: CGFloat(11 * 20))
+                .onContinuousHover(coordinateSpace: .local, perform: { phase in
+                    switch phase {
+                        case .active(let pt):
+                        mousePosition = pt
+                        case .ended:
+                        mousePosition = nil
+                        }
+                })
                 .gesture(
                     dragGesture
                 )
@@ -82,45 +109,29 @@ struct PixelGridView: View {
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(.background)
-                .stroke(Color.accentColor.secondary, lineWidth: messageIsSelected ? 4 : 0)
+                .stroke(Color.accentColor.secondary, lineWidth: gridIsSelected ? 4 : 0)
         )
         .focusable()
         .focused($isFocused)
         .focusEffectDisabled()
+        .onTapGesture {
+            isFocused = true
+        }
         .onChange(of: isFocused, initial: true, { oldValue, newValue in
-            if !messageIsSelected && newValue == true {
+            if !gridIsSelected && newValue == true {
                 messageStore.selectedGridId = pixelGrid.id
             }
             messageStore.selectedMessageId = newValue ? pixelGrid.message.id : messageStore.selectedMessageId
-        })
-        .onChange(of: pixelGrid.width, initial: true) { oldValue, newValue in
             
-        }
+        })
     }
     
     var dragHandleTrailing: some View {
-        ZStack {
-            UnevenRoundedRectangle(
-                cornerRadii:
-                        .init(
-                            topLeading: 3,
-                            bottomLeading: 3,
-                            bottomTrailing: 10,
-                            topTrailing: 10
-                        ),
-                style: .continuous)
-            .frame(width: 18, height:59)
-            .foregroundStyle(.tertiary)
-            HStack(spacing: 2) {
-                Rectangle()
-                    .frame(width: 1)
-                Rectangle()
-                    .frame(width: 1)
-                Rectangle()
-                    .frame(width: 1)
-            }
-            .foregroundStyle(.black.opacity(0.4))
-            .frame(height: 30)
+        DragHandle(
+            hoveringDragHandle: hoveringDragHandle || temporaryWidth != nil
+        )
+        .onHover { hovering in
+            hoveringDragHandle = hovering
         }
         .pointerStyle(.frameResize(position: .trailing))
         .gesture(

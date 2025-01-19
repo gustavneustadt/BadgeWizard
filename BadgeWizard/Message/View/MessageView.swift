@@ -32,6 +32,8 @@ struct MessageView: View {
         }
         .onTapGesture {
             messageStore.selectedMessageId = message.id
+            messageStore.selectedGridId = message.pixelGrids.first?.id
         }
+        .focusable(false)
     }
 }

@@ -14,6 +14,7 @@ extension MessageView {
         @ObservedObject var message: Message
         let scrollViewSize: CGSize
         @Environment(\.undoManager) var undoManager
+        @EnvironmentObject var messageStore: MessageStore
         
         var body: some View {
             ScrollView([.horizontal]) {
@@ -30,8 +31,8 @@ extension MessageView {
                                 }
                             )
                         }
-                        AddGridButton {
-                            message.addGrid()
+                        AddGridButton { duplicate in
+                            message.addGrid(duplicate: duplicate ? messageStore.selectedGrid : nil)
                         }
                     }
                     Spacer()

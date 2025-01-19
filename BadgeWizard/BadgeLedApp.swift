@@ -54,6 +54,10 @@ struct BadgeLedApp: App {
                 .onChange(of: messagesCount) { _, newValue in
                     messageStore.updateMessageCount(to: newValue, undoManager: undoManager)
                 }
+                .onChange(of: messageStore.messages.count, initial: true) { _, newValue in
+                    guard messagesCount != newValue else { return }
+                    messagesCount = newValue
+                }
         }
     }
 }
