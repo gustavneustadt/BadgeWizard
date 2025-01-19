@@ -9,7 +9,7 @@ A native macOS App written in SwiftUI for controlling [FOSSASIA’S BadgeMagic L
 - Native interface for macOS
 
 ## Current Status
-This project is in early development. More features and improvements coming soon!
+This project is in early development. More features and improvements coming soon.
 
 ## Credits
 The app is inspired by the [firmware](https://github.com/fossasia/badgemagic-firmware) and [Flutter App](https://github.com/fossasia/badgemagic-app), open sourced by FOSSASIA.
