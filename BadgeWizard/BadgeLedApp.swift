@@ -13,13 +13,47 @@ struct BadgeLedApp: App {
     @StateObject var messageStore: MessageStore = MessageStore(messages: [
         .init(flash: false, marquee: false, speed: .medium, mode: .left)
     ])
+    @State var messagesCount: Int = 1
+    @State var showInspector: Bool = true
+    @Environment(\.undoManager) var undoManager
+    
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .inspector(isPresented: .constant(true)) {
-                    // MessageInspector(selectionManager: selectionManager)
+                .toolbar {
+                    ToolbarItem(placement: .primaryAction) {
+                        BadgeSendButton(badgeManager: bluetoothManager, messages: messageStore.messages)
+                    }
+                    
+                    ToolbarItem(placement: .principal) {
+                        HStack {
+                            Picker("Messages", selection: $messagesCount) {
+                                ForEach(0..<8, id: \.self) { index in
+                                    Text("\(index + 1) Messages")
+                                        .tag(index + 1)
+                                }
+                            }
+                        }
+                    }
+                    
+                    ToolbarItem {
+                        Button {
+                            showInspector.toggle()
+                        } label: {
+                            Image(systemName: "sidebar.trailing")
+                        }
+                    }
+                    .hidden(showInspector)
+                }
+                .inspector(isPresented: $showInspector) {
+                    MessageInspector()
+                        .inspectorColumnWidth(300)
                 }
                 .environmentObject(messageStore)
+                .onChange(of: messagesCount) { _, newValue in
+                    messageStore.updateMessageCount(to: newValue, undoManager: undoManager)
+                }
         }
     }
 }

@@ -11,7 +11,7 @@ import SwiftUI
 extension PixelGridView {
     struct GridControlsPopover: View {
         let pixelGrid: PixelGrid
-        @State var fontName: String = "Apple MacOS 8.0"
+        @State var fontName: String = ""
         @State var kerning: Double = 0
         @State var fontSize: Double = 12
         @State var text: String = ""
@@ -23,15 +23,15 @@ extension PixelGridView {
         let onInvertGrid: () -> Void = {}
         
         func updateText() {
-            pixelGrid.applyText(text, font: fontName, size: fontSize, weight: fontWeight, kerning: kerning)
+            pixelGrid.applyText(text, postscriptFontName: fontName, size: fontSize, kerning: kerning)
         }
         
         var body: some View {
             Form {
-                FontSelector(
-                    selectedFontName: $fontName,
-                    selectedWeight: $fontWeight
-                )
+                // FontSelector(
+                //     selectedFontName: $fontName,
+                //     selectedWeight: $fontWeight
+                // )
                 TextField("Kerning:", value: $kerning, format: .number)
                 TextField("Font Size:", value: $fontSize, format: .number)
                 TextField(text: $text) {

@@ -12,36 +12,26 @@ struct MessageView: View {
     @ObservedObject var message: Message
     let messageNumber: Int
     @State private var scrollViewSize: CGSize = .zero
-    let previewTimer: Publishers.Autoconnect<Timer.TimerPublisher>
-    @EnvironmentObject var selectionManager: SelectionManager
-    
-    
-    private var columnSum: Int {
-        message.pixelGrids.reduce(0) { $0 + $1.width }
-    }
+    @EnvironmentObject var messageStore: MessageStore
     
     var body: some View {
         VStack(spacing: 8) {
             ZStack(alignment: .trailing) {
                 GridScroll(
                     message: message,
-                    scrollViewSize: scrollViewSize,
-                    onPixelChanged: { }
+                    scrollViewSize: scrollViewSize
                 )
                 .getSize($scrollViewSize)
-                
-                HStack(spacing: 0) {
-                    Header(
-                        messageNumber: messageNumber,
-                        columnSum: columnSum
-                    )
-                    
-                    PreviewSidebar(
-                        message: message,
-                        previewTimer: previewTimer
-                    )
-                }
+                Header(
+                    messageNumber: messageNumber,
+                    gridSum: message.pixelGrids.count,
+                    columnSum: message.width,
+                    selected: messageStore.selectedMessageId == message.id
+                )
             }
+        }
+        .onTapGesture {
+            messageStore.selectedMessageId = message.id
         }
     }
 }

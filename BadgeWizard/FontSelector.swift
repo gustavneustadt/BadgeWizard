@@ -1,102 +1,102 @@
-//
-//  FontNameSelector.swift
-//  BadgeLedApp
-//
-//  Created by Gustav on 30.12.24.
-//
-
 import SwiftUI
 
 struct FontSelector: View {
-    @Binding var selectedFontName: String
-    @Binding var selectedWeight: NSFont.Weight
+    @Binding var selectedFont: String
+    
+    @State var selectedFontName: String = ""
+    @State var selectedStyle: String = ""
+    @State private var styleState: StyleState = .empty
     
     var fontNames: [String] {
         let names = NSFontManager.shared.availableFontFamilies
         return names.sorted()
     }
     
-    func getAvailableWeights(for fontName: String) -> [NSFont.Weight] {
-        // Verify the font exists before proceeding
-        guard NSFont(name: fontName, size: 12) != nil else { return [] }
-        let fontManager = NSFontManager.shared
+    private struct FontStyle: Equatable {
+        let display: String
+        let postscript: String
+    }
+    
+    private struct StyleState: Equatable {
+        var styles: [FontStyle]
+        var selectedPostscript: String
         
-        let weights: [NSFont.Weight] = [
-            .ultraLight,
-            .thin,
-            .light,
-            .regular,
-            .medium,
-            .semibold,
-            .bold,
-            .heavy,
-            .black
-        ]
-        
-        return weights.filter { weight in
-            // Convert weight to the equivalent NSFontManager weight
-            let managerWeight = convertToManagerWeight(weight)
-            // Try to create a font with this weight
-            let weightedFont = fontManager.font(withFamily: fontName, traits: [], weight: Int(managerWeight), size: 12)
-            return weightedFont != nil
+        static let empty = StyleState(styles: [], selectedPostscript: "")
+    }
+    
+    init(selectedFont: Binding<String>) {
+        self._selectedFont = selectedFont
+        if let firstFont = NSFontManager.shared.availableFontFamilies.first {
+            self._selectedFontName = State(initialValue: firstFont)
         }
     }
     
-    // Convert NSFont.Weight to NSFontManager weight values
-    private func convertToManagerWeight(_ weight: NSFont.Weight) -> Int {
-        switch weight {
-        case .ultraLight: return 2    // NSFontWeightUltraLight
-        case .thin: return 3          // NSFontWeightThin
-        case .light: return 4         // NSFontWeightLight
-        case .regular: return 5       // NSFontWeightRegular
-        case .medium: return 6        // NSFontWeightMedium
-        case .semibold: return 7      // NSFontWeightSemibold
-        case .bold: return 8          // NSFontWeightBold
-        case .heavy: return 9         // NSFontWeightHeavy
-        case .black: return 10        // NSFontWeightBlack
-        default: return 5             // Default to regular
+    private func getAvailableStyles(for fontName: String) -> [FontStyle] {
+        let fontManager = NSFontManager.shared
+        
+        guard !fontName.isEmpty,
+              fontManager.availableFontFamilies.contains(fontName) else {
+            return []
         }
+        
+        guard let members = fontManager.availableMembers(ofFontFamily: fontName) else {
+            return []
+        }
+        
+        return members.compactMap { member in
+            guard let postScriptName = member[0] as? String,
+                  let displayName = member[1] as? String else {
+                return nil
+            }
+            return FontStyle(display: displayName, postscript: postScriptName)
+        }
+    }
+    
+    func updateStyleState(for fontName: String) {
+        let styles = getAvailableStyles(for: fontName)
+        
+        // Check if the current selected style exists in the new font's styles
+        // We compare the display names because that's what we want to preserve
+        let currentStyleDisplayName = styleState.styles
+            .first { $0.postscript == styleState.selectedPostscript }?
+            .display
+        
+        let matchingStyle = styles.first { $0.display == currentStyleDisplayName }
+        
+        let newSelectedStyle = matchingStyle?.postscript ?? styles.first?.postscript ?? ""
+        
+        styleState = StyleState(
+            styles: styles,
+            selectedPostscript: newSelectedStyle
+        )
+        
+        selectedStyle = newSelectedStyle
     }
     
     var body: some View {
-        Picker("Font", selection: $selectedFontName) {
+        Picker("Font:", selection: $selectedFontName) {
             ForEach(fontNames, id: \.self) { fontName in
-                Text(fontName)
-                    .tag(fontName)
+                Text(fontName).tag(fontName)
             }
+        }
+        .onChange(of: selectedFontName, initial: true) { _, newValue in
+            if selectedFontName.isEmpty && !fontNames.isEmpty {
+                selectedFontName = fontNames[0]
+            }
+            updateStyleState(for: selectedFontName)
+            // Update the binding with the new postscript name
+            selectedFont = styleState.selectedPostscript
         }
         
-        if !selectedFontName.isEmpty {
-            let availableWeights = getAvailableWeights(for: selectedFontName)
-            if !availableWeights.isEmpty {
-                Picker("Weight", selection: $selectedWeight) {
-                    ForEach(availableWeights, id: \.self) { weight in
-                        Text(weightName(for: weight))
-                            .tag(weight)
-                    }
-                }
-                .onChange(of: selectedFontName) {
-                    // If the current weight isn't available in the new font, select the first available weight
-                    if !availableWeights.contains(selectedWeight) {
-                        selectedWeight = availableWeights[0]
-                    }
-                }
+        Picker("Style:", selection: $styleState.selectedPostscript) {
+            ForEach(styleState.styles, id: \.postscript) { style in
+                Text(style.display).tag(style.postscript)
             }
         }
-    }
-    
-    func weightName(for weight: NSFont.Weight) -> String {
-        switch weight {
-        case .ultraLight: return "Ultra Light"
-        case .thin: return "Thin"
-        case .light: return "Light"
-        case .regular: return "Regular"
-        case .medium: return "Medium"
-        case .semibold: return "Semibold"
-        case .bold: return "Bold"
-        case .heavy: return "Heavy"
-        case .black: return "Black"
-        default: return "Regular"
+        .disabled(styleState.styles.isEmpty)
+        .onChange(of: styleState.selectedPostscript) { _, newValue in
+            // Update the binding when style changes
+            selectedFont = newValue
         }
     }
 }

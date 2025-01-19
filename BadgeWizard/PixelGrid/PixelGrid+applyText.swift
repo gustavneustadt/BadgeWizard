@@ -1,19 +1,15 @@
 import AppKit
 extension PixelGrid {
     
-    func applyText(_ text: String, font: String, size: CGFloat = 11, weight: NSFont.Weight = .regular, kerning: CGFloat = 0) {
-        let fontDescriptor = NSFontDescriptor(name: font, size: size)
-        let weightedFontDescriptor = fontDescriptor.addingAttributes([
-            .traits: [
-                NSFontDescriptor.TraitKey.weight: weight
-            ]
-        ])
-        
-        guard let font = NSFont(descriptor: weightedFontDescriptor, size: size) else {
-            print("Failed to load font: \(font)")
+    func createFontWithPostscript(postscriptName: String, size: CGFloat) -> NSFont? {
+        return NSFont(name: postscriptName, size: size)
+    }
+    
+    func applyText(_ text: String, postscriptFontName: String, size: CGFloat = 11, kerning: CGFloat = 0) {
+        guard let font = createFontWithPostscript(postscriptName: postscriptFontName, size: size) else {
+            print("Failed to load font: \(postscriptFontName)")
             return
         }
-        
         
         let attributes: [NSAttributedString.Key: Any] = [
             .font: font,

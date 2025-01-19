@@ -1,8 +1,7 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "%lld Columns" : {
-      "extractionState" : "stale",
+    "%lld Columns in Total" : {
       "localizations" : {
         "en" : {
           "variations" : {
@@ -10,13 +9,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld Column"
+                  "value" : "%lld Column in Total"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "new",
-                  "value" : "%lld Columns"
+                  "value" : "%lld Columns in Total"
                 }
               }
             }
@@ -24,11 +23,29 @@
         }
       }
     },
-    "%lld Columns in Total" : {
-
+    "%lld Grids" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Grid"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "new",
+                  "value" : "%lld Grids"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "%lld Messages" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "variations" : {
@@ -51,25 +68,128 @@
       }
     },
     "Add Grid" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Raster hinzufügen"
+          }
+        }
+      }
+    },
+    "Add Text" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Text hinzufügen"
+          }
+        }
+      }
+    },
+    "Cancel" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abbrechen"
+          }
+        }
+      }
     },
     "Clear Grid" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Raster leeren"
+          }
+        }
+      }
     },
     "Fill Grid" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Raster füllen"
+          }
+        }
+      }
     },
     "Flashing" : {
-
-    },
-    "Font" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blinken"
+          }
+        }
+      }
     },
     "Font Size:" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schriftgröße:"
+          }
+        }
+      }
+    },
+    "Font:" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schrift:"
+          }
+        }
+      }
+    },
+    "Font: %@" : {
 
     },
+    "Grid %lld" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Raster %lld"
+          }
+        }
+      }
+    },
     "Grid Actions" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Raster Aktionen"
+          }
+        }
+      }
+    },
+    "Grid Configuration" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Raster Einstellungen"
+          }
+        }
+      }
+    },
+    "Inverse Grid" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Raster umkehren"
+          }
+        }
+      }
     },
     "Invert Grid" : {
 
@@ -78,25 +198,130 @@
 
     },
     "Marquee" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Umranden"
+          }
+        }
+      }
     },
     "Message %lld" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nachricht %lld"
+          }
+        }
+      }
+    },
+    "Message Configuration" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nachricht Einstellungen"
+          }
+        }
+      }
+    },
+    "Messages" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nachrichten"
+          }
+        }
+      }
     },
     "Mode:" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modus:"
+          }
+        }
+      }
+    },
+    "No Grid selected" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Raster ausgewählt"
+          }
+        }
+      }
+    },
+    "No Message selected" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Nachricht ausgewählt"
+          }
+        }
+      }
     },
     "Preview" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorschau"
+          }
+        }
+      }
+    },
+    "Refugees Welcome" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refugees Welcome"
+          }
+        }
+      }
     },
     "Set text to:" : {
 
     },
-    "Speed:" : {
+    "Size:" : {
 
     },
-    "Weight" : {
-
+    "Speed:" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geschwindigkeit:"
+          }
+        }
+      }
+    },
+    "Style:" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stil:"
+          }
+        }
+      }
+    },
+    "Text:" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Text:"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"
