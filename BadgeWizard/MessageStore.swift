@@ -34,4 +34,23 @@ class MessageStore: ObservableObject {
         guard let id = selectedGridId else { return nil }
         return selectedMessage?.pixelGrids.first { $0.id == id }
     }
+    
+    func addMessage() {
+        let newMessage = Message(store: self)
+        messages.append(newMessage)
+        self.selectedMessageId = newMessage.id
+    }
+    
+    func updateMessageCount(to count: Int, undoManager: UndoManager?) {
+        let current = messages.count
+        if count > current {
+            for _ in current..<count {
+                addMessage()
+            }
+        } else if count < current {
+            for _ in count..<current {
+                messages.removeLast()
+            }
+        }
+    }
 }
