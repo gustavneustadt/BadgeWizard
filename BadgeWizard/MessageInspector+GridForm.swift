@@ -74,7 +74,9 @@ extension MessageInspector {
                     Spacer()
                 }
                 Button {
-                    grid.deleteGrid()
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        grid.deleteGrid()
+                    }
                 } label: {
                     Spacer()
                     Image(systemName: "delete.left.fill")

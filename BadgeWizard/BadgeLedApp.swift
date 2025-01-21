@@ -52,7 +52,9 @@ struct BadgeLedApp: App {
                 }
                 .environmentObject(messageStore)
                 .onChange(of: messagesCount) { _, newValue in
-                    messageStore.updateMessageCount(to: newValue, undoManager: undoManager)
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        messageStore.updateMessageCount(to: newValue, undoManager: undoManager)
+                    }
                 }
                 .onChange(of: messageStore.messages.count, initial: true) { _, newValue in
                     guard messagesCount != newValue else { return }

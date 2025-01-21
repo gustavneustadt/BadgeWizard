@@ -66,16 +66,21 @@ struct PixelGridView: View {
     }
     
     var body: some View {
+        let spring = Animation.interpolatingSpring(mass: 0.04, stiffness: 11.55, damping: 1.17, initialVelocity: 8.0)
         VStack {
             HStack {
                 Button {
-                    pixelGrid.message.reorderGrid(id: pixelGrid.id, direction: .backward)
+                    _ = withAnimation(spring) {
+                        pixelGrid.message.reorderGrid(id: pixelGrid.id, direction: .backward)
+                    }
                 } label: {
                     Image(systemName: "arrow.left")
                 }
                 .disabled(pixelGrid.message.isGridAt(id: pixelGrid.id, position: .start))
                 Button {
-                    pixelGrid.message.reorderGrid(id: pixelGrid.id, direction: .forward)
+                    _ = withAnimation(spring) {
+                        pixelGrid.message.reorderGrid(id: pixelGrid.id, direction: .forward)
+                    }
                 } label: {
                     Image(systemName: "arrow.right")
                 }

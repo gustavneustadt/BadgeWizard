@@ -116,34 +116,12 @@
     "Duplicate Grid" : {
 
     },
-    "Fill Grid" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Raster füllen"
-          }
-        }
-      }
-    },
     "Flashing" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Blinken"
-          }
-        }
-      }
-    },
-    "Font Size:" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Schriftgröße:"
           }
         }
       }
@@ -168,34 +146,12 @@
         }
       }
     },
-    "Grid Actions" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Raster Aktionen"
-          }
-        }
-      }
-    },
     "Grid Configuration" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Raster Einstellungen"
-          }
-        }
-      }
-    },
-    "Inverse Grid" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Raster umkehren"
           }
         }
       }

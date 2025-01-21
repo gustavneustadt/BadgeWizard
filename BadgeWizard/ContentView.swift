@@ -23,7 +23,9 @@ struct ContentView: View {
                     if messageStore.messages.count < 8 {
                         Divider()
                         Button {
-                            messageStore.addMessage()
+                            withAnimation(.easeOut(duration: 0.2)) {
+                                messageStore.addMessage()                                
+                            }
                         } label: {
                             Image(systemName: "plus.rectangle")
                             Text("Add Message")

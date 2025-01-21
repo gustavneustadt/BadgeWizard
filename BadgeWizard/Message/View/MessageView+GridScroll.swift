@@ -30,9 +30,12 @@ extension MessageView {
                                     // grid.resizeFromLeadingEdge(to: val)
                                 }
                             )
+                            .zIndex(messageStore.selectedGridId == grid.id ? 1 : 0)
                         }
                         AddGridButton { duplicate in
-                            message.addGrid(messageStore.selectedGrid, duplicateGrid: duplicate)
+                            withAnimation(.easeOut(duration: 0.2)) {
+                                message.addGrid(messageStore.selectedGrid, duplicateGrid: duplicate)
+                            }
                         }
                         .offset(y: 13)
                     }
