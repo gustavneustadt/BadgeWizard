@@ -185,7 +185,7 @@ class LEDBadgeManager: NSObject, ObservableObject {
                         peripheral.writeValue(base64Data, for: characteristic, type: .withResponse)
                         continuation.resume()
                     }
-                    try await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+                    // try await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
                 }
             }
             connectionState = .ready
