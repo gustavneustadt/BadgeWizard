@@ -30,8 +30,10 @@ extension LEDPreviewView {
         // Calculate how many complete frames we need
         let framesCount = Int(ceil(Double(newGridWidth) / Double(badgeWidth)))
         
+        let framePosition = (currentPosition * speedMultiplier * 0.75).truncatingRemainder(dividingBy: Double(framesCount))
+        
         // Get current frame index
-        let currentFrameIndex = Int(currentPosition) % framesCount
+        let currentFrameIndex = Int(framePosition)
         
         // Calculate the starting column for the current frame
         let startCol = currentFrameIndex * badgeWidth
