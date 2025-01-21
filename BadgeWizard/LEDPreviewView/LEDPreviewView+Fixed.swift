@@ -7,19 +7,15 @@
 import Foundation
 
 extension LEDPreviewView {
-    internal func displayFixed(_ buffer: inout [[Bool]]) {
+    internal func displayFixed() {
         let badgeHeight = 11
         let badgeWidth = 44
         let newGridWidth = pixels[0].count
         
         // For images smaller than or equal to badge width, display centered
         if newGridWidth <= badgeWidth {
-            // Clear the entire buffer first
-            for i in 0..<badgeHeight {
-                for j in 0..<badgeWidth {
-                    buffer[i][j] = false
-                }
-            }
+            // Clear the buffer
+            displayBuffer.clear()
             
             // Calculate center offset
             let offset = (badgeWidth - newGridWidth) / 2
@@ -29,7 +25,7 @@ extension LEDPreviewView {
                 for x in 0..<badgeWidth {
                     let sourceX = x - offset
                     if sourceX >= 0 && sourceX < newGridWidth {
-                        buffer[y][x] = pixels[y][sourceX].isOn
+                        displayBuffer.set(x, y, pixels[y][sourceX].isOn)
                     }
                 }
             }
@@ -50,12 +46,8 @@ extension LEDPreviewView {
         let remainingWidth = newGridWidth - startCol
         let currentFrameWidth = min(badgeWidth, remainingWidth)
         
-        // Clear the entire buffer before displaying the new frame
-        for i in 0..<badgeHeight {
-            for j in 0..<badgeWidth {
-                buffer[i][j] = false
-            }
-        }
+        // Clear the buffer
+        displayBuffer.clear()
         
         // Calculate center offset for this frame
         let offset = (badgeWidth - currentFrameWidth) / 2
@@ -66,7 +58,7 @@ extension LEDPreviewView {
                 let sourceX = x - offset
                 let absoluteSourceX = startCol + sourceX
                 if sourceX >= 0 && sourceX < currentFrameWidth && absoluteSourceX < newGridWidth {
-                    buffer[y][x] = pixels[y][absoluteSourceX].isOn
+                    displayBuffer.set(x, y, pixels[y][absoluteSourceX].isOn)
                 }
             }
         }

@@ -5,8 +5,9 @@
 //  Created by Gustav on 08.01.25.
 //
 import Foundation
+
 extension LEDPreviewView {
-    internal func displaySnowflake(_ buffer: inout [[Bool]]) {
+    internal func displaySnowflake() {
         let badgeHeight = 11
         let badgeWidth = 44
         let newGridWidth = pixels[0].count
@@ -45,12 +46,8 @@ extension LEDPreviewView {
         let remainingWidth = newGridWidth - startCol
         let currentFrameWidth = min(badgeWidth, remainingWidth)
         
-        // Clear the buffer first
-        for y in 0..<badgeHeight {
-            for x in 0..<badgeWidth {
-                buffer[y][x] = false
-            }
-        }
+        // Clear the buffer
+        displayBuffer.clear()
         
         // Check if this is the last chunk
         let isLastChunk = currentFrameIndex == framesCount - 1
@@ -71,7 +68,7 @@ extension LEDPreviewView {
                         for col in 0..<currentFrameWidth {
                             let sourceCol = startCol + col
                             if sourceCol < newGridWidth {
-                                buffer[actualFallPosition][col] = pixels[row][sourceCol].isOn
+                                displayBuffer.set(col, actualFallPosition, pixels[row][sourceCol].isOn)
                             }
                         }
                     }
@@ -86,18 +83,18 @@ extension LEDPreviewView {
                         for col in 0..<currentFrameWidth {
                             let sourceCol = startCol + col
                             if sourceCol < newGridWidth {
-                                buffer[row][col] = pixels[row][sourceCol].isOn
+                                displayBuffer.set(col, row, pixels[row][sourceCol].isOn)
                             }
                         }
                     }
                     
                     if fallOutPosition >= row && fallOutPosition < badgeHeight {
-                        for col in 0..<currentFrameWidth {
-                            buffer[row][col] = false
-                            
-                            let sourceCol = startCol + col
-                            if sourceCol < newGridWidth && fallOutPosition < badgeHeight {
-                                buffer[fallOutPosition][col] = pixels[row][sourceCol].isOn
+                        if fallOutPosition < badgeHeight {
+                            for col in 0..<currentFrameWidth {
+                                let sourceCol = startCol + col
+                                if sourceCol < newGridWidth {
+                                    displayBuffer.set(col, fallOutPosition, pixels[row][sourceCol].isOn)
+                                }
                             }
                         }
                     }
@@ -115,7 +112,7 @@ extension LEDPreviewView {
                     for col in 0..<currentFrameWidth {
                         let sourceCol = startCol + col
                         if sourceCol < newGridWidth {
-                            buffer[actualFallPosition][col] = pixels[row][sourceCol].isOn
+                            displayBuffer.set(col, actualFallPosition, pixels[row][sourceCol].isOn)
                         }
                     }
                 }

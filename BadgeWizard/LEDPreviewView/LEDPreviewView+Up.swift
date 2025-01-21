@@ -7,7 +7,7 @@
 import Foundation
 
 extension LEDPreviewView {
-    internal func scrollUp(_ buffer: inout [[Bool]]) {
+    internal func scrollUp() {
         let badgeHeight = 11
         let badgeWidth = 44
         let newGridWidth = pixels[0].count
@@ -30,11 +30,7 @@ extension LEDPreviewView {
         let currentFrameWidth = min(badgeWidth, remainingWidth)
         
         // Clear the buffer
-        for y in 0..<badgeHeight {
-            for x in 0..<badgeWidth {
-                buffer[y][x] = false
-            }
-        }
+        displayBuffer.clear()
         
         // Apply the scrolling animation for the current frame
         if currentStep < badgeHeight { // Scrolling in
@@ -43,7 +39,7 @@ extension LEDPreviewView {
                     let sourceY = y - (badgeHeight - currentStep)
                     let sourceX = startCol + x
                     if sourceY >= 0 && sourceY < badgeHeight && sourceX < newGridWidth {
-                        buffer[y][x] = pixels[sourceY][sourceX].isOn
+                        displayBuffer.set(x, y, pixels[sourceY][sourceX].isOn)
                     }
                 }
             }
@@ -52,7 +48,7 @@ extension LEDPreviewView {
                 for x in 0..<currentFrameWidth {
                     let sourceX = startCol + x
                     if sourceX < newGridWidth {
-                        buffer[y][x] = pixels[y][sourceX].isOn
+                        displayBuffer.set(x, y, pixels[y][sourceX].isOn)
                     }
                 }
             }
@@ -62,7 +58,7 @@ extension LEDPreviewView {
                     let sourceY = y + (currentStep - (badgeHeight * 2))
                     let sourceX = startCol + x
                     if sourceY >= 0 && sourceY < badgeHeight && sourceX < newGridWidth {
-                        buffer[y][x] = pixels[sourceY][sourceX].isOn
+                        displayBuffer.set(x, y, pixels[sourceY][sourceX].isOn)
                     }
                 }
             }

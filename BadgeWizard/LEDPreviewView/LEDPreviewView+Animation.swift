@@ -4,9 +4,8 @@
 //
 //  Created by Gustav on 08.01.25.
 //
-
 extension LEDPreviewView {
-    internal func displayAnimation(_ buffer: inout [[Bool]]) {
+    internal func displayAnimation() {
         let badgeHeight = 11
         let badgeWidth = 44
         let displayWidth = min(pixels[0].count, badgeWidth)
@@ -48,7 +47,7 @@ extension LEDPreviewView {
                 
                 if pausePhase {
                     if isWithinNewGrid {
-                        buffer[i][j] = pixels[i][sourceCol].isOn
+                        displayBuffer.set(j, i, pixels[i][sourceCol].isOn)
                     }
                     continue
                 }
@@ -65,7 +64,7 @@ extension LEDPreviewView {
                     }
                 }
                 
-                buffer[i][j] = lineShow || bitmapShowOut || bitmapShowCenter
+                displayBuffer.set(j, i, lineShow || bitmapShowOut || bitmapShowCenter)
             }
         }
     }

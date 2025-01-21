@@ -4,11 +4,13 @@
 //
 //  Created by Gustav on 08.01.25.
 //
-
 extension LEDPreviewView {
-    internal func scrollRight(_ buffer: inout [[Bool]]) {
+    internal func scrollRight() {
+        // Get current pixels array
+        let currentPixels = pixels
+        
         // reset position when all the pixels scrolled through
-        if Int(currentPosition) > pixels[0].count + 44 {
+        if Int(currentPosition) > currentPixels[0].count + 44 {
             currentPosition = 0
         }
         
@@ -16,11 +18,11 @@ extension LEDPreviewView {
         
         for y in 0..<11 {
             for x in 0..<44 {
-                let sourceX = pixels[0].count - 1 - (offset - x)
-                if sourceX >= 0 && sourceX < pixels[0].count {
-                    buffer[y][x] = pixels[y][sourceX].isOn
+                let sourceX = currentPixels[0].count - 1 - (offset - x)
+                if sourceX >= 0 && sourceX < currentPixels[0].count {
+                    displayBuffer.set(x, y, currentPixels[y][sourceX].isOn)
                 } else {
-                    buffer[y][x] = false
+                    displayBuffer.set(x, y, false)
                 }
             }
         }

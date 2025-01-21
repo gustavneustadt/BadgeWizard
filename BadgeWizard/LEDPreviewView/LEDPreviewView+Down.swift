@@ -5,9 +5,8 @@
 //  Created by Gustav on 08.01.25.
 //
 import Foundation
-
 extension LEDPreviewView {
-    internal func scrollDown(_ buffer: inout [[Bool]]) {
+    internal func scrollDown() {
         let badgeHeight = 11
         let badgeWidth = 44
         let newGridWidth = pixels[0].count
@@ -29,11 +28,7 @@ extension LEDPreviewView {
         let currentFrameWidth = min(badgeWidth, remainingWidth)
         
         // Clear the buffer first
-        for y in 0..<badgeHeight {
-            for x in 0..<badgeWidth {
-                buffer[y][x] = false
-            }
-        }
+        displayBuffer.clear()
         
         // Apply scrolling animation based on current step
         if currentStep < badgeHeight { // Scrolling in
@@ -43,7 +38,7 @@ extension LEDPreviewView {
                     if sourceY >= 0 && sourceY < badgeHeight {
                         let sourceX = startCol + x
                         if sourceX < newGridWidth {
-                            buffer[y][x] = pixels[sourceY][sourceX].isOn
+                            displayBuffer.set(x, y, pixels[sourceY][sourceX].isOn)
                         }
                     }
                 }
@@ -53,7 +48,7 @@ extension LEDPreviewView {
                 for x in 0..<currentFrameWidth {
                     let sourceX = startCol + x
                     if sourceX < newGridWidth {
-                        buffer[y][x] = pixels[y][sourceX].isOn
+                        displayBuffer.set(x, y, pixels[y][sourceX].isOn)
                     }
                 }
             }
@@ -64,10 +59,11 @@ extension LEDPreviewView {
                     if sourceY >= 0 && sourceY < badgeHeight {
                         let sourceX = startCol + x
                         if sourceX < newGridWidth {
-                            buffer[y][x] = pixels[sourceY][sourceX].isOn
+                            displayBuffer.set(x, y, pixels[sourceY][sourceX].isOn)
                         }
                     }
                 }
             }
         }
-    }}
+    }
+}
