@@ -47,19 +47,30 @@ class Message: ObservableObject, Identifiable, Equatable, Hashable {
     }
     
     func getBitmap() -> [String] {
-        let pixels = pixelGrids.map { grid in
-            if self.mode == .picture {
-                return Message.combinePixelArrays(
-                    [
-                        grid.pixels,
-                        Message.createPadding(width: 4)
-                    ]
-                )
+        if mode == .animation {
+            // First combine all pixel arrays
+            let combinedPixels = Message.combinePixelArrays(pixelGrids.map(\.pixels))
+            
+            // Create result array with correct dimensions
+            var result: [[Pixel]] = Array(repeating: [], count: 11)
+            
+            // Process in chunks of 44
+            for startIndex in stride(from: 0, to: combinedPixels[0].count, by: 44) {
+                // Extract chunk
+                let endIndex = min(startIndex + 44, combinedPixels[0].count)
+                for y in 0..<11 {
+                    // Add chunk
+                    result[y].append(contentsOf: combinedPixels[y][startIndex..<endIndex])
+                    // Add 4-pixel padding
+                    result[y].append(contentsOf: Array(repeating: Pixel(x: 0, y: y, isOn: false), count: 4))
+                }
             }
-            return grid.pixels
+            
+            return Message.pixelsToHexStrings(pixels: result)
+        } else {
+            let combinedPixels = Message.combinePixelArrays(pixelGrids.map(\.pixels))
+            return Message.pixelsToHexStrings(pixels: combinedPixels)
         }
-        let combinedPixel = Message.combinePixelArrays(pixels)
-        return Message.pixelsToHexStrings(pixels: combinedPixel)
     }
     
     func addGrid(_ grid: PixelGrid? = nil, duplicateGrid: Bool = false) {
