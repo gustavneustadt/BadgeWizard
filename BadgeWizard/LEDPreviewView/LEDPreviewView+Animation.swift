@@ -9,22 +9,22 @@ extension LEDPreviewView {
     internal func displayAnimation() {
         let badgeWidth = 44
         let totalWidth = pixels[0].count
-        let animationSteps = 5 // Match firmware ANI_ANIMATION_STEPS
+        let animationSteps = 5 // ANI_ANIMATION_STEPS from firmware
         
-        // Calculate current frame
+        // Calculate frames like firmware does
         let totalFrames = (totalWidth + badgeWidth - 1) / badgeWidth
-        let frameIndex = Int(currentPosition / Double(animationSteps)) % totalFrames
+        
+        // Use integer step counting like firmware
+        let step = Int(currentPosition)
+        let frameIndex = (step / animationSteps) % totalFrames
         let startX = frameIndex * badgeWidth
         
-        // Pre-calculate end position for bounds checking
-        let endX = min(startX + badgeWidth, totalWidth)
-        
+        // Draw current frame
         for y in 0..<11 {
             let row = pixels[y]
-            let sourceEndX = min(endX, row.count)
             for x in 0..<badgeWidth {
                 let sourceX = startX + x
-                displayBuffer.set(x, y, sourceX < sourceEndX ? row[sourceX].isOn : false)
+                displayBuffer.set(x, y, sourceX < row.count ? row[sourceX].isOn : false)
             }
         }
     }
