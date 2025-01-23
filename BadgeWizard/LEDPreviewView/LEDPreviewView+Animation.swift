@@ -4,67 +4,27 @@
 //
 //  Created by Gustav on 08.01.25.
 //
+
 extension LEDPreviewView {
     internal func displayAnimation() {
-        let badgeHeight = 11
         let badgeWidth = 44
-        let displayWidth = min(pixels[0].count, badgeWidth)
-        let horizontalOffset = (badgeWidth - displayWidth) / 2
+        let totalWidth = pixels[0].count
+        let animationSteps = 5 // ANI_ANIMATION_STEPS from firmware
         
-        // Add pause phase: total length is now badge width + pause length
-        let pauseLength = 20
-        let totalAnimationLength = badgeWidth + pauseLength
-        let currentStep = Int(currentPosition) % totalAnimationLength
+        // Calculate frames like firmware does
+        let totalFrames = (totalWidth + badgeWidth - 1) / badgeWidth
         
-        let revealPhase = currentStep < badgeWidth / 2
-        let pausePhase = currentStep >= badgeWidth / 2 && currentStep < badgeWidth / 2 + pauseLength
-        let hidePhase = currentStep >= badgeWidth / 2 + pauseLength
+        // Use integer step counting like firmware
+        let step = Int(currentPosition)
+        let frameIndex = (step / animationSteps) % totalFrames
+        let startX = frameIndex * badgeWidth
         
-        let leftCenterCol = badgeWidth / 2 - 1
-        let rightCenterCol = badgeWidth / 2
-        let maxDistance = leftCenterCol
-        
-        let currentAnimationIndex = if hidePhase {
-            currentStep - (badgeWidth / 2 + pauseLength)
-        } else {
-            currentStep % (maxDistance + 1)
-        }
-        
-        var leftColPos = leftCenterCol - currentAnimationIndex
-        var rightColPos = rightCenterCol + currentAnimationIndex
-        
-        if leftColPos < 0 { leftColPos += badgeWidth }
-        if rightColPos >= badgeWidth { rightColPos -= badgeWidth }
-        
-        for i in 0..<badgeHeight {
-            for j in 0..<badgeWidth {
-                let lineShow = !pausePhase && (j == leftColPos || j == rightColPos)
-                var bitmapShowCenter = false
-                var bitmapShowOut = false
-                
-                let sourceCol = j - horizontalOffset
-                let isWithinNewGrid = sourceCol >= 0 && sourceCol < displayWidth
-                
-                if pausePhase {
-                    if isWithinNewGrid {
-                        displayBuffer.set(j, i, pixels[i][sourceCol].isOn)
-                    }
-                    continue
-                }
-                
-                if revealPhase {
-                    if isWithinNewGrid && j > leftColPos && j < rightColPos {
-                        bitmapShowCenter = pixels[i][sourceCol].isOn
-                    }
-                }
-                
-                if hidePhase {
-                    if isWithinNewGrid && (j < leftColPos || j > rightColPos) {
-                        bitmapShowOut = pixels[i][sourceCol].isOn
-                    }
-                }
-                
-                displayBuffer.set(j, i, lineShow || bitmapShowOut || bitmapShowCenter)
+        // Draw current frame
+        for y in 0..<11 {
+            let row = pixels[y]
+            for x in 0..<badgeWidth {
+                let sourceX = startX + x
+                displayBuffer.set(x, y, sourceX < row.count ? row[sourceX].isOn : false)
             }
         }
     }

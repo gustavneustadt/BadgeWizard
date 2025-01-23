@@ -23,6 +23,7 @@ struct MessageView: View {
                 )
                 .getSize($scrollViewSize)
                 Header(
+                    message: message,
                     messageNumber: messageNumber,
                     gridSum: message.pixelGrids.count,
                     columnSum: message.width,

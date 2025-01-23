@@ -151,17 +151,37 @@ class PixelGrid: ObservableObject, Identifiable {
         PixelGrid(message: Message.placeholder())
     }
     
-    func deleteGrid() {
-        
+    private func deleteGridFromMessage() {
         self.message.pixelGrids.removeAll { $0 === self }
-        
-        if self.message.store?.selectedGridId == self.id {
-            message.store?.selectedGridId = nil
-        }
-        
         if self.message.pixelGrids.count < 1 {
             message.addGrid()
         }
+    }
+    
+    func deleteGrid() {
+        guard self.message.store?.selectedGridId == self.id else {
+            self.deleteGridFromMessage()
+            return
+            
+        }
+        
+        if let indexBefore = self.message.pixelGrids.firstIndex(where: { grid in
+            grid == self
+        })?.advanced(by: -1) {
+            guard indexBefore >= 0 else {
+                
+                self.message.store?.selectedGridId = nil
+                self.deleteGridFromMessage()
+                return
+            }
+            
+            self.message.store?.selectedGridId = self.message.pixelGrids[indexBefore].id
+            self.deleteGridFromMessage()
+            return
+        }
+        self.message.store?.selectedGridId = nil
+        
+        self.deleteGridFromMessage()
     }
 }
 

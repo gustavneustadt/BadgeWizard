@@ -7,19 +7,28 @@
 
 extension LEDPreviewView {
     internal func scrollLeft() {
-        // Get current pixels array
-        let currentPixels = pixels
+        let badgeWidth = 44
+        let totalWidth = pixels[0].count
         
-        // Reset position when all pixels have scrolled through
-        if Int(currentPosition) > pixels[0].count + 44 {
-            currentPosition = 0
-        }
+        // Calculate total steps needed for one complete scroll
+        let totalSteps = totalWidth + badgeWidth
         
-        let offset = Int(currentPosition)
+        // Get current scroll position
+        let scrollPosition = Int(currentPosition) % totalSteps
+        
+        // Clear buffer and prepare for new frame
+        displayBuffer.clear()
+        
+        // Draw the current frame
         for y in 0..<11 {
-            for x in 0..<44 {
-                let sourceX = x + offset - 44
-                displayBuffer.set(x, y, sourceX >= 0 && sourceX < currentPixels[0].count && currentPixels[y][sourceX].isOn)
+            for x in 0..<badgeWidth {
+                // Calculate source position accounting for scroll
+                let sourceX = x + scrollPosition - badgeWidth
+                
+                // Only draw if we're within bounds of source pixels
+                if sourceX >= 0 && sourceX < totalWidth {
+                    displayBuffer.set(x, y, pixels[y][sourceX].isOn)
+                }
             }
         }
     }

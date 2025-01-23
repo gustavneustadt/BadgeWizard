@@ -30,9 +30,6 @@ extension MessageInspector {
 
         var body: some View {
             Form {
-                Toggle(isOn: $message.onionSkinning) {
-                    Text("Onion Skinning")
-                }
                 
                 Toggle(isOn: $showAppleTextPopover) {
                     Spacer()
@@ -83,7 +80,6 @@ extension MessageInspector {
                     Text("Delete Grid")
                     Spacer()
                 }
-                .disabled(message.pixelGrids.count == 1)
             }
             .frame(maxWidth: .infinity)
             .onChange(of: text) {

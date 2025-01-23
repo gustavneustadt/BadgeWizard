@@ -4,53 +4,87 @@
 //
 //  Created by Gustav on 08.01.25.
 //
+import Foundation
 
 extension LEDPreviewView {
     internal func displayLaser() {
-        let frameSteps = 44 * 3  // LED_COLS * 3 for in-still-out
-        let currentStep = Int(currentPosition) % frameSteps
-        let maxWidth = pixels[0].count
         let badgeWidth = 44
+        let totalWidth = pixels[0].count
         
-        // Calculate centering offset
-        let offset = (badgeWidth - maxWidth) / 2
+        // Calculate frame parameters
+        let frameSteps = badgeWidth * 3 // in-still-out phases
+        let totalFrames = (totalWidth + badgeWidth - 1) / badgeWidth
+        let currentFrameIndex = Int(currentPosition) / frameSteps % totalFrames
+        let step = Int(currentPosition) % frameSteps
         
-        displayBuffer.clear()
+        // Determine animation phase
+        if step < badgeWidth {
+            // Laser in phase
+            laserIn(currentFrameIndex: currentFrameIndex, step: step)
+        } else if step < badgeWidth * 2 {
+            // Still phase
+            displayFrame(at: currentFrameIndex)
+        } else {
+            // Laser out phase
+            laserOut(currentFrameIndex: currentFrameIndex, step: step - badgeWidth * 2)
+        }
+    }
+    
+    private func laserIn(currentFrameIndex: Int, step: Int) {
+        let badgeWidth = 44
+        let startX = currentFrameIndex * badgeWidth
+        let sweepPosition = step % badgeWidth
         
-        if currentStep < 44 {  // Laser in
-            let c = min(currentStep, badgeWidth - 1)
-            for y in 0..<11 {
-                for x in 0..<44 {
-                    let sourceX = x - offset
-                    if x < currentStep {
-                        if sourceX >= 0 && sourceX < maxWidth {
-                            displayBuffer.set(x, y, pixels[y][sourceX].isOn)
-                        }
-                    } else {
-                        let laserX = c - offset
-                        if laserX >= 0 && laserX < maxWidth {
-                            displayBuffer.set(x, y, pixels[y][laserX].isOn)
-                        }
-                    }
+        for y in 0..<11 {
+            // Draw revealed content up to sweep position
+            for x in 0..<sweepPosition {
+                let sourceX = startX + x
+                if sourceX < pixels[0].count {
+                    displayBuffer.set(x, y, pixels[y][sourceX].isOn)
                 }
             }
-        } else if currentStep < 88 {  // Still
-            displayFixed()
-        } else {  // Laser out
-            let c = min(currentStep - 88, badgeWidth - 1)
-            for y in 0..<11 {
-                for x in 0..<44 {
-                    let sourceX = x - offset
-                    if x < c {
-                        let laserX = c - offset
-                        if laserX >= 0 && laserX < maxWidth {
-                            displayBuffer.set(x, y, pixels[y][laserX].isOn)
-                        }
-                    } else {
-                        if sourceX >= 0 && sourceX < maxWidth {
-                            displayBuffer.set(x, y, pixels[y][sourceX].isOn)
-                        }
-                    }
+            
+            // Draw laser line
+            for x in sweepPosition..<badgeWidth {
+                if startX + sweepPosition < pixels[0].count {
+                    displayBuffer.set(x, y, pixels[y][startX + sweepPosition].isOn)
+                }
+            }
+        }
+    }
+    
+    private func laserOut(currentFrameIndex: Int, step: Int) {
+        let badgeWidth = 44
+        let startX = currentFrameIndex * badgeWidth
+        let sweepPosition = step % badgeWidth
+        
+        for y in 0..<11 {
+            // Draw content after sweep position
+            for x in sweepPosition..<badgeWidth {
+                let sourceX = startX + x
+                if sourceX < pixels[0].count {
+                    displayBuffer.set(x, y, pixels[y][sourceX].isOn)
+                }
+            }
+            
+            // Draw laser line
+            for x in 0..<sweepPosition {
+                if startX + sweepPosition < pixels[0].count {
+                    displayBuffer.set(x, y, pixels[y][startX + sweepPosition].isOn)
+                }
+            }
+        }
+    }
+    
+    private func displayFrame(at index: Int) {
+        let badgeWidth = 44
+        let startX = index * badgeWidth
+        
+        for y in 0..<11 {
+            for x in 0..<badgeWidth {
+                let sourceX = startX + x
+                if sourceX < pixels[0].count {
+                    displayBuffer.set(x, y, pixels[y][sourceX].isOn)
                 }
             }
         }

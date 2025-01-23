@@ -11,6 +11,7 @@ import Combine
 
 extension MessageView {
     struct Header: View {
+        @ObservedObject var message: Message
         let messageNumber: Int
         let gridSum: Int
         let columnSum: Int
@@ -21,7 +22,7 @@ extension MessageView {
             let padding: (x: CGFloat, y: CGFloat) = (x: 5, y: 3)
             return VStack {
                 HStack {
-                    HStack(spacing: 0) {
+                    HStack {
                         Text("Message \(messageNumber)")
                             .lineLimit(1)
                             .truncationMode(.middle)
@@ -33,6 +34,11 @@ extension MessageView {
                                 RoundedRectangle(cornerRadius: 4, style: .continuous)
                                     .fill(selected ? Color.accentColor : Color.clear)
                             )
+                        Toggle(isOn: $message.onionSkinning) {
+                            Text("Onion Skinning")
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                        }
                         Spacer()
                     }
                     Text("\(gridSum) Grids")
@@ -59,6 +65,6 @@ extension MessageView {
     }
 }
 
-#Preview {
-    MessageView.Header(messageNumber: 1, gridSum: 2, columnSum: 10, selected: true)
-}
+// #Preview {
+//     MessageView.Header(messageNumber: 1, gridSum: 2, columnSum: 10, selected: true)
+// }

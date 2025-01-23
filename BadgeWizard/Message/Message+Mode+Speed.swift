@@ -27,9 +27,9 @@ extension Message {
         case up        = 2
         case down      = 3
         case fixed     = 4
-        case picture   = 5
+        case animation = 5
         case snowflake = 6
-        case animation = 7
+        case picture   = 7
         case laser     = 8
         
         // Mode 5 Animation Frames -> 48 wide px
@@ -40,9 +40,9 @@ extension Message {
             case .up:        return "Scroll Up"
             case .down:      return "Scroll Down"
             case .fixed:     return "Static Display"
+            case .animation: return "Animation"
             case .snowflake: return "Snowflake Effect"
             case .picture:   return "Picture Mode"
-            case .animation: return "Animation"
             case .laser:     return "Laser Effect"
             }
         }
