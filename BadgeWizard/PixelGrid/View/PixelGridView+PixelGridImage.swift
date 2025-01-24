@@ -12,6 +12,7 @@ extension PixelGridView {
         var mousePosition: CGPoint? = nil
         var onionSkinning: Bool
         @ObservedObject var previousGrid: PixelGrid
+        @Environment(\.colorScheme) var colorScheme
         
         init(pixelGrid: PixelGrid, mousePosition: CGPoint? = nil, onionSkinning: Bool? = false) {
             self.pixelGrid = pixelGrid
@@ -88,10 +89,10 @@ extension PixelGridView {
                 guard let itemOn = context.resolveSymbol(id: "itemOn"),
                       let itemOff = context.resolveSymbol(id: "itemOff"),
                       let itemHover = context.resolveSymbol(id: "itemHover"),
-                      let itemOnionSkin = context.resolveSymbol(id: "itemOnionSkin") else { return }
+                      let itemOnionSkin = context.resolveSymbol(id: "itemOnionSkin")
+                else { return }
                 
                 
-                drawOnionSkin(context: context, symbol: itemOnionSkin, pixelSize: pixelSize)
                 
                 let onPixels: [Pixel] = pixelGrid.pixels.compactMap { row in
                     row.compactMap { pixel in
@@ -126,6 +127,7 @@ extension PixelGridView {
                 }
                 
                 drawHoverPixels(context: context, symbol: itemHover, pixelSize: pixelSize)
+                drawOnionSkin(context: context, symbol: itemOnionSkin, pixelSize: pixelSize)
                 
             } symbols: {
                 RoundedRectangle(cornerRadius: 3, style: .continuous)
@@ -144,8 +146,14 @@ extension PixelGridView {
                     .tag("itemHover")
                 
                 // Add onion skin symbol
-                RoundedRectangle(cornerRadius: 3, style: .continuous)
-                    .fill(Color.accentColor.opacity(0.3))
+                Circle()
+                    .fill(Color.accentColor.mix(
+                        with: colorScheme == .dark ? .black : .white,
+                        by: colorScheme == .dark ? 0.7 : 0.4,
+                        in: .perceptual
+                    ).opacity(
+                        colorScheme == .dark ? 0.6 : 0.8
+                    ))
                     .frame(width: 10, height: 10)
                     .tag("itemOnionSkin")
             }

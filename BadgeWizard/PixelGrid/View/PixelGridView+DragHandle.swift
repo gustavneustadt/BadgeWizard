@@ -30,10 +30,17 @@ extension PixelGridView {
                 context.fill(
                     backgroundPath,
                     with: .color(
-                        hoveringDragHandle ?
-                        Color("ButtonColor").mix(with: Color(nsColor: .separatorColor), by: 0.5) : Color("ButtonColor")
+                        Color(nsColor: .separatorColor)
                     )
                 )
+                if hoveringDragHandle {
+                    context.fill(
+                        backgroundPath,
+                        with: .color(
+                            Color(nsColor: .separatorColor)
+                        )
+                    )
+                }
                 
                 // Draw lines
                 let lineHeight: CGFloat = 30

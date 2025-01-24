@@ -8,7 +8,6 @@
 import SwiftUI
 
 extension MessageInspector {
-    
     struct GridForm: View {
         @ObservedObject var grid: PixelGrid
         @ObservedObject var message: Message
