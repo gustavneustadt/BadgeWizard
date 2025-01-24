@@ -34,27 +34,26 @@ extension MessageView {
                                 RoundedRectangle(cornerRadius: 4, style: .continuous)
                                     .fill(selected ? Color.accentColor : Color.clear)
                             )
+                        Spacer()
+                    }
+                    HStack {
+                        Text("\(gridSum) Grids")
+                        Text("·")
+                        Text("\(columnSum) Columns")
+                    }
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+                    .frame(minWidth: 0, maxWidth: .infinity)
+                    
+                    HStack(spacing: 0) {
+                        Spacer()
                         Toggle(isOn: $message.onionSkinning) {
                             Text("Onion Skinning")
                                 .lineLimit(1)
                                 .truncationMode(.tail)
                         }
-                        Spacer()
-                    }
-                    Text("\(gridSum) Grids")
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                        .foregroundStyle(.secondary)
-                        .frame(minWidth: 0, maxWidth: .infinity)
-                        .multilineTextAlignment(.center)
-                    
-                    HStack(spacing: 0) {
-                        Spacer()
-                        Text("\(columnSum) Columns in Total")
-                            .lineLimit(1)
-                            .truncationMode(.tail)
-                            .foregroundStyle(.secondary)
-                            .monospacedDigit()
                     }
                 }
                 .offset(y: -padding.y)

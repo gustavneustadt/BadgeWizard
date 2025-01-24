@@ -6,13 +6,53 @@ import Combine
 
 struct LEDPreviewView: View {
     @ObservedObject var message: Message
-    @State internal var currentPosition: Double = 0
     @State private var size: CGSize = .zero
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.colorScheme) var colorScheme
 
     @State internal var displayBuffer: DisplayBuffer
     
+    
+    private var animationInterval: TimeInterval {
+        let baseSpeed = 200000.0 / 1_000_000.0
+        return baseSpeed - (Double(message.speed.rawValue) * baseSpeed / 8.0)
+    }
+    
+    // Separate timers
+    @State internal var currentPosition: Double = 0
+    @State private var animationTimer: Timer.TimerPublisher = Timer.publish(every: 0.2, on: .main, in: .common)
+    @State private var animationCancellable: AnyCancellable?
+    
+    @State internal var marqueeStep: Int = 0
+    @State private var marqueeTimer: Timer.TimerPublisher = Timer.publish(every: 0.1, on: .main, in: .common)
+    @State private var marqueeCancellable: AnyCancellable?
+    
+    @State private var flashStep: Int = 0
+    @State private var flashTimer: Timer.TimerPublisher = Timer.publish(every: 0.5, on: .main, in: .common)
+    @State private var flashCancellable: AnyCancellable?
+    
+    private func resetTimers() {
+        // Cancel all existing timers
+        animationCancellable?.cancel()
+        marqueeCancellable?.cancel()
+        flashCancellable?.cancel()
+        
+        // Start main animation timer
+        animationTimer = Timer.publish(every: animationInterval, on: .main, in: .common)
+        animationCancellable = AnyCancellable(animationTimer.connect())
+        
+        // Only start marquee timer if enabled
+        if message.marquee {
+            marqueeTimer = Timer.publish(every: 0.1, on: .main, in: .common)
+            marqueeCancellable = AnyCancellable(marqueeTimer.connect())
+        }
+        
+        // Only start flash timer if enabled
+        if message.flash {
+            flashTimer = Timer.publish(every: 0.5, on: .main, in: .common)
+            flashCancellable = AnyCancellable(flashTimer.connect())
+        }
+    }
     
     init(message: Message?) {
         self.message = message ?? Message.placeholder()
@@ -22,25 +62,6 @@ struct LEDPreviewView: View {
     // Move computed properties here to make them reactive
     internal var pixels: [[Pixel]] {
         message.getCombinedPixelArrays()
-    }
-    
-    // Hardware timing constants in microseconds
-    private let BASE_SPEED: Double = 200000 // 0.2 seconds
-    
-    // Keep fast timer for smooth updates
-    private let timer = Timer.publish(every: 0.025, on: .main, in: .common).autoconnect()
-    
-    internal var speedMultiplier: Double {
-        let speedLevel = Double(message.speed.rawValue)
-        // Calculate delay in microseconds using hardware formula
-        let delayMicros = BASE_SPEED - (speedLevel * BASE_SPEED / 8.0)
-        // Convert to seconds
-        let delaySeconds = delayMicros / 1_000_000
-        
-        // Calculate pixels to move per frame
-        // At slowest speed (0.2s delay) we want to move ~0.125 pixels per frame
-        // At fastest speed (0.025s delay) we want to move ~1 pixel per frame
-        return 0.025 / delaySeconds
     }
     
     var body: some View {
@@ -80,23 +101,25 @@ struct LEDPreviewView: View {
         }
         .frame(height: 11 * (size.width / 44))
         .getSize($size)
-        .onReceive(timer) { _ in
-                updateAnimation()
-        }
-        // Add onChange modifiers to handle property changes
-        .onChange(of: message.pixelGrids) {
-            currentPosition = 0  // Reset position when pixels change
+        .onChange(of: message.speed) { resetTimers() }
+        .onChange(of: message.marquee) { resetTimers() }
+        .onChange(of: message.flash) { resetTimers() }
+        .onReceive(animationTimer) { _ in updateAnimation() }
+        .onReceive(marqueeTimer) { _ in marqueeStep += 1 }
+        .onReceive(flashTimer) { _ in flashStep += 1 }
+        .onAppear { resetTimers() }
+        .onDisappear {
+            animationCancellable?.cancel()
+            marqueeCancellable?.cancel()
+            flashCancellable?.cancel()
         }
         .onChange(of: message.mode) {
-            currentPosition = 0  // Reset position when mode changes
+            currentPosition = 0
         }
     }
     
     private func updateAnimation() {
-        // Update position with reactive multiplier
-        currentPosition += speedMultiplier
-        
-        // Clear buffer instead of creating new one
+        currentPosition += 1  // Increment by 1 since timer matches hardware timing
         displayBuffer.clear()
         
         switch message.mode {
@@ -120,12 +143,10 @@ struct LEDPreviewView: View {
             displayLaser()
         }
         
-        // Handle flash effect
-        if message.flash && (Int(currentPosition / speedMultiplier) % 20) < 10 {
+        if message.flash && (flashStep % 2 == 0) {
             displayBuffer.clear()
         }
         
-        // Handle marquee effect if needed
         if message.marquee {
             applyMarquee()
         }

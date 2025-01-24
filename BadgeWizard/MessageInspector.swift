@@ -23,6 +23,7 @@ struct MessageInspector: View {
         })
     }
     var body: some View {
+        
         VStack(alignment: .leading) {
             Group {
                 HStack {
@@ -52,7 +53,7 @@ struct MessageInspector: View {
             
             Divider()
                 .foregroundStyle(.clear)
-            Group {
+            Group{
                 HStack {
                     Text("Grid Configuration")
                     Spacer()

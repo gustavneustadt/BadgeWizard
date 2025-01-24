@@ -51,6 +51,7 @@ extension MessageInspector {
                             .padding(.top)
                     }
                     .padding()
+                    .frame(width: 250)
                 })
                 Divider()
                     .foregroundStyle(.clear)

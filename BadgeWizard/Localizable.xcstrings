@@ -1,7 +1,14 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "·" : {
+
+    },
+    "%lld Columns" : {
+
+    },
     "%lld Columns in Total" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "variations" : {

@@ -6,57 +6,32 @@
 //
 extension LEDPreviewView {
     internal func applyMarquee() {
-        // Cap the speed multiplier for marquee to match hardware limitations (speed 5)
-        let cappedSpeedMultiplier = min(speedMultiplier, 0.797) // speed 5 (quick) value
-        let step = Int((Double(Int(currentPosition)) * cappedSpeedMultiplier).rounded()) / 2 % 4
+        let pattern = 0b000100010001  // Original pattern from C code
+        let step = Int(marqueeStep)
         
-        // Create a temporary buffer for non-border content
-        var tempBuffer = DisplayBuffer()
-        
-        // Copy the non-border content to the temp buffer
-        for i in 1..<10 {
-            for j in 1..<43 {
-                tempBuffer.set(j, i, displayBuffer.get(j, i))
-            }
+        for x in 0..<44 {
+            // Clear existing edges
+            displayBuffer.set(x, 0, false)   // Top edge
+            displayBuffer.set(x, 10, false)  // Bottom edge
+            
+            // Bottom edge - moving right to left
+            let bottomBit = (pattern & (1 << ((step + x) & 3))) != 0
+            displayBuffer.set(x, 0, bottomBit)
+            
+            // Top edge - moving left to right
+            let topBit = (pattern & (1 << ((-step + x) & 3))) != 0
+            displayBuffer.set(x, 10, topBit)
         }
         
-        // Clear the original buffer
-        displayBuffer.clear()
-        
-        // Copy back the inner content
-        for i in 1..<10 {
-            for j in 1..<43 {
-                displayBuffer.set(j, i, tempBuffer.get(j, i))
-            }
-        }
-        
-        // Apply marquee effect on the borders (counterclockwise)
-        for i in 0..<11 {
-            for j in 0..<44 {
-                let isOnBorder = i == 0 || j == 0 || i == 10 || j == 43
-                if isOnBorder {
-                    var shouldLight = false
-                    
-                    // Top edge: right to left
-                    if i == 0 {
-                        shouldLight = (43 - j) % 4 == step
-                    }
-                    // Left edge: top to bottom
-                    else if j == 0 {
-                        shouldLight = i % 4 == step
-                    }
-                    // Bottom edge: left to right
-                    else if i == 10 {
-                        shouldLight = j % 4 == step
-                    }
-                    // Right edge: bottom to top
-                    else if j == 43 {
-                        shouldLight = (10 - i) % 4 == step
-                    }
-                    
-                    displayBuffer.set(j, i, shouldLight)
-                }
-            }
+        // Add vertical edges
+        for y in 1..<10 {
+            // Left edge - moving down
+            let leftBit = (pattern & (1 << ((step + y) & 3))) != 0
+            displayBuffer.set(43, y, leftBit)
+            
+            // Right edge - moving up
+            let rightBit = (pattern & (1 << ((-step + y) & 3))) != 0
+            displayBuffer.set(0, y, rightBit)
         }
     }
 }
