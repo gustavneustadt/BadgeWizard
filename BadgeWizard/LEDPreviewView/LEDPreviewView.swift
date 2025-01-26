@@ -12,13 +12,6 @@ struct LEDPreviewView: View {
 
     @State internal var displayBuffer: DisplayBuffer
     
-    
-    private var animationInterval: TimeInterval {
-        let baseSpeed = 0.2
-        return baseSpeed - (Double(message.speed.rawValue) * baseSpeed / 8.0)
-    }
-    
-    // Separate timers
     @State internal var timerStep: Int = 0
     @State internal var marqueeStep: Int = 0
     @State private var flashStep: Int = 0
@@ -26,52 +19,78 @@ struct LEDPreviewView: View {
     
     let animationTimer = Timer.publish(every: 0.025, on: .main, in: .common).autoconnect()
     
-
-    
     init(message: Message?) {
         self.message = message ?? Message.placeholder()
         self._displayBuffer = State(initialValue: DisplayBuffer())
     }
     
-    // Move computed properties here to make them reactive
     internal var pixels: [[Pixel]] {
         message.getCombinedPixelArrays()
     }
     
     var body: some View {
         TimelineView(.animation) { timeline in
-            Canvas { context, size in
-                let ledSize = size.width / CGFloat(44)
-                let ledSpacing = ledSize / 4
+            ZStack {
                 
-                if !isEnabled {
-                    context.fill(
-                        Path(roundedRect: CGRect(origin: .zero, size: size),
-                             cornerRadius: (ledSize / 2) - ledSpacing),
-                        with: .color(Color(nsColor: NSColor.separatorColor))
-                    )
-                    return
-                }
-                
-                // Draw all LEDs in a single pass
-                for y in 0..<11 {
-                    for x in 0..<44 {
-                        let isOn = displayBuffer.get(x, y)
-                        let offset = CGSize(
-                            width: CGFloat(x) * ledSize + ledSpacing / 2,
-                            height: CGFloat(y) * ledSize + ledSpacing / 2
-                        )
-                        
-                        context.translateBy(x: offset.width, y: offset.height)
+                Canvas { context, size in
+                    let ledSize = size.width / CGFloat(44)
+                    let ledSpacing = ledSize / 4
+                    
+                    if !isEnabled {
                         context.fill(
-                            Path(ellipseIn: CGRect(origin: .zero, size: CGSize(width: ledSize-2, height: ledSize-2))),
-                            with: .color(isOn ? .accentColor : .accentColor.opacity(0.2))
+                            Path(roundedRect: CGRect(origin: .zero, size: size),
+                                 cornerRadius: (ledSize / 2) - ledSpacing),
+                            with: .color(Color(nsColor: NSColor.separatorColor))
                         )
-                        context.translateBy(x: -offset.width, y: -offset.height)
+                        return
+                    }
+                    
+                    // Draw all LEDs in a single pass
+                    for y in 0..<11 {
+                        for x in 0..<44 {
+                            let isOn = displayBuffer.get(x, y)
+                            guard !isOn else { continue }
+                            let offset = CGSize(
+                                width: CGFloat(x) * ledSize + ledSpacing / 2,
+                                height: CGFloat(y) * ledSize + ledSpacing / 2
+                            )
+                            
+                            context.translateBy(x: offset.width, y: offset.height)
+                            context.fill(
+                                Path(ellipseIn: CGRect(origin: .zero, size: CGSize(width: ledSize-2, height: ledSize-2))),
+                                with: .color(.accentColor.opacity(0.2))
+                            )
+                            context.translateBy(x: -offset.width, y: -offset.height)
+                        }
                     }
                 }
+                Canvas { context, size in
+                    let ledSize = size.width / CGFloat(44)
+                    let ledSpacing = ledSize / 4
+                    guard isEnabled else { return }
+                    
+                    // Draw all LEDs in a single pass
+                    for y in 0..<11 {
+                        for x in 0..<44 {
+                            let isOn = displayBuffer.get(x, y)
+                            guard isOn else { continue }
+                            let offset = CGSize(
+                                width: CGFloat(x) * ledSize + ledSpacing / 2,
+                                height: CGFloat(y) * ledSize + ledSpacing / 2
+                            )
+                            
+                            context.translateBy(x: offset.width, y: offset.height)
+                            context.fill(
+                                Path(ellipseIn: CGRect(origin: .zero, size: CGSize(width: ledSize-2, height: ledSize-2))),
+                                with: .color(.accentColor.mix(with: .white, by: 0.5))
+                            )
+                            context.translateBy(x: -offset.width, y: -offset.height)
+                        }
+                    }
+                }
+                .shadow(color: .accentColor, radius: 2)
+                .shadow(color: .accentColor, radius: 5)
             }
-            .shadow(color: .accentColor.opacity(1), radius: 3)
         }
         .frame(height: 11 * (size.width / 44))
         .getSize($size)
