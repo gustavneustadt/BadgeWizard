@@ -25,12 +25,12 @@ extension LEDPreviewView {
         
         // Add vertical edges
         for y in 1..<10 {
-            // Left edge - moving down
-            let leftBit = (pattern & (1 << ((step + y) & 3))) != 0
+            // Right edge - moving up
+            let leftBit = (pattern & (1 << ((step + y + 3) & 3))) != 0
             displayBuffer.set(43, y, leftBit)
             
-            // Right edge - moving up
-            let rightBit = (pattern & (1 << ((-step + y) & 3))) != 0
+            // Left edge - moving down
+            let rightBit = (pattern & (1 << ((-step + y - 2) & 3))) != 0
             displayBuffer.set(0, y, rightBit)
         }
     }
