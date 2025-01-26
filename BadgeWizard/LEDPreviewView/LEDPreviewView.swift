@@ -14,45 +14,19 @@ struct LEDPreviewView: View {
     
     
     private var animationInterval: TimeInterval {
-        let baseSpeed = 200000.0 / 1_000_000.0
+        let baseSpeed = 0.2
         return baseSpeed - (Double(message.speed.rawValue) * baseSpeed / 8.0)
     }
     
     // Separate timers
-    @State internal var currentPosition: Double = 0
-    @State private var animationTimer: Timer.TimerPublisher = Timer.publish(every: 0.2, on: .main, in: .common)
-    @State private var animationCancellable: AnyCancellable?
-    
+    @State internal var timerStep: Int = 0
     @State internal var marqueeStep: Int = 0
-    @State private var marqueeTimer: Timer.TimerPublisher = Timer.publish(every: 0.1, on: .main, in: .common)
-    @State private var marqueeCancellable: AnyCancellable?
-    
     @State private var flashStep: Int = 0
-    @State private var flashTimer: Timer.TimerPublisher = Timer.publish(every: 0.5, on: .main, in: .common)
-    @State private var flashCancellable: AnyCancellable?
+    @State internal var animationStep: Int = 0
     
-    private func resetTimers() {
-        // Cancel all existing timers
-        animationCancellable?.cancel()
-        marqueeCancellable?.cancel()
-        flashCancellable?.cancel()
-        
-        // Start main animation timer
-        animationTimer = Timer.publish(every: animationInterval, on: .main, in: .common)
-        animationCancellable = AnyCancellable(animationTimer.connect())
-        
-        // Only start marquee timer if enabled
-        if message.marquee {
-            marqueeTimer = Timer.publish(every: 0.1, on: .main, in: .common)
-            marqueeCancellable = AnyCancellable(marqueeTimer.connect())
-        }
-        
-        // Only start flash timer if enabled
-        if message.flash {
-            flashTimer = Timer.publish(every: 0.5, on: .main, in: .common)
-            flashCancellable = AnyCancellable(flashTimer.connect())
-        }
-    }
+    let animationTimer = Timer.publish(every: 0.025, on: .main, in: .common).autoconnect()
+    
+
     
     init(message: Message?) {
         self.message = message ?? Message.placeholder()
@@ -101,25 +75,39 @@ struct LEDPreviewView: View {
         }
         .frame(height: 11 * (size.width / 44))
         .getSize($size)
-        .onChange(of: message.speed) { resetTimers() }
-        .onChange(of: message.marquee) { resetTimers() }
-        .onChange(of: message.flash) { resetTimers() }
         .onReceive(animationTimer) { _ in updateAnimation() }
-        .onReceive(marqueeTimer) { _ in marqueeStep += 1 }
-        .onReceive(flashTimer) { _ in flashStep += 1 }
-        .onAppear { resetTimers() }
-        .onDisappear {
-            animationCancellable?.cancel()
-            marqueeCancellable?.cancel()
-            flashCancellable?.cancel()
-        }
         .onChange(of: message.mode) {
-            currentPosition = 0
+            animationStep = 0
         }
     }
     
     private func updateAnimation() {
-        currentPosition += 1  // Increment by 1 since timer matches hardware timing
+        timerStep += 1
+        
+        let nthUpdate: Int = { switch message.speed {
+        case .verySlow:
+            8
+        case .slow:
+            7
+        case .relaxed:
+            6
+        case .medium:
+            5
+        case .steady:
+            4
+        case .quick:
+            3
+        case .fast:
+            2
+        case .veryFast:
+            1
+        }
+        }()
+        
+        if timerStep % nthUpdate == 0 {
+            animationStep += 1  // Increment by 1 since timer matches hardware timing
+        }
+        
         displayBuffer.clear()
         
         switch message.mode {
@@ -143,8 +131,16 @@ struct LEDPreviewView: View {
             displayLaser()
         }
         
+        if timerStep % 20 == 0 {
+            flashStep += 1
+        }
+        
         if message.flash && (flashStep % 2 == 0) {
             displayBuffer.clear()
+        }
+        
+        if timerStep % 4 == 0 {
+            marqueeStep += 1
         }
         
         if message.marquee {

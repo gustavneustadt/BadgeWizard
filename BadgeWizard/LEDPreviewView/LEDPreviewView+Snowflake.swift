@@ -25,7 +25,7 @@ extension LEDPreviewView {
         let totalSteps = (stepsPerNormalChunk * (framesCount - 1)) + stepsForLastChunk
         
         // Get current frame and animation step
-        let absoluteStep = Int(currentPosition) % totalSteps
+        let absoluteStep = animationStep % totalSteps
         
         // Calculate which chunk we're on and the step within that chunk
         var currentFrameIndex = 0

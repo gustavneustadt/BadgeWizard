@@ -14,8 +14,8 @@ extension LEDPreviewView {
         // Calculate frame parameters
         let frameSteps = badgeWidth * 3 // in-still-out phases
         let totalFrames = (totalWidth + badgeWidth - 1) / badgeWidth
-        let currentFrameIndex = Int(currentPosition) / frameSteps % totalFrames
-        let step = Int(currentPosition) % frameSteps
+        let currentFrameIndex = animationStep / frameSteps % totalFrames
+        let step = animationStep % frameSteps
         
         // Determine animation phase
         if step < badgeWidth {

@@ -15,7 +15,7 @@ extension LEDPreviewView {
         let totalFrames = (totalWidth + badgeWidth - 1) / badgeWidth
         
         // Use integer step counting like firmware
-        let step = Int(currentPosition)
+        let step = animationStep
         let frameIndex = (step / animationSteps) % totalFrames
         let startX = frameIndex * badgeWidth
         

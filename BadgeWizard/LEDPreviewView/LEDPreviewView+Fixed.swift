@@ -14,7 +14,7 @@ extension LEDPreviewView {
         // Calculate which frame to show based on current position
         let frameWidth = badgeWidth
         let totalFrames = (totalWidth + frameWidth - 1) / frameWidth
-        let currentFrame = (Int(currentPosition) / badgeWidth) % totalFrames
+        let currentFrame = (animationStep / badgeWidth) % totalFrames
         
         // Calculate starting x position for current frame
         let startX = currentFrame * frameWidth

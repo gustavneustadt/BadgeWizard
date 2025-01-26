@@ -12,7 +12,7 @@ extension MessageInspector {
         @ObservedObject var grid: PixelGrid
         @ObservedObject var message: Message
         @State var selectedFontPostscriptName: String = ""
-        @State var showAppleTextPopover: Bool = false
+        @State var showApplyTextPopover: Bool = false
         @State var fontSize: Double = 11
         @State var kerning: Double = 0
         @State var text: String = ""
@@ -30,14 +30,14 @@ extension MessageInspector {
         var body: some View {
             Form {
                 
-                Toggle(isOn: $showAppleTextPopover) {
+                Toggle(isOn: $showApplyTextPopover) {
                     Spacer()
                     Image("grid.text")
                     Text("Add Text")
                     Spacer()
                 }
                 .toggleStyle(.button)
-                .popover(isPresented: $showAppleTextPopover, attachmentAnchor: .point(.bottom), arrowEdge: .bottom, content: {
+                .popover(isPresented: $showApplyTextPopover, attachmentAnchor: .point(.bottom), arrowEdge: .bottom, content: {
                     Form {
                         FontSelector(selectedFont: $selectedFontPostscriptName)
                         Stepper(value: $kerning, format: .number) {

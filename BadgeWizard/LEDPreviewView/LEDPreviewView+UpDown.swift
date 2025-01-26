@@ -13,12 +13,12 @@ extension LEDPreviewView {
         let totalSteps = frameSteps * framesCount
         
         // Reset when complete cycle is done
-        if Int(currentPosition) > totalSteps {
-            currentPosition = 0
+        if animationStep > totalSteps {
+            animationStep = 0
         }
         
-        let framePosition = Int(currentPosition) / frameSteps
-        let currentStep = Int(currentPosition) % frameSteps
+        let framePosition = animationStep / frameSteps
+        let currentStep = animationStep % frameSteps
         
         // Starting column for current frame
         let startCol = framePosition * 44
@@ -47,12 +47,12 @@ extension LEDPreviewView {
         let totalSteps = frameSteps * framesCount
         
         // Reset when complete cycle is done
-        if Int(currentPosition) > totalSteps {
-            currentPosition = 0
+        if animationStep > totalSteps {
+            animationStep = 0
         }
         
-        let framePosition = Int(currentPosition) / frameSteps
-        let currentStep = Int(currentPosition) % frameSteps
+        let framePosition = animationStep / frameSteps
+        let currentStep = animationStep % frameSteps
         
         // Starting column for current frame
         let startCol = framePosition * 44

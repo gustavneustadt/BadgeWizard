@@ -14,7 +14,7 @@ extension LEDPreviewView {
         let totalSteps = totalWidth + badgeWidth
         
         // Get current scroll position, moving in opposite direction from left scroll
-        let scrollPosition = totalSteps - (Int(currentPosition) % totalSteps)
+        let scrollPosition = totalSteps - (animationStep % totalSteps)
         
         // Clear buffer and prepare for new frame
         displayBuffer.clear()
