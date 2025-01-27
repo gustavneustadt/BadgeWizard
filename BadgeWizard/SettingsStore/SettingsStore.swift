@@ -25,14 +25,14 @@ extension EnvironmentValues {
 
 /// Protocol defining the settings interface
 protocol SettingsStoreProtocol {
-    var zoomLevel: Double { get set }
+    var pixelGridPixelSize: Double { get set }
 }
 
 /// Store for managing app-wide settings
 final class SettingsStore: ObservableObject, SettingsStoreProtocol {
     /// Zoom level for the pixel grid display
     /// Default value is 1.0 (100%)
-    @AppStorage("zoomLevel") var zoomLevel: Double = 1.0 {
+    @AppStorage("pixelGridPixelSize") var pixelGridPixelSize: Double = 20 {
         willSet { objectWillChange.send() }
     }
     
@@ -45,10 +45,10 @@ final class SettingsStore: ObservableObject, SettingsStoreProtocol {
 // MARK: - Constants
 extension SettingsStore {
     /// Constants for zoom level limits and increments
-    enum ZoomLimits {
-        static let minimum: Double = 0.5  // 50%
-        static let maximum: Double = 3.0  // 300%
-        static let increment: Double = 0.25 // 25% steps
+    enum PixelGridPixelSizeLimits {
+        static let minimum: Double = 10
+        static let maximum: Double = 30
+        static let increment: Double = 5
     }
 }
 
@@ -56,18 +56,18 @@ extension SettingsStore {
 extension SettingsStore {
     /// Increases the zoom level by one increment
     func increaseZoom() {
-        let newZoom = min(zoomLevel + ZoomLimits.increment, ZoomLimits.maximum)
-        zoomLevel = newZoom
+        let newSize = min(pixelGridPixelSize + PixelGridPixelSizeLimits.increment, PixelGridPixelSizeLimits.maximum)
+        pixelGridPixelSize = newSize
     }
     
     /// Decreases the zoom level by one increment
     func decreaseZoom() {
-        let newZoom = max(zoomLevel - ZoomLimits.increment, ZoomLimits.minimum)
-        zoomLevel = newZoom
+        let newSize = max(pixelGridPixelSize - PixelGridPixelSizeLimits.increment, PixelGridPixelSizeLimits.minimum)
+        pixelGridPixelSize = newSize
     }
     
     /// Resets the zoom level to 100%
     func resetZoom() {
-        zoomLevel = 1.0
+        pixelGridPixelSize = 1.0
     }
 }

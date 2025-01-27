@@ -12,12 +12,14 @@ extension PixelGridView {
         var mousePosition: CGPoint? = nil
         var onionSkinning: Bool
         @ObservedObject var previousGrid: PixelGrid
+        let pixelSize: CGFloat
         @Environment(\.colorScheme) var colorScheme
         
-        init(pixelGrid: PixelGrid, mousePosition: CGPoint? = nil, onionSkinning: Bool? = false) {
+        init(pixelGrid: PixelGrid, mousePosition: CGPoint? = nil, onionSkinning: Bool? = false, pixelSize: CGFloat) {
             self.pixelGrid = pixelGrid
             self.mousePosition = mousePosition
             self.onionSkinning = onionSkinning ?? false
+            self.pixelSize = pixelSize
             
             // Get previous grid if it exists, otherwise use a placeholder
             let message = pixelGrid.message
@@ -31,7 +33,7 @@ extension PixelGridView {
             }
         }
         
-        func drawOnionSkin(context: GraphicsContext, symbol: GraphicsContext.ResolvedSymbol, pixelSize: CGSize) {
+        func drawOnionSkin(context: GraphicsContext, symbol: GraphicsContext.ResolvedSymbol) {
             // Only draw onion skin if this isn't the first grid
             if let currentIndex = pixelGrid.message.pixelGrids.firstIndex(where: { $0.id == pixelGrid.id }),
                currentIndex > 0 {
@@ -47,8 +49,8 @@ extension PixelGridView {
                         context.draw(
                             symbol,
                             at: CGPoint(
-                                x: CGFloat(pixel.x) * pixelSize.width + pixelSize.width/2,
-                                y: CGFloat(pixel.y) * pixelSize.height + pixelSize.height/2
+                                x: CGFloat(pixel.x) * pixelSize + pixelSize/2,
+                                y: CGFloat(pixel.y) * pixelSize + pixelSize/2
                             )
                         )
                     }
@@ -56,11 +58,11 @@ extension PixelGridView {
             }
         }
         
-        func drawHoverPixels(context: GraphicsContext, symbol: GraphicsContext.ResolvedSymbol, pixelSize: CGSize) {
+        func drawHoverPixels(context: GraphicsContext, symbol: GraphicsContext.ResolvedSymbol) {
             var hoverPixel: (x: Int, y: Int)? = nil
             if let mousePosition = mousePosition {
-                let x = Int((mousePosition.x - 2) / pixelSize.width)
-                let y = Int((mousePosition.y - 2) / pixelSize.height)
+                let x = Int((mousePosition.x - 2) / pixelSize)
+                let y = Int((mousePosition.y - 2) / pixelSize)
                 if x >= 0 && x < pixelGrid.width && y >= 0 && y < 11 {
                     hoverPixel = (x, y)
                 }
@@ -71,8 +73,8 @@ extension PixelGridView {
                 context.draw(
                     symbol,
                     at: CGPoint(
-                        x: CGFloat(hoverPixel.x) * pixelSize.width + pixelSize.width/2,
-                        y: CGFloat(hoverPixel.y) * pixelSize.height + pixelSize.height/2
+                        x: CGFloat(hoverPixel.x) * pixelSize + pixelSize/2,
+                        y: CGFloat(hoverPixel.y) * pixelSize + pixelSize/2
                     )
                 )
             }
@@ -80,10 +82,6 @@ extension PixelGridView {
         
         var body: some View {
             Canvas { context, size in
-                let pixelSize: CGSize = .init(
-                    width: size.width / CGFloat(pixelGrid.width),
-                    height: size.height / 11
-                )
                 
                 // Create symbols
                 guard let itemOn = context.resolveSymbol(id: "itemOn"),
@@ -104,8 +102,8 @@ extension PixelGridView {
                     context.draw(
                         itemOn,
                         at: CGPoint(
-                            x: CGFloat(pixel.x) * pixelSize.width + pixelSize.width/2,
-                            y: CGFloat(pixel.y) * pixelSize.height + pixelSize.height/2
+                            x: CGFloat(pixel.x) * pixelSize + pixelSize/2,
+                            y: CGFloat(pixel.y) * pixelSize + pixelSize/2
                         )
                     )
                 }
@@ -120,29 +118,29 @@ extension PixelGridView {
                     context.draw(
                         itemOff,
                         at: CGPoint(
-                            x: CGFloat(pixel.x) * pixelSize.width + pixelSize.width/2,
-                            y: CGFloat(pixel.y) * pixelSize.height + pixelSize.height/2
+                            x: CGFloat(pixel.x) * pixelSize + pixelSize/2,
+                            y: CGFloat(pixel.y) * pixelSize + pixelSize/2
                         )
                     )
                 }
                 
-                drawHoverPixels(context: context, symbol: itemHover, pixelSize: pixelSize)
-                drawOnionSkin(context: context, symbol: itemOnionSkin, pixelSize: pixelSize)
+                drawHoverPixels(context: context, symbol: itemHover)
+                drawOnionSkin(context: context, symbol: itemOnionSkin)
                 
             } symbols: {
-                RoundedRectangle(cornerRadius: 3, style: .continuous)
+                RoundedRectangle(cornerRadius: pixelSize/8, style: .continuous)
                     .fill(Color.accentColor)
-                    .frame(width: 19, height: 19)
+                    .frame(width: pixelSize - 2, height: pixelSize - 2)
                     .tag("itemOn")
                 
-                RoundedRectangle(cornerRadius: 3, style: .continuous)
+                RoundedRectangle(cornerRadius: pixelSize/8, style: .continuous)
                     .fill(.separator)
-                    .frame(width: 19, height: 19)
+                    .frame(width: pixelSize - 2, height: pixelSize - 2)
                     .tag("itemOff")
                 
-                RoundedRectangle(cornerRadius: 3, style: .continuous)
+                RoundedRectangle(cornerRadius: pixelSize/8, style: .continuous)
                     .fill(.separator)
-                    .frame(width: 19, height: 19)
+                    .frame(width: pixelSize - 2, height: pixelSize - 2)
                     .tag("itemHover")
                 
                 // Add onion skin symbol
@@ -154,7 +152,7 @@ extension PixelGridView {
                     ).opacity(
                         colorScheme == .dark ? 0.6 : 0.8
                     ))
-                    .frame(width: 10, height: 10)
+                    .frame(width: pixelSize / 2, height: pixelSize / 2)
                     .tag("itemOnionSkin")
             }
         }
