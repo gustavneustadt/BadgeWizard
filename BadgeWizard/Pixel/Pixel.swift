@@ -6,8 +6,7 @@
 //
 import SwiftUI
 
-struct Pixel: Hashable, Identifiable, Equatable {
-    let id: Identifier<Pixel> = .init()
+struct Pixel: Hashable {
     let x: Int
     let y: Int
     let isOn: Bool

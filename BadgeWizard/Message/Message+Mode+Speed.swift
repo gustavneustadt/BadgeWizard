@@ -32,7 +32,6 @@ extension Message {
         case picture   = 7
         case laser     = 8
         
-        // Mode 5 Animation Frames -> 48 wide px
         var description: String {
             switch self {
             case .left:      return "Scroll Left"

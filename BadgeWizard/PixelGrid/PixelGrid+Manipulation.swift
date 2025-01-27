@@ -9,10 +9,12 @@ import Foundation
 extension PixelGrid {
     func setPixel(x: Int, y: Int, isOn: Bool, isUndo: Bool = false, undoManager: UndoManager?) {
         guard pixels[y][x].isOn != isOn else { return }
+        message.objectWillChange.send()
         
         var newPixels = pixels
         newPixels[y][x] = Pixel(x: x, y: y, isOn: isOn)
         pixels = newPixels
+        
         
         undoManager?.registerUndo(withTarget: self) { grid in
             grid.setPixel(x: x, y: y, isOn: !isOn, isUndo: true, undoManager: undoManager)
@@ -37,7 +39,6 @@ extension PixelGrid {
         }
         
         pixels = newPixels
-        
     }
     
     /// Helper function to restore state from given Pixels
