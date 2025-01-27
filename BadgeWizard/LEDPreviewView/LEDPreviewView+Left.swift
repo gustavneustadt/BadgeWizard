@@ -15,10 +15,7 @@ extension LEDPreviewView {
         
         // Get current scroll position
         let scrollPosition = animationStep % totalSteps
-        
-        // Clear buffer and prepare for new frame
-        displayBuffer.clear()
-        
+
         // Draw the current frame
         for y in 0..<11 {
             for x in 0..<badgeWidth {

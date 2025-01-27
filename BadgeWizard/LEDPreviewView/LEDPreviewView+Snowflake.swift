@@ -46,9 +46,6 @@ extension LEDPreviewView {
         let remainingWidth = newGridWidth - startCol
         let currentFrameWidth = min(badgeWidth, remainingWidth)
         
-        // Clear the buffer
-        displayBuffer.clear()
-        
         // Check if this is the last chunk
         let isLastChunk = currentFrameIndex == framesCount - 1
         

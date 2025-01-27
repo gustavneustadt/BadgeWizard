@@ -34,9 +34,6 @@ extension LEDPreviewView {
         
         let startX = currentFrame * badgeWidth
         
-        // Clear buffer before drawing
-        displayBuffer.clear()
-        
         // Draw content from center outwards
         for i in 0...range {
             let leftX = centerX - i
