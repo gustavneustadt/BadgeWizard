@@ -11,7 +11,6 @@ extension PixelGrid: Equatable {
         // Compare the relevant properties
         return lhs.pixels == rhs.pixels &&
         lhs.width == rhs.width &&
-        lhs.height == rhs.height &&
-        lhs.patternGap == rhs.patternGap
+        lhs.height == rhs.height
     }    
 }

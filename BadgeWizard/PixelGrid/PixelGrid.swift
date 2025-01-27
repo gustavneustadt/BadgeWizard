@@ -15,9 +15,6 @@ class PixelGrid: ObservableObject, Identifiable {
 
     let height = 11
     
-    // Add the gap property here
-    @Published var patternGap: Int = 1
-    
     unowned var message: Message
     
     init(pixels: [[Pixel]] = [], width: Int? = nil, message: Message) {
@@ -36,54 +33,6 @@ class PixelGrid: ObservableObject, Identifiable {
         
     }
     
-    func getAsciiArt() -> String {
-        var result = ""
-        var lastRow = 0
-        for (i, row) in self.pixels.enumerated() {
-            if lastRow != i {
-                result.append("\n")
-                lastRow = i
-            }
-            for pixel in row {
-                if pixel.isOn {
-                    result.append("0")
-                } else {
-                    result.append("-")
-                }
-            }
-        }
-        return result
-    }
-    
-    func pixelFromString(text: String) {
-        // Split the string into rows
-        let rows = text.components(separatedBy: "\n")
-        
-        // Create the pixel grid
-        var pixelGrid: [[Pixel]] = []
-        
-        // Process each row
-        for (y, row) in rows.enumerated() {
-            var pixelRow: [Pixel] = []
-            
-            // Process each character in the row
-            for (x, char) in row.enumerated() {
-                let pixel = Pixel(
-                    x: x,
-                    y: y,
-                    isOn: (char == "0")
-                )
-                pixelRow.append(pixel)
-            }
-            
-            // Only append non-empty rows to handle any trailing newlines
-            if !pixelRow.isEmpty {
-                pixelGrid.append(pixelRow)
-            }
-        }
-        width = pixelGrid.isEmpty ? 0 : pixelGrid[0].count
-        pixels = pixelGrid
-    }
     
     func buildMatrix() {
         let oldPixels = pixels
