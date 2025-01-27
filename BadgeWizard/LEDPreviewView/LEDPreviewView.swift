@@ -10,7 +10,7 @@ struct LEDPreviewView: View {
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.colorScheme) var colorScheme
 
-    @State internal var displayBuffer: DisplayBuffer
+    @StateObject internal var displayBuffer: DisplayBuffer = DisplayBuffer()
     
     @State internal var timerStep: Int = 0
     @State internal var marqueeStep: Int = 0
@@ -21,7 +21,6 @@ struct LEDPreviewView: View {
     
     init(message: Message?) {
         self.message = message ?? Message.placeholder()
-        self._displayBuffer = State(initialValue: DisplayBuffer())
     }
     
     internal var pixels: [[Pixel]] {
@@ -31,7 +30,6 @@ struct LEDPreviewView: View {
     let offPixelColor: Color = .accentColor.opacity(0.2)
     let onPixelColor: Color = .accentColor.mix(with: .white, by: 0.5)
     var body: some View {
-        TimelineView(.animation) { timeline in
             ZStack {
                 Canvas { context, size in
                     let ledSize = size.width / CGFloat(44)
@@ -105,7 +103,7 @@ struct LEDPreviewView: View {
                 .shadow(color: .accentColor, radius: 2)
                 .shadow(color: .accentColor, radius: 5)
             }
-        }
+        
         .frame(height: 11 * (size.width / 44))
         .getSize($size)
         .onReceive(animationTimer) { _ in updateAnimation() }
@@ -119,6 +117,7 @@ struct LEDPreviewView: View {
     
     fileprivate func executeAnimationUpdate() {
         // Increment by 1 since timer matches hardware timing
+        displayBuffer.objectWillChange.send()
         displayBuffer.clear()
         switch message.mode {
         case .left:
@@ -175,6 +174,7 @@ struct LEDPreviewView: View {
         }
         
         if message.flash && (flashStep % 2 == 0) {
+            displayBuffer.objectWillChange.send()
             displayBuffer.clear()
         }
         
@@ -183,6 +183,7 @@ struct LEDPreviewView: View {
         }
         
         if message.marquee {
+            displayBuffer.objectWillChange.send()
             applyMarquee()
         }
     }

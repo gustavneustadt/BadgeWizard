@@ -4,8 +4,9 @@
 //
 //  Created by Gustav on 21.01.25.
 //
+import SwiftUI
 
-struct DisplayBuffer {
+class DisplayBuffer: ObservableObject {
     var data: UnsafeMutableBufferPointer<UInt64>
     
     init() {
@@ -17,7 +18,7 @@ struct DisplayBuffer {
         self.data = buffer
     }
     
-    mutating func set(_ x: Int, _ y: Int, _ value: Bool) {
+    func set(_ x: Int, _ y: Int, _ value: Bool) {
         let wordIndex = (y * ((44 + 63) / 64)) + (x / 64)
         let bitIndex = x % 64
         if value {
@@ -33,7 +34,7 @@ struct DisplayBuffer {
         return (data[wordIndex] & (1 << bitIndex)) != 0
     }
     
-    mutating func clear() {
+    func clear() {
         data.update(repeating: 0)
     }
 }
