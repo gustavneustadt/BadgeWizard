@@ -29,11 +29,32 @@ struct LEDPreviewView: View {
     
     let offPixelColor: Color = .accentColor.opacity(0.2)
     let onPixelColor: Color = .accentColor.mix(with: .white, by: 0.5)
+    
+    @State private var ledSize: CGFloat = 0
+    @State private var ledSpacing: CGFloat = 0
+    @State private var ledPath: Path = .init()
+    
+    func updateLedProperties() {
+        self.ledSize = size.width / CGFloat(44)
+        self.ledSpacing = ledSize / 4
+        self.ledPath = Path(ellipseIn: CGRect(origin: .zero, size: CGSize(width: ledSize-2, height: ledSize-2)))
+    }
+    
+    func iterateThroughLeds(callback: (_ offsetX: CGFloat, _ offsetY: CGFloat, _ isOn: Bool) -> Void) {
+        for y in 0..<11 {
+            let offsetY: CGFloat = CGFloat(y) * ledSize + ledSpacing / 2
+            for x in 0..<44 {
+                let offsetX: CGFloat = CGFloat(x) * ledSize + ledSpacing / 2
+                let isOn = displayBuffer.get(x, y)
+                
+                callback(offsetX, offsetY, isOn)
+            }
+        }
+    }
+    
     var body: some View {
             ZStack {
-                Canvas { context, size in
-                    let ledSize = size.width / CGFloat(44)
-                    let ledSpacing = ledSize / 4
+                Canvas { context, _ in
                     
                     if !isEnabled {
                         context.fill(
@@ -44,22 +65,14 @@ struct LEDPreviewView: View {
                         return
                     }
                     
-                    let ledPath = Path(ellipseIn: CGRect(origin: .zero, size: CGSize(width: ledSize-2, height: ledSize-2)))
-                    // Draw all LEDs in a single pass
-                    
                     var offPixelBatch = Path()
                     
-                    for y in 0..<11 {
-                        let offsetY: CGFloat = CGFloat(y) * ledSize + ledSpacing / 2
-                        for x in 0..<44 {
-                            let offsetX: CGFloat = CGFloat(x) * ledSize + ledSpacing / 2
-                            let isOn = displayBuffer.get(x, y)
-                            guard !isOn else { continue }
-                            
+                    iterateThroughLeds { x, y, isOn in
+                        if isOn == false {
                             offPixelBatch.addPath(
                                 ledPath,
                                 transform:
-                                        .init(translationX: offsetX, y: offsetY)
+                                        .init(translationX: x, y: y)
                             )
                         }
                     }
@@ -70,29 +83,19 @@ struct LEDPreviewView: View {
                     )
                 }
                 Canvas { context, size in
-                    let ledSize = size.width / CGFloat(44)
-                    let ledSpacing = ledSize / 4
-                    
                     guard isEnabled else { return }
-                    
-                    let ledPath = Path(ellipseIn: CGRect(origin: .zero, size: CGSize(width: ledSize-2, height: ledSize-2)))
-                    // Draw all LEDs in a single pass
-                    
+
                     var onPixelBatch = Path()
                     
-                    for y in 0..<11 {
-                        let offsetY: CGFloat = CGFloat(y) * ledSize + ledSpacing / 2
-                        for x in 0..<44 {
-                            let offsetX: CGFloat = CGFloat(x) * ledSize + ledSpacing / 2
-                            let isOn = displayBuffer.get(x, y)
-                            guard isOn else { continue }
-                            
+                    iterateThroughLeds { x, y, isOn in
+                        if isOn {
                             onPixelBatch.addPath(
                                 ledPath,
                                 transform:
-                                        .init(translationX: offsetX, y: offsetY)
+                                        .init(translationX: x, y: y)
                             )
                         }
+                        
                     }
                     
                     context.fill(
@@ -106,6 +109,9 @@ struct LEDPreviewView: View {
         
         .frame(height: 11 * (size.width / 44))
         .getSize($size)
+        .onChange(of: size, initial: true, { _, _ in
+            updateLedProperties()
+        })
         .onReceive(animationTimer) { _ in updateAnimation() }
         .onChange(of: pixels) {
             executeAnimationUpdate()
