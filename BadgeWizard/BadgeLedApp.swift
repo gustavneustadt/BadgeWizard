@@ -9,10 +9,19 @@ import SwiftUI
 
 @main
 struct BadgeLedApp: App {
+    
     @StateObject private var bluetoothManager = LEDBadgeManager()
+    
+#if DEBUG
+    @StateObject var messageStore: MessageStore = MessageStore(messages: [
+        Message.testMessage
+    ])
+#else
     @StateObject var messageStore: MessageStore = MessageStore(messages: [
         .init(flash: false, marquee: false, speed: .medium, mode: .left)
     ])
+#endif
+    
     @State var messagesCount: Int = 1
     @State var showInspector: Bool = true
     @Environment(\.undoManager) var undoManager
@@ -60,6 +69,16 @@ struct BadgeLedApp: App {
                     guard messagesCount != newValue else { return }
                     messagesCount = newValue
                 }
+        }
+        .commands {
+#if DEBUG
+            CommandGroup(after: .newItem) {
+                Button("Export Message as Debug Code") {
+                    messageStore.selectedMessage?.copyDebugCodeToClipboard()
+                }
+            }
+#endif
+            
         }
     }
 }
