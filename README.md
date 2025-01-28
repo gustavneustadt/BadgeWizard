@@ -1,6 +1,7 @@
-![Badge Wizard App Icon for macOS, Magic wand in front of a stylized LED matrix badge](BadgeWizard/Assets.xcassets/AppIcon.appiconset/128.png)
+<img alt="Badge Wizard App Icon for macOS, Magic wand in front of a stylized LED matrix badge" width="128" src="BadgeWizard/Assets.xcassets/AppIcon.appiconset/512.png">
+
 # Badge Wizard
-A native macOS App written in SwiftUI for controlling [FOSSASIA’S BadgeMagic LED matrix displays](https://badgemagic.fossasia.org). It works with FOSSASIA LED matrix display with a resolution of 11×44 pixels. You can create, preview, and send custom messages and animations to the LED badge over Bluetooth.
+A native macOS App written in SwiftUI to controll [FOSSASIA’S BadgeMagic LED 44×11 matrix displays](https://badgemagic.fossasia.org). The App may work with other badges too. You can create, preview, and send custom messages and animations to the LED badge over Bluetooth.
 
 ## Features
 - Create and edit multiple messages
