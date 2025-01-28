@@ -110,7 +110,7 @@ struct PixelGridView: View {
                 .gesture(
                     dragGesture
                 )
-                .padding([.top, .bottom, .leading])
+                .padding([.top, .bottom, .leading], settings.pixelGridPixelSize)
                 .padding(.trailing, settings.pixelGridPixelSize)
                 .overlay {
                     ZStack {
@@ -121,7 +121,7 @@ struct PixelGridView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-                .padding(.trailing, 8)
+                .padding(.trailing, settings.pixelGridPixelSize * 0.4)
                 if temporaryWidth != nil {
                     let width = calculateWidth(columns: temporaryWidth!) - self.width
                     if width > 0 {
@@ -133,7 +133,7 @@ struct PixelGridView: View {
                 }
             }
             .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: settings.pixelGridPixelSize / 2, style: .continuous)
                     .fill(.background)
                     .stroke(Color.accentColor.secondary, lineWidth: gridIsSelected ? 4 : 0)
             )

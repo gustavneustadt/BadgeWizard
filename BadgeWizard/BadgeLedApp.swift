@@ -40,13 +40,13 @@ struct BadgeLedApp: App {
                         ControlGroup {
                             
                             Button {
-                                settingsStore.decreaseZoom()
+                                settingsStore.decreaseSize()
                             } label: {
                                 Image(systemName: "minus.magnifyingglass")
                             }
                             
                             Button {
-                                settingsStore.increaseZoom()
+                                settingsStore.increaseSize()
                             } label: {
                                 Image(systemName: "plus.magnifyingglass")
                             }
