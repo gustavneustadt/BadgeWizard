@@ -28,7 +28,7 @@ struct LEDPreviewView: View {
     }
     
     let offPixelColor: Color = .accentColor.opacity(0.2)
-    let onPixelColor: Color = .accentColor.mix(with: .white, by: 0.5)
+    @State var onPixelColor: Color = .accentColor
     
     @State private var ledSize: CGFloat = 0
     @State private var ledSpacing: CGFloat = 0
@@ -118,6 +118,9 @@ struct LEDPreviewView: View {
         }
         .onChange(of: message.mode) {
             animationStep = 0
+        }
+        .onChange(of: colorScheme, initial: true) { _, value in
+            onPixelColor = value == .dark ?  .accentColor.mix(with: .white, by: 0.5) :  .accentColor
         }
     }
     
