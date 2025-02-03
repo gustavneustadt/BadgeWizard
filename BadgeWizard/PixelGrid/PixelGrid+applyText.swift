@@ -92,7 +92,7 @@ extension PixelGrid {
         let finalHeight = 11
         let rowsToUse = max(min(contentHeight, finalHeight), 0)
         
-        var pixelArray = Array(repeating: Array(repeating: Pixel(x: 0, y: 0, isOn: false), count: trimmedWidth < 1 ? 1 : trimmedWidth), count: finalHeight)
+        var pixelArray = Array(repeating: Array(repeating: false, count: trimmedWidth < 1 ? 1 : trimmedWidth), count: finalHeight)
         
         // Fill the array with actual content (up to 11 rows)
         for y in 0..<rowsToUse {
@@ -101,7 +101,7 @@ extension PixelGrid {
                 let sourceX = x + firstNonEmptyCol
                 guard let color = bitmap.colorAt(x: sourceX, y: sourceY) else { continue }
                 let brightness = color.brightnessComponent
-                pixelArray[y][x] = Pixel(x: x, y: y, isOn: brightness < 0.5)
+                pixelArray[y][x] = brightness < 0.5
             }
         }
         
@@ -115,7 +115,7 @@ extension PixelGrid {
         if rowsToUse < finalHeight {
             for y in rowsToUse..<finalHeight {
                 for x in 0..<trimmedWidth {
-                    pixelArray[y][x] = Pixel(x: x, y: y, isOn: false)
+                    pixelArray[y][x] = false
                 }
             }
         }

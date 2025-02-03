@@ -43,14 +43,14 @@ extension LEDPreviewView {
                 if leftX >= 0 {
                     let sourceX = startX + leftX
                     if sourceX < totalWidth {
-                        displayBuffer.set(leftX, y, pixels[y][sourceX].isOn)
+                        displayBuffer.set(leftX, y, pixels[y][sourceX])
                     }
                 }
                 
                 if rightX < badgeWidth {
                     let sourceX = startX + rightX
                     if sourceX < totalWidth {
-                        displayBuffer.set(rightX, y, pixels[y][sourceX].isOn)
+                        displayBuffer.set(rightX, y, pixels[y][sourceX])
                     }
                 }
             }
@@ -106,7 +106,7 @@ extension LEDPreviewView {
             for x in 0..<44 {
                 let sourceX = startX + x
                 if sourceX < pixels[0].count {
-                    displayBuffer.set(x, y, pixels[y][sourceX].isOn)
+                    displayBuffer.set(x, y, pixels[y][sourceX])
                 }
             }
         }

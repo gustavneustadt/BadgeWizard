@@ -65,7 +65,7 @@ extension LEDPreviewView {
                         for col in 0..<currentFrameWidth {
                             let sourceCol = startCol + col
                             if sourceCol < newGridWidth {
-                                displayBuffer.set(col, actualFallPosition, pixels[row][sourceCol].isOn)
+                                displayBuffer.set(col, actualFallPosition, pixels[row][sourceCol])
                             }
                         }
                     }
@@ -80,7 +80,7 @@ extension LEDPreviewView {
                         for col in 0..<currentFrameWidth {
                             let sourceCol = startCol + col
                             if sourceCol < newGridWidth {
-                                displayBuffer.set(col, row, pixels[row][sourceCol].isOn)
+                                displayBuffer.set(col, row, pixels[row][sourceCol])
                             }
                         }
                     }
@@ -90,7 +90,7 @@ extension LEDPreviewView {
                             for col in 0..<currentFrameWidth {
                                 let sourceCol = startCol + col
                                 if sourceCol < newGridWidth {
-                                    displayBuffer.set(col, fallOutPosition, pixels[row][sourceCol].isOn)
+                                    displayBuffer.set(col, fallOutPosition, pixels[row][sourceCol])
                                 }
                             }
                         }
@@ -109,7 +109,7 @@ extension LEDPreviewView {
                     for col in 0..<currentFrameWidth {
                         let sourceCol = startCol + col
                         if sourceCol < newGridWidth {
-                            displayBuffer.set(col, actualFallPosition, pixels[row][sourceCol].isOn)
+                            displayBuffer.set(col, actualFallPosition, pixels[row][sourceCol])
                         }
                     }
                 }

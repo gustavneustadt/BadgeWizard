@@ -24,7 +24,7 @@ extension LEDPreviewView {
             for x in 0..<badgeWidth {
                 let sourceX = startX + x
                 if sourceX < totalWidth {
-                    displayBuffer.set(x, y, pixels[y][sourceX].isOn)
+                    displayBuffer.set(x, y, pixels[y][sourceX])
                 }
             }
         }

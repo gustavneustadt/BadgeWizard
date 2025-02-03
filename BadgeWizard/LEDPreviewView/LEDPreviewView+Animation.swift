@@ -24,7 +24,7 @@ extension LEDPreviewView {
             let row = pixels[y]
             for x in 0..<badgeWidth {
                 let sourceX = startX + x
-                displayBuffer.set(x, y, sourceX < row.count ? row[sourceX].isOn : false)
+                displayBuffer.set(x, y, sourceX < row.count ? row[sourceX] == true : false)
             }
         }
     }

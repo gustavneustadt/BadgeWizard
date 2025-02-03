@@ -30,12 +30,12 @@ extension LEDPreviewView {
                 
                 if currentStep < 11 { // Scrolling up (in)
                     let shiftedY = y + (currentStep - 11)
-                    displayBuffer.set(x, y, shiftedY >= 0 && pixels[shiftedY][sourceCol].isOn)
+                    displayBuffer.set(x, y, shiftedY >= 0 && pixels[shiftedY][sourceCol])
                 } else if currentStep < 22 { // Stay still
-                    displayBuffer.set(x, y, pixels[y][sourceCol].isOn)
+                    displayBuffer.set(x, y, pixels[y][sourceCol])
                 } else { // Scrolling up (out)
                     let shiftedY = y + (currentStep - 22)
-                    displayBuffer.set(x, y, shiftedY < 11 && pixels[shiftedY][sourceCol].isOn)
+                    displayBuffer.set(x, y, shiftedY < 11 && pixels[shiftedY][sourceCol])
                 }
             }
         }
@@ -64,12 +64,12 @@ extension LEDPreviewView {
                 
                 if currentStep < 11 { // Scrolling down (in)
                     let shiftedY = y - (currentStep - 11)
-                    displayBuffer.set(x, y, shiftedY < 11 && shiftedY >= 0 && pixels[shiftedY][sourceCol].isOn)
+                    displayBuffer.set(x, y, shiftedY < 11 && shiftedY >= 0 && pixels[shiftedY][sourceCol])
                 } else if currentStep < 22 { // Stay still
-                    displayBuffer.set(x, y, pixels[y][sourceCol].isOn)
+                    displayBuffer.set(x, y, pixels[y][sourceCol])
                 } else { // Scrolling down (out)
                     let shiftedY = y - (currentStep - 22)
-                    displayBuffer.set(x, y, shiftedY >= 0 && pixels[shiftedY][sourceCol].isOn)
+                    displayBuffer.set(x, y, shiftedY >= 0 && pixels[shiftedY][sourceCol])
                 }
             }
         }

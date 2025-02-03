@@ -8,11 +8,11 @@ import Foundation
 
 extension PixelGrid {
     func setPixel(x: Int, y: Int, isOn: Bool, isUndo: Bool = false, undoManager: UndoManager?) {
-        guard pixels[y][x].isOn != isOn else { return }
+        guard pixels[y][x] != isOn else { return }
         message.objectWillChange.send()
         
         var newPixels = pixels
-        newPixels[y][x] = Pixel(x: x, y: y, isOn: isOn)
+        newPixels[y][x] = isOn
         pixels = newPixels
         
         
@@ -34,7 +34,7 @@ extension PixelGrid {
         var newPixels = pixels
         for y in 0..<height {
             for x in 0..<width {
-                newPixels[y][x] = Pixel(x: x, y: y, isOn: false)
+                newPixels[y][x] = false
             }
         }
         
@@ -42,7 +42,7 @@ extension PixelGrid {
     }
     
     /// Helper function to restore state from given Pixels
-    func restoreState(_ state: [[Pixel]], undoManager: UndoManager?) {
+    func restoreState(_ state: [[Bool]], undoManager: UndoManager?) {
         // Store the current state for redo
         let previousState = pixels
         
@@ -59,17 +59,13 @@ extension PixelGrid {
     
     func invert(undoManager: UndoManager?) {
         // Create a new matrix with inverted values
-        var newPixels = Array(repeating: Array(repeating: Pixel(x: 0, y: 0, isOn: false), count: width), count: height)
+        var newPixels = Array(repeating: Array(repeating: false, count: width), count: height)
         
         // Perform the inversion operation concurrently for better performance
         DispatchQueue.concurrentPerform(iterations: height) { y in
             for x in 0..<width {
                 // Create a new pixel with inverted isOn state
-                newPixels[y][x] = Pixel(
-                    x: x,
-                    y: y,
-                    isOn: !pixels[y][x].isOn
-                )
+                newPixels[y][x] = !pixels[y][x]
             }
         }
         

@@ -23,7 +23,7 @@ struct LEDPreviewView: View {
         self.message = message ?? Message.placeholder()
     }
     
-    internal var pixels: [[Pixel]] {
+    internal var pixels: [[Bool]] {
         message.getCombinedPixelArrays()
     }
     

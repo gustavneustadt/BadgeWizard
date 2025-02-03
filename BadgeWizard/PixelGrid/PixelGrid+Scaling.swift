@@ -27,17 +27,17 @@ extension PixelGrid {
         guard widthDifference != 0 else { return }
         
         // Create array of the correct size
-        var newPixels = Array(repeating: Array(repeating: Pixel(x: 0, y: 0, isOn: false), count: newWidth), count: height)
+        var newPixels = Array(repeating: Array(repeating: false, count: newWidth), count: height)
         
         // Process each row concurrently for better performance
         DispatchQueue.concurrentPerform(iterations: height) { y in
             for x in 0..<newWidth {
                 if x < oldWidth && x < newWidth {
                     // Copy existing pixels from the start
-                    newPixels[y][x] = Pixel(x: x, y: y, isOn: pixels[y][x].isOn)
+                    newPixels[y][x] = pixels[y][x]
                 } else if x >= oldWidth {
                     // Add new empty pixels at the end
-                    newPixels[y][x] = Pixel(x: x, y: y, isOn: false)
+                    newPixels[y][x] = false
                 }
             }
         }
@@ -57,7 +57,7 @@ extension PixelGrid {
     //     guard widthDifference != 0 else { return }
     //     
     //     // Create array of the correct size
-    //     var newPixels = Array(repeating: Array(repeating: Pixel(x: 0, y: 0, isOn: false), count: newWidth), count: height)
+    //     var newPixels = Array(repeating: Array(repeating: false, count: newWidth), count: height)
     //     
     //     // Process each row concurrently for better performance
     //     DispatchQueue.concurrentPerform(iterations: height) { y in
@@ -70,14 +70,14 @@ extension PixelGrid {
     //                 } else {
     //                     // Copy existing pixels, shifted right
     //                     let oldX = x - widthDifference
-    //                     newPixels[y][x] = Pixel(x: x, y: y, isOn: pixels[y][oldX].isOn)
+    //                     newPixels[y][x] = Pixel(x: x, y: y, isOn: pixels[y][oldX])
     //                 }
     //             } else {
     //                 // Shrinking the grid - remove pixels from the start
     //                 let oldX = x - widthDifference
     //                 if oldX < oldWidth {
     //                     // Copy pixels from the right side
-    //                     newPixels[y][x] = Pixel(x: x, y: y, isOn: pixels[y][oldX].isOn)
+    //                     newPixels[y][x] = Pixel(x: x, y: y, isOn: pixels[y][oldX])
     //                 }
     //             }
     //         }

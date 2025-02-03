@@ -46,21 +46,21 @@ extension PixelGrid {
         width = rowWidth
         
         // Create new pixel grid
-        var newPixels = Array(repeating: Array(repeating: Pixel(x: 0, y: 0, isOn: false), count: width), count: height)
+        var newPixels = Array(repeating: Array(repeating: false, count: width), count: height)
         
         // Parse ASCII art into pixels
         for (y, row) in rows.enumerated() {
             for (x, char) in row.enumerated() {
                 // Consider any non-space, non-hyphen character as an "on" pixel
                 let isOn = char != " " && char != "-"
-                newPixels[y][x] = Pixel(x: x, y: y, isOn: isOn)
+                newPixels[y][x] = isOn
             }
         }
         
         // Fill remaining rows with empty pixels if ASCII art is shorter than grid height
         for y in rows.count..<height {
             for x in 0..<width {
-                newPixels[y][x] = Pixel(x: x, y: y, isOn: false)
+                newPixels[y][x] = false
             }
         }
         
@@ -104,7 +104,7 @@ extension PixelGrid {
                 lastRow = i
             }
             for pixel in row {
-                if pixel.isOn {
+                if pixel == true {
                     result.append("0")
                 } else {
                     result.append("-")

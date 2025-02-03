@@ -3,13 +3,10 @@ import SwiftUI
 class PixelGrid: ObservableObject, Identifiable {
     var id: Identifier<PixelGrid> = .init()
     
-    @Published var pixels: [[Pixel]]
+    @Published var pixels: [[Bool]]
     @Published var width: Int {
         willSet {
             message.objectWillChange.send()
-        }
-        didSet {
-            buildMatrix()
         }
     }
 
@@ -17,19 +14,17 @@ class PixelGrid: ObservableObject, Identifiable {
     
     unowned var message: Message
     
-    init(pixels: [[Pixel]] = [], width: Int? = nil, message: Message) {
-        self.width = width ?? 20
-        self.pixels = pixels
+    init(pixels: [[Bool]] = [], width: Int? = nil, message: Message) {
+        let setWidth = width ?? 20
+        
+        self.width = setWidth
         self.message = message
         
-        guard pixels.isEmpty else { return }
-        for y in 0..<height {
-            var row: [Pixel] = []
-            for x in 0..<self.width {
-                row.append(Pixel(x: x, y: y, isOn: false))
-            }
-            self.pixels.append(row)
+        guard pixels.isEmpty else {
+            self.pixels = pixels
+            return
         }
+        self.pixels = Array(repeating: Array(repeating: false, count: setWidth), count: self.height)
         
     }
     
@@ -39,14 +34,14 @@ class PixelGrid: ObservableObject, Identifiable {
         let oldWidth = oldPixels.isEmpty ? 1 : oldPixels[0].count
         
         // Create array of the correct size
-        var newPixels = Array(repeating: Array(repeating: Pixel(x: 0, y: 0, isOn: false), count: width), count: height)
+        var newPixels = Array(repeating: Array(repeating: false, count: width), count: height)
         
         DispatchQueue.concurrentPerform(iterations: height) { y in
             for x in 0..<width {
                 if x < oldWidth && !oldPixels.isEmpty {
-                    newPixels[y][x] = Pixel(x: x, y: y, isOn: oldPixels[y][x].isOn)
+                    newPixels[y][x] = true
                 } else {
-                    newPixels[y][x] = Pixel(x: x, y: y, isOn: false)
+                    newPixels[y][x] = false
                 }
             }
         }
@@ -62,7 +57,7 @@ class PixelGrid: ObservableObject, Identifiable {
             // Process 8 pixels in this row starting from startX
             for x in 0..<8 {
                 let actualX = startX + x
-                if actualX < width && pixels[y][actualX].isOn {
+                if actualX < width && pixels[y][actualX] == true {
                     // For 90-degree counterclockwise rotation:
                     // - The x position becomes the bit position (y in the output)
                     // - The y position becomes the byte index from right to left

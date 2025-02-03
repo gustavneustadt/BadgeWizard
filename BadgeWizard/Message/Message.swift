@@ -52,7 +52,7 @@ class Message: ObservableObject, Identifiable, Equatable, Hashable {
             let combinedPixels = Message.combinePixelArrays(pixelGrids.map(\.pixels))
             
             // Create result array with correct dimensions
-            var result: [[Pixel]] = Array(repeating: [], count: 11)
+            var result: [[Bool]] = Array(repeating: [], count: 11)
             
             // Process in chunks of 44
             for startIndex in stride(from: 0, to: combinedPixels[0].count, by: 44) {
@@ -62,7 +62,7 @@ class Message: ObservableObject, Identifiable, Equatable, Hashable {
                     // Add chunk
                     result[y].append(contentsOf: combinedPixels[y][startIndex..<endIndex])
                     // Add 4-pixel padding
-                    result[y].append(contentsOf: Array(repeating: Pixel(x: 0, y: y, isOn: false), count: 4))
+                    result[y].append(contentsOf: Array(repeating: false, count: 4))
                 }
             }
             
@@ -88,7 +88,7 @@ class Message: ObservableObject, Identifiable, Equatable, Hashable {
         store?.selectedGridId = newGrid.id
     }
     
-    func getCombinedPixelArrays() -> [[Pixel]] {
+    func getCombinedPixelArrays() -> [[Bool]] {
         Self.combinePixelArrays(
             pixelGrids.map {
                 $0.pixels

@@ -40,14 +40,14 @@ extension LEDPreviewView {
             for x in 0..<sweepPosition {
                 let sourceX = startX + x
                 if sourceX < pixels[0].count {
-                    displayBuffer.set(x, y, pixels[y][sourceX].isOn)
+                    displayBuffer.set(x, y, pixels[y][sourceX])
                 }
             }
             
             // Draw laser line
             for x in sweepPosition..<badgeWidth {
                 if startX + sweepPosition < pixels[0].count {
-                    displayBuffer.set(x, y, pixels[y][startX + sweepPosition].isOn)
+                    displayBuffer.set(x, y, pixels[y][startX + sweepPosition])
                 }
             }
         }
@@ -63,14 +63,14 @@ extension LEDPreviewView {
             for x in sweepPosition..<badgeWidth {
                 let sourceX = startX + x
                 if sourceX < pixels[0].count {
-                    displayBuffer.set(x, y, pixels[y][sourceX].isOn)
+                    displayBuffer.set(x, y, pixels[y][sourceX])
                 }
             }
             
             // Draw laser line
             for x in 0..<sweepPosition {
                 if startX + sweepPosition < pixels[0].count {
-                    displayBuffer.set(x, y, pixels[y][startX + sweepPosition].isOn)
+                    displayBuffer.set(x, y, pixels[y][startX + sweepPosition])
                 }
             }
         }
@@ -84,7 +84,7 @@ extension LEDPreviewView {
             for x in 0..<badgeWidth {
                 let sourceX = startX + x
                 if sourceX < pixels[0].count {
-                    displayBuffer.set(x, y, pixels[y][sourceX].isOn)
+                    displayBuffer.set(x, y, pixels[y][sourceX])
                 }
             }
         }

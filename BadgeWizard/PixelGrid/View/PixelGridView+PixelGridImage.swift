@@ -33,25 +33,22 @@ extension PixelGridView {
         
         func drawOnionSkin(context: GraphicsContext, symbol: GraphicsContext.ResolvedSymbol, pixelSize: CGSize) {
             // Only draw onion skin if this isn't the first grid
-            if let currentIndex = pixelGrid.message.pixelGrids.firstIndex(where: { $0.id == pixelGrid.id }),
-               currentIndex > 0 {
-                let onionPixels: [Pixel] = previousGrid.pixels.compactMap { row in
-                    row.compactMap { pixel in
-                        pixel.isOn ? pixel : nil
-                    }
-                }.flatMap { $0 }
-                
-                for pixel in onionPixels {
-                    // Only draw if within current grid bounds
-                    if pixel.x < pixelGrid.width {
-                        context.draw(
-                            symbol,
-                            at: CGPoint(
-                                x: CGFloat(pixel.x) * pixelSize.width + pixelSize.width/2,
-                                y: CGFloat(pixel.y) * pixelSize.height + pixelSize.height/2
-                            )
+            guard
+                let currentIndex = pixelGrid.message.pixelGrids.firstIndex(where: { $0.id == pixelGrid.id }),
+                currentIndex > 0
+            else { return }
+            
+            for y in 0..<previousGrid.height {
+                for x in 0..<previousGrid.width {
+                    guard x <= pixelGrid.width else { continue }
+                    guard previousGrid.pixels[y][x] == true else { continue }
+                    context.draw(
+                        symbol,
+                        at: CGPoint(
+                            x: CGFloat(x) * pixelSize.width + pixelSize.width/2,
+                            y: CGFloat(y) * pixelSize.height + pixelSize.height/2
                         )
-                    }
+                    )
                 }
             }
         }
@@ -93,37 +90,16 @@ extension PixelGridView {
                 else { return }
                 
                 
-                
-                let onPixels: [Pixel] = pixelGrid.pixels.compactMap { row in
-                    row.compactMap { pixel in
-                        pixel.isOn ? pixel : nil
-                    }
-                }.flatMap { $0 }
-                
-                for pixel in onPixels {
-                    context.draw(
-                        itemOn,
-                        at: CGPoint(
-                            x: CGFloat(pixel.x) * pixelSize.width + pixelSize.width/2,
-                            y: CGFloat(pixel.y) * pixelSize.height + pixelSize.height/2
+                for y in 0..<pixelGrid.height {
+                    for x in 0..<pixelGrid.width {
+                        context.draw(
+                            pixelGrid.pixels[y][x] == true ? itemOn : itemOff,
+                            at: CGPoint(
+                                x: CGFloat(x) * pixelSize.width + pixelSize.width/2,
+                                y: CGFloat(y) * pixelSize.height + pixelSize.height/2
+                            )
                         )
-                    )
-                }
-                
-                let offPixels: [Pixel] = pixelGrid.pixels.compactMap { row in
-                    row.compactMap { pixel in
-                        pixel.isOn == false ? pixel : nil
                     }
-                }.flatMap { $0 }
-                
-                for pixel in offPixels {
-                    context.draw(
-                        itemOff,
-                        at: CGPoint(
-                            x: CGFloat(pixel.x) * pixelSize.width + pixelSize.width/2,
-                            y: CGFloat(pixel.y) * pixelSize.height + pixelSize.height/2
-                        )
-                    )
                 }
                 
                 drawHoverPixels(context: context, symbol: itemHover, pixelSize: pixelSize)

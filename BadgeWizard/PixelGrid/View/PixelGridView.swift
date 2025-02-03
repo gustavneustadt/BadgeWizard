@@ -46,7 +46,7 @@ struct PixelGridView: View {
                 if x >= 0 && x < pixelGrid.width && y >= 0 && y < pixelGrid.height {
                     if value.translation == .zero {
                         // This is the start of the drag - set mode based on initial pixel
-                        drawMode = !pixelGrid.pixels[y][x].isOn
+                        drawMode = !pixelGrid.pixels[y][x]
                     }
                     pixelGrid.setPixel(x: x, y: y, isOn: drawMode, undoManager: undo)
                 }

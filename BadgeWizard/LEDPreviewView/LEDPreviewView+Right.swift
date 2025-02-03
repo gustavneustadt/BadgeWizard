@@ -24,7 +24,7 @@ extension LEDPreviewView {
                 
                 // Only draw if we're within bounds of source pixels
                 if sourceX >= 0 && sourceX < totalWidth {
-                    displayBuffer.set(x, y, pixels[y][sourceX].isOn)
+                    displayBuffer.set(x, y, pixels[y][sourceX])
                 }
             }
         }
