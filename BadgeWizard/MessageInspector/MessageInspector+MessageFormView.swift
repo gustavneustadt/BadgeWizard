@@ -11,7 +11,7 @@ import SwiftUI
 
 extension MessageInspector {
     struct MessageFormView: View {
-        @ObservedObject var message: Message
+        @Bindable var message: Message
         
         init(message: Message?) {
             self.message = message ?? Message.placeholder()

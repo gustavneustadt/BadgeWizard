@@ -1,30 +1,31 @@
 import SwiftUI
+import SwiftData
 
-class PixelGrid: ObservableObject, Identifiable {
-    var id: Identifier<PixelGrid> = .init()
+@Model
+final class PixelGrid {
     
-    @Published var pixels: [[Bool]]
-    @Published var width: Int {
-        willSet {
-            message.objectWillChange.send()
-        }
-    }
-
-    let height = 11
+    @Attribute(.unique) var id: UUID
     
-    unowned var message: Message
+    // MARK: Properties
+    var pixels: [[Bool]]
+    var width: Int
+    var height: Int
+    
+    var message: Message
     
     init(pixels: [[Bool]] = [], width: Int? = nil, message: Message) {
         let setWidth = width ?? 20
+        let setHeight = 11
         
+        self.height = setHeight
         self.width = setWidth
         self.message = message
-        
+        self.id = .init()
         guard pixels.isEmpty else {
             self.pixels = pixels
             return
         }
-        self.pixels = Array(repeating: Array(repeating: false, count: setWidth), count: self.height)
+        self.pixels = Array(repeating: Array(repeating: false, count: setWidth), count: setHeight)
         
     }
     

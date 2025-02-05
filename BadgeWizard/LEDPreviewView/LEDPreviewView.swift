@@ -5,7 +5,7 @@ import SwiftUI
 import Combine
 
 struct LEDPreviewView: View {
-    @ObservedObject var message: Message
+    @Bindable var message: Message
     @State private var size: CGSize = .zero
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.colorScheme) var colorScheme

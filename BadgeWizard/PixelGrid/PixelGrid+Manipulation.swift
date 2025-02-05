@@ -9,7 +9,6 @@ import Foundation
 extension PixelGrid {
     func setPixel(x: Int, y: Int, isOn: Bool, isUndo: Bool = false, undoManager: UndoManager?) {
         guard pixels[y][x] != isOn else { return }
-        message.objectWillChange.send()
         
         var newPixels = pixels
         newPixels[y][x] = isOn

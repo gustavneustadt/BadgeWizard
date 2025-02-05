@@ -8,10 +8,10 @@ import SwiftUI
 
 extension PixelGridView {
     struct PixelGridImage: View {
-        @ObservedObject var pixelGrid: PixelGrid
+        @Bindable var pixelGrid: PixelGrid
         var mousePosition: CGPoint? = nil
         var onionSkinning: Bool
-        @ObservedObject var previousGrid: PixelGrid
+        @Bindable var previousGrid: PixelGrid
         @Environment(\.colorScheme) var colorScheme
         
         init(pixelGrid: PixelGrid, mousePosition: CGPoint? = nil, onionSkinning: Bool? = false) {

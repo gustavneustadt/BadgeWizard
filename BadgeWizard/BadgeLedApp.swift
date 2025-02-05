@@ -80,5 +80,7 @@ struct BadgeLedApp: App {
 #endif
             
         }
+        .modelContainer(for: Message.self)
+        .modelContainer(for: PixelGrid.self)
     }
 }

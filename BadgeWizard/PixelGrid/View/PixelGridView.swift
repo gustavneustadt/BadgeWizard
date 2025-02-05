@@ -8,7 +8,7 @@ import SwiftUI
 
 struct PixelGridView: View {
     @EnvironmentObject var messageStore: MessageStore
-    @ObservedObject var pixelGrid: PixelGrid
+    @Bindable var pixelGrid: PixelGrid
     @State private var showPopover = false
     var onTrailingWidthChanged: (Int) -> Void = { _ in }
     var onLeadingWidthChanged: (Int) -> Void = { _ in }

@@ -6,10 +6,12 @@
 //
 
 import Foundation
+import SwiftData
+
 extension Message {
     /// Speed settings for LED badge animations
     /// Values represent different animation speeds from slowest to fastest
-    enum Speed: Int, CaseIterable {
+    enum Speed: Int, CaseIterable, Codable {
         case verySlow = 0   // Slowest
         case slow     = 1
         case relaxed  = 2
@@ -21,7 +23,7 @@ extension Message {
     }
     
     /// Animation modes for LED badge display
-    enum Mode: Int, CaseIterable {
+    enum Mode: Int, CaseIterable, Codable {
         case left      = 0
         case right     = 1
         case up        = 2

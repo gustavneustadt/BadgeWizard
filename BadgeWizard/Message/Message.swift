@@ -6,43 +6,42 @@
 //
 
 import Foundation
+import SwiftData
 
-// Swift equivalent of the Flutter code
-class Message: ObservableObject, Identifiable, Equatable, Hashable {
-    static func == (lhs: Message, rhs: Message) -> Bool {
-        lhs.id == rhs.id
-    }
+@Model
+final class Message {
+
+    // MARK: Relationship
+    var pixelGrids = [PixelGrid]()
     
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
+    @Attribute(.unique) var id: UUID
     
-    var id: Identifier<Message> = .init()
-    
-    // MARK: Message Badge Data
-    @Published var pixelGrids: [PixelGrid] = []
-    @Published var flash: Bool
-    @Published var marquee: Bool
-    @Published var speed: Speed
-    @Published var mode: Mode
+    // MARK: Properties
+    var flash: Bool
+    var marquee: Bool
+    var speed: Speed
+    var mode: Mode
+    var onionSkinning: Bool
     
     
-    // MARK: Other stuff
-    @Published var onionSkinning: Bool = false
-    unowned var store: MessageStore?
-    
+    @Transient
     var width: Int {
         pixelGrids.reduce(0) { partialResult, grid in
             return partialResult + grid.width
         }
     }
     
+    @Transient
+    unowned var store: MessageStore?
+    
     init(flash: Bool = false, marquee: Bool = false, speed: Speed = .medium, mode: Mode = .left, store: MessageStore? = nil) {
         self.flash = flash
         self.marquee = marquee
         self.speed = speed
         self.mode = mode
+        self.id = .init()
         self.store = store
+        self.onionSkinning = false
         addGrid()
     }
     
