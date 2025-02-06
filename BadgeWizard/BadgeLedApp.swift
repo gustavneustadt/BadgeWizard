@@ -10,6 +10,7 @@ import SwiftUI
 @main
 struct BadgeLedApp: App {
     
+    @StateObject private var settingsStore = SettingsStore.shared
     @StateObject private var bluetoothManager = LEDBadgeManager()
     
 #if DEBUG
@@ -35,6 +36,26 @@ struct BadgeLedApp: App {
                         BadgeSendButton(badgeManager: bluetoothManager, messages: messageStore.messages)
                     }
                     
+                    ToolbarItem {
+                        ControlGroup {
+                            
+                            Button {
+                                settingsStore.decreaseSize()
+                            } label: {
+                                Image(systemName: "minus.magnifyingglass")
+                            }
+                            
+                            Button {
+                                settingsStore.increaseSize()
+                            } label: {
+                                Image(systemName: "plus.magnifyingglass")
+                            }
+                            
+                        } label: {
+                            Text("Pixel Grid Zoom")
+                        }
+                    }
+                    
                     ToolbarItem(placement: .principal) {
                         HStack {
                             Picker("Messages", selection: $messagesCount) {
@@ -45,6 +66,7 @@ struct BadgeLedApp: App {
                             }
                         }
                     }
+                    
                     
                     ToolbarItem {
                         Button {
@@ -59,7 +81,6 @@ struct BadgeLedApp: App {
                     MessageInspector()
                         .inspectorColumnWidth(300)
                 }
-                .environmentObject(messageStore)
                 .onChange(of: messagesCount) { _, newValue in
                     withAnimation(.easeInOut(duration: 0.2)) {
                         messageStore.updateMessageCount(to: newValue, undoManager: undoManager)
@@ -69,6 +90,8 @@ struct BadgeLedApp: App {
                     guard messagesCount != newValue else { return }
                     messagesCount = newValue
                 }
+                .environmentObject(messageStore)
+                .environmentObject(settingsStore)
         }
         .commands {
 #if DEBUG

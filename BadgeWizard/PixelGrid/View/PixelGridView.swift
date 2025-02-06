@@ -8,6 +8,7 @@ import SwiftUI
 
 struct PixelGridView: View {
     @EnvironmentObject var messageStore: MessageStore
+    @EnvironmentObject private var settings: SettingsStore
     @ObservedObject var pixelGrid: PixelGrid
     @State private var showPopover = false
     var onTrailingWidthChanged: (Int) -> Void = { _ in }
@@ -18,7 +19,6 @@ struct PixelGridView: View {
     @State var isDragging: Bool = false
     @State var temporaryWidth: Int? = nil
     @State var hoveringDragHandle: Bool = false
-    
     @State var mousePosition: CGPoint? = nil
     
     @State private var drawMode: Bool = true
@@ -38,7 +38,7 @@ struct PixelGridView: View {
                     messageStore.selectedMessageId = pixelGrid.message.id
                 }
                 
-                let pixelSize: CGFloat = 20 // 20px + 1px spacing
+                let pixelSize = settings.pixelGridPixelSize
                 
                 let x = Int((value.location.x - 2) / pixelSize)
                 let y = Int((value.location.y - 2) / pixelSize)
@@ -58,7 +58,7 @@ struct PixelGridView: View {
     }
     
     func calculateWidth(columns: Int) -> CGFloat {
-        CGFloat(columns * 20)
+        CGFloat(columns) * settings.pixelGridPixelSize
     }
     
     var width: CGFloat {
@@ -94,10 +94,11 @@ struct PixelGridView: View {
                 PixelGridImage(
                     pixelGrid: pixelGrid,
                     mousePosition: mousePosition,
-                    onionSkinning: pixelGrid.message.onionSkinning
+                    onionSkinning: pixelGrid.message.onionSkinning,
+                    pixelSize: settings.pixelGridPixelSize
                 )
                 .frame(width: width,
-                       height: CGFloat(11 * 20))
+                       height: CGFloat(11 * settings.pixelGridPixelSize))
                 .onContinuousHover(coordinateSpace: .local, perform: { phase in
                     switch phase {
                     case .active(let pt):
@@ -109,8 +110,8 @@ struct PixelGridView: View {
                 .gesture(
                     dragGesture
                 )
-                .padding([.top, .bottom, .leading])
-                .padding(.trailing, 19)
+                .padding([.top, .bottom, .leading], settings.pixelGridPixelSize)
+                .padding(.trailing, settings.pixelGridPixelSize)
                 .overlay {
                     ZStack {
                         HStack {
@@ -120,7 +121,7 @@ struct PixelGridView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-                .padding(.trailing, 8)
+                .padding(.trailing, settings.pixelGridPixelSize * 0.4)
                 if temporaryWidth != nil {
                     let width = calculateWidth(columns: temporaryWidth!) - self.width
                     if width > 0 {
@@ -132,7 +133,7 @@ struct PixelGridView: View {
                 }
             }
             .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: settings.pixelGridPixelSize / 2, style: .continuous)
                     .fill(.background)
                     .stroke(Color.accentColor.secondary, lineWidth: gridIsSelected ? 4 : 0)
             )
@@ -154,7 +155,8 @@ struct PixelGridView: View {
     
     var dragHandleTrailing: some View {
         DragHandle(
-            hoveringDragHandle: hoveringDragHandle || temporaryWidth != nil
+            hoveringDragHandle: hoveringDragHandle || temporaryWidth != nil,
+            pixelSize: settings.pixelGridPixelSize
         )
         .onHover { hovering in
             hoveringDragHandle = hovering
@@ -169,7 +171,7 @@ struct PixelGridView: View {
                     temporaryWidth = nil
                 })
                 .onChanged { value in
-                    let newWidth = max(1, pixelGrid.width + Int(value.translation.width / 20))
+                    let newWidth = max(1, pixelGrid.width + Int(value.translation.width / settings.pixelGridPixelSize))
                     if temporaryWidth == nil {
                         temporaryWidth = newWidth
                     }
