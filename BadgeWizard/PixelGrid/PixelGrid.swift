@@ -11,9 +11,9 @@ final class PixelGrid {
     var width: Int
     var height: Int
     
-    var message: Message
+    weak var message: Message?
     
-    init(pixels: [[Bool]] = [], width: Int? = nil, message: Message) {
+    init(pixels: [[Bool]] = [], width: Int? = nil, message: Message?) {
         let setWidth = width ?? 20
         let setHeight = 11
         
@@ -97,36 +97,49 @@ final class PixelGrid {
     }
     
     private func deleteGridFromMessage() {
-        self.message.pixelGrids.removeAll { $0 === self }
-        if self.message.pixelGrids.count < 1 {
+        guard let message = self.message else { return }
+        message.pixelGrids.removeAll { $0 === self }
+        if message.pixelGrids.count < 1 {
             message.addGrid()
         }
     }
     
     func deleteGrid() {
-        guard self.message.store?.selectedGridId == self.id else {
+        guard let message = self.message else { return }
+        
+        guard message.store?.selectedGridId == self.id else {
             self.deleteGridFromMessage()
             return
             
         }
         
-        if let indexBefore = self.message.pixelGrids.firstIndex(where: { grid in
+        if let indexBefore = message.pixelGrids.firstIndex(where: { grid in
             grid == self
         })?.advanced(by: -1) {
             guard indexBefore >= 0 else {
                 
-                self.message.store?.selectedGridId = nil
+                message.store?.selectedGridId = nil
                 self.deleteGridFromMessage()
                 return
             }
             
-            self.message.store?.selectedGridId = self.message.pixelGrids[indexBefore].id
+            message.store?.selectedGridId = message.pixelGrids[indexBefore].id
             self.deleteGridFromMessage()
             return
         }
-        self.message.store?.selectedGridId = nil
+        message.store?.selectedGridId = nil
         
         self.deleteGridFromMessage()
+    }
+    
+    func reorder(direction: MoveDirection) {
+        guard let message = self.message else { return }
+        message.reorderGrid(id: self.id, direction: direction)
+    }
+    
+    func isAt(position: GridPosition) -> Bool {
+        guard let message = self.message else { return false }
+        return message.isGridAt(id: self.id, position: position)
     }
 }
 

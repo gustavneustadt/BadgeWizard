@@ -20,7 +20,10 @@ extension PixelGridView {
             self.onionSkinning = onionSkinning ?? false
             
             // Get previous grid if it exists, otherwise use a placeholder
-            let message = pixelGrid.message
+            guard let message = pixelGrid.message else {
+                self.previousGrid = PixelGrid.placeholder()
+                return
+            }
             if  onionSkinning == true,
                 let currentIndex = message.pixelGrids.firstIndex(where: { $0.id == pixelGrid.id }),
                currentIndex > 0 {
@@ -32,9 +35,11 @@ extension PixelGridView {
         }
         
         func drawOnionSkin(context: GraphicsContext, symbol: GraphicsContext.ResolvedSymbol, pixelSize: CGSize) {
+            guard let message = pixelGrid.message else { return }
+            
             // Only draw onion skin if this isn't the first grid
             guard
-                let currentIndex = pixelGrid.message.pixelGrids.firstIndex(where: { $0.id == pixelGrid.id }),
+                let currentIndex = message.pixelGrids.firstIndex(where: { $0.id == pixelGrid.id }),
                 currentIndex > 0
             else { return }
             

@@ -35,7 +35,7 @@ struct PixelGridView: View {
                 
                 if messageStore.selectedGridId != pixelGrid.id {
                     messageStore.selectedGridId = pixelGrid.id
-                    messageStore.selectedMessageId = pixelGrid.message.id
+                    messageStore.selectedMessageId =  pixelGrid.message != nil ? pixelGrid.message!.id : nil
                 }
                 
                 let pixelSize: CGFloat = 20 // 20px + 1px spacing
@@ -71,20 +71,20 @@ struct PixelGridView: View {
             HStack {
                 Button {
                     _ = withAnimation(spring) {
-                        pixelGrid.message.reorderGrid(id: pixelGrid.id, direction: .backward)
+                        pixelGrid.reorder(direction: .backward)
                     }
                 } label: {
                     Image(systemName: "arrow.left")
                 }
-                .disabled(pixelGrid.message.isGridAt(id: pixelGrid.id, position: .start))
+                .disabled(pixelGrid.isAt(position: .start))
                 Button {
                     _ = withAnimation(spring) {
-                        pixelGrid.message.reorderGrid(id: pixelGrid.id, direction: .forward)
+                        pixelGrid.reorder(direction: .forward)
                     }
                 } label: {
                     Image(systemName: "arrow.right")
                 }
-                .disabled(pixelGrid.message.isGridAt(id: pixelGrid.id, position: .end))
+                .disabled(pixelGrid.isAt(position: .end))
                 Spacer()
             }
             .controlSize(.small)
@@ -94,7 +94,7 @@ struct PixelGridView: View {
                 PixelGridImage(
                     pixelGrid: pixelGrid,
                     mousePosition: mousePosition,
-                    onionSkinning: pixelGrid.message.onionSkinning
+                    onionSkinning: pixelGrid.message?.onionSkinning ?? false
                 )
                 .frame(width: width,
                        height: CGFloat(11 * 20))
@@ -146,7 +146,8 @@ struct PixelGridView: View {
                 if !gridIsSelected && newValue == true {
                     messageStore.selectedGridId = pixelGrid.id
                 }
-                messageStore.selectedMessageId = newValue ? pixelGrid.message.id : messageStore.selectedMessageId
+                guard let message = pixelGrid.message else { return }
+                messageStore.selectedMessageId = newValue ? message.id : messageStore.selectedMessageId
                 
             })
         }

@@ -12,7 +12,8 @@ import SwiftData
 final class Message {
 
     // MARK: Relationship
-    var pixelGrids = [PixelGrid]()
+    @Relationship(deleteRule: .cascade, inverse: \PixelGrid.message)
+    var pixelGrids: [PixelGrid] = []
     
     @Attribute(.unique) var id: UUID
     

@@ -8,12 +8,6 @@
 import Foundation
 
 extension Message {
-    enum GridPosition {
-        case start
-        case end
-        case middle
-    }
-    
     /// Determines if a grid is at the start, end, or middle of the pixelGrids array
     /// - Parameter id: The Identifier of the PixelGrid to check
     /// - Returns: A GridPosition indicating where in the array the grid is located

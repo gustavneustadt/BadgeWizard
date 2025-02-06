@@ -7,10 +7,6 @@
 
 import Foundation
 extension Message {
-    enum MoveDirection {
-        case forward
-        case backward
-    }
     
     @discardableResult
     func reorderGrid(_ id: UUID, toIndex: Int) -> Bool {
