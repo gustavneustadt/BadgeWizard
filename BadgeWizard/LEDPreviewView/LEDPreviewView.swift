@@ -9,30 +9,55 @@ struct LEDPreviewView: View {
     @State private var size: CGSize = .zero
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.colorScheme) var colorScheme
-
-    @StateObject internal var displayBuffer: DisplayBuffer = DisplayBuffer()
     
+    // MARK: Animation states
+    @StateObject internal var displayBuffer: DisplayBuffer = DisplayBuffer()
+    let animationTimer = Timer.publish(every: 0.025, on: .main, in: .common).autoconnect()
     @State internal var timerStep: Int = 0
     @State internal var marqueeStep: Int = 0
     @State private var flashStep: Int = 0
     @State internal var animationStep: Int = 0
     
-    let animationTimer = Timer.publish(every: 0.025, on: .main, in: .common).autoconnect()
-    
-    init(message: Message?) {
-        self.message = message ?? Message.placeholder()
-    }
-    
-    internal var pixels: [[Bool]] {
-        message.getCombinedPixelArrays()
-    }
-    
-    let offPixelColor: Color = .accentColor.opacity(0.2)
+    // MARK: Shape drawing states
     @State var onPixelColor: Color = .accentColor
     
     @State private var ledSize: CGFloat = 0
     @State private var ledSpacing: CGFloat = 0
     @State private var ledPath: Path = .init()
+    let offPixelColor: Color = .accentColor.opacity(0.2)
+    
+    init(message: Message?) {
+        self.message = message ?? Message.placeholder()
+    }
+    
+    var totalAnimationFrames: Int {
+        switch message.mode {
+        case .left, .right:
+            return pixels[0].count + 44 // Content width + display width
+        case .up, .down:
+            return 11 + 11 // Content height + display height
+        case .animation:
+            return message.pixelGrids.count // Number of animation frames
+        case .snowflake:
+            return 10
+        case .laser:
+            return 10
+        case .fixed, .picture:
+            return 1 // No animation
+        }
+    }
+    var animationProgress: Double {
+        guard message.mode != .fixed && message.mode != .picture else {
+            return 1.0
+        }
+        return Double(animationStep % totalAnimationFrames) / Double(totalAnimationFrames)
+    }
+    
+    
+    internal var pixels: [[Bool]] {
+        message.getCombinedPixelArrays()
+    }
+    
     
     func updateLedProperties() {
         self.ledSize = size.width / CGFloat(44)
@@ -52,7 +77,39 @@ struct LEDPreviewView: View {
         }
     }
     
+    var updateAnimationAfterNumberOfSteps: Int {
+        switch message.speed {
+        case .verySlow:
+            8
+        case .slow:
+            7
+        case .relaxed:
+            6
+        case .medium:
+            5
+        case .steady:
+            4
+        case .quick:
+            3
+        case .fast:
+            2
+        case .veryFast:
+            1
+        }
+    }
+    
+    var totalAnimationDuration: String {
+        let value = Double(totalAnimationFrames * updateAnimationAfterNumberOfSteps) * 0.025
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = value < 60 ? [.second] : [.minute, .second]
+        formatter.allowsFractionalUnits = true
+        formatter.unitsStyle = .short
+        
+        return formatter.string(from: value) ?? "\(value) seconds"
+    }
+    
     var body: some View {
+        VStack(spacing: 4){
             ZStack {
                 Canvas { context, _ in
                     
@@ -84,7 +141,7 @@ struct LEDPreviewView: View {
                 }
                 Canvas { context, size in
                     guard isEnabled else { return }
-
+                    
                     var onPixelBatch = Path()
                     
                     iterateThroughLeds { x, y, isOn in
@@ -106,9 +163,20 @@ struct LEDPreviewView: View {
                 .shadow(color: .accentColor, radius: 2)
                 .shadow(color: .accentColor, radius: 5)
             }
-        
-        .frame(height: 11 * (size.width / 44))
-        .getSize($size)
+            .frame(height: 11 * (size.width / 44))
+            .getSize($size)
+           
+            HStack {
+                Spacer()
+                Text("\(totalAnimationDuration)")
+                ProgressView(value: animationProgress)
+                    .progressViewStyle(.circular)
+                    .controlSize(.mini)
+            }
+            .font(.body.smallCaps())
+            .monospacedDigit()
+            .foregroundStyle(.secondary)
+        }
         .onChange(of: size, initial: true, { _, _ in
             updateLedProperties()
         })
@@ -153,27 +221,7 @@ struct LEDPreviewView: View {
     private func updateAnimation() {
         timerStep += 1
         
-        let nthUpdate: Int = { switch message.speed {
-        case .verySlow:
-            8
-        case .slow:
-            7
-        case .relaxed:
-            6
-        case .medium:
-            5
-        case .steady:
-            4
-        case .quick:
-            3
-        case .fast:
-            2
-        case .veryFast:
-            1
-        }
-        }()
-        
-        if timerStep % nthUpdate == 0 {
+        if timerStep % updateAnimationAfterNumberOfSteps == 0 {
             animationStep += 1
             executeAnimationUpdate()
         }
