@@ -7,13 +7,9 @@
 
 import Foundation
 extension Message {
-    enum MoveDirection {
-        case forward
-        case backward
-    }
     
     @discardableResult
-    func reorderGrid(_ id: Identifier<PixelGrid>, toIndex: Int) -> Bool {
+    func reorderGrid(_ id: UUID, toIndex: Int) -> Bool {
         // Validate the new index is within bounds
         guard toIndex >= 0 && toIndex <= pixelGrids.count else { return false }
         
@@ -33,7 +29,7 @@ extension Message {
     }
     
     @discardableResult
-    func reorderGrid(id: Identifier<PixelGrid>, direction: MoveDirection) -> Bool {
+    func reorderGrid(id: UUID, direction: MoveDirection) -> Bool {
         guard let currentIndex = pixelGrids.firstIndex(where: { $0.id == id }) else { return false }
         
         let newIndex: Int

@@ -19,13 +19,7 @@ extension Message {
         #if DEBUG
         extension Message {
             static var \(name): Message {
-                let message = Message(
-                    flash: \(flash),
-                    marquee: \(marquee),
-                    speed: .\(speedCase),
-                    mode: .\(modeCase)
-                )
-                
+                var pixelGrids: [PixelGrid] = []
         """
         
         // Generate code for each grid
@@ -39,33 +33,25 @@ extension Message {
             code += """
             
                     // Grid \(index)
-                    let grid\(index) = try! PixelGrid.fromASCIIArt(\"\"\"
+                    pixelGrids.append(
+                        try! PixelGrid.fromASCIIArt(\"\"\"
             \(indentedArt)
-                    \"\"\", message: message)
+                    \"\"\")
+                    )
             """
-        }
-        
-        // Add grids to message
-        if !pixelGrids.isEmpty {
-            code += """
-            
-            
-                    message.pixelGrids = [
-            """
-            
-            for i in 0..<pixelGrids.count {
-                code += "grid\(i)"
-                if i < pixelGrids.count - 1 {
-                    code += ", "
-                }
-            }
-            
-            code += "]"
         }
         
         code += """
-            
-                    
+        
+        
+                    let message = Message(
+                        flash: \(flash),
+                        marquee: \(marquee),
+                        speed: .\(speedCase),
+                        mode: .\(modeCase),
+                        grids: pixelGrids
+                    )
+        
                     return message
                 }
             }

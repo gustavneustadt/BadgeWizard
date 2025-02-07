@@ -6,44 +6,55 @@
 //
 
 import Foundation
+import SwiftData
 
-// Swift equivalent of the Flutter code
-class Message: ObservableObject, Identifiable, Equatable, Hashable {
-    static func == (lhs: Message, rhs: Message) -> Bool {
-        lhs.id == rhs.id
-    }
+@Model
+final class Message {
+
+    // MARK: Relationship
+    var pixelGrids: [PixelGrid] = []
     
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
+    @Attribute(.unique) var id: UUID
     
-    var id: Identifier<Message> = .init()
-    
-    // MARK: Message Badge Data
-    @Published var pixelGrids: [PixelGrid] = []
-    @Published var flash: Bool
-    @Published var marquee: Bool
-    @Published var speed: Speed
-    @Published var mode: Mode
+    // MARK: Properties
+    var flash: Bool
+    var marquee: Bool
+    var speed: Speed
+    var mode: Mode
+    var onionSkinning: Bool
     
     
-    // MARK: Other stuff
-    @Published var onionSkinning: Bool = false
-    unowned var store: MessageStore?
-    
+    @Transient
     var width: Int {
         pixelGrids.reduce(0) { partialResult, grid in
             return partialResult + grid.width
         }
     }
     
-    init(flash: Bool = false, marquee: Bool = false, speed: Speed = .medium, mode: Mode = .left, store: MessageStore? = nil) {
+    @Transient
+    unowned var store: MessageStore?
+    
+    init(
+        flash: Bool = false,
+        marquee: Bool = false,
+        speed: Speed = .medium,
+        mode: Mode = .left,
+        store: MessageStore? = nil,
+        grids: [PixelGrid] = []
+    ) {
         self.flash = flash
         self.marquee = marquee
         self.speed = speed
         self.mode = mode
+        self.id = .init()
         self.store = store
-        addGrid()
+        self.onionSkinning = false
+        
+        if grids.isEmpty == false {
+            addGrids(grids)
+        } else {
+            newGrid()
+        }
     }
     
     func getBitmap() -> [String] {
@@ -73,7 +84,17 @@ class Message: ObservableObject, Identifiable, Equatable, Hashable {
         }
     }
     
-    func addGrid(_ grid: PixelGrid? = nil, duplicateGrid: Bool = false) {
+    func addGrids(_ grids: [PixelGrid]) {
+        for grid in grids {
+            self.addGrid(grid)
+        }
+    }
+    func addGrid(_ grid: PixelGrid) {
+        let newGrid = PixelGrid(pixels: grid.pixels, width: grid.width, message: self)
+        self.pixelGrids.append(newGrid)
+    }
+    
+    func newGrid(_ grid: PixelGrid? = nil, duplicateGrid: Bool = false) {
         // FIXME: Something is up when duplicating a grid and then hitting delete
         if duplicateGrid,
         let newGrid = grid?.duplicate() {
@@ -82,10 +103,17 @@ class Message: ObservableObject, Identifiable, Equatable, Hashable {
             return
         }
         
-        let newGrid = PixelGrid.init(width: grid?.width, message: self)
+        let newGrid = PixelGrid.init(
+            width: grid?.width,
+            message: self
+        )
         
         pixelGrids.append(newGrid)
         store?.selectedGridId = newGrid.id
+    }
+    
+    var combinedPixelArrays: [[Bool]] {
+        getCombinedPixelArrays()
     }
     
     func getCombinedPixelArrays() -> [[Bool]] {

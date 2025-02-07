@@ -33,8 +33,9 @@ extension PixelGrid {
             bytesPerRow: 0,
             bitsPerPixel: 0
         ) else {
-            self.pixels = [[]]
-            self.width = 1
+            
+            self.update(pixels: [[]], width: 1)
+            
             print("Failed to create bitmap")
             return
         }
@@ -43,8 +44,7 @@ extension PixelGrid {
         NSGraphicsContext.saveGraphicsState()
         
         guard let context = NSGraphicsContext(bitmapImageRep: bitmap) else {
-            self.pixels = [[]]
-            self.width = 1
+            self.update(pixels: [[]], width: 1)
             print("Failed to create graphics context")
             return
         }
@@ -106,8 +106,7 @@ extension PixelGrid {
         }
         
         guard trimmedWidth > 0 else {
-            self.pixels = [[]]
-            self.width = 1
+            self.update(pixels: [[]], width: 1)
             return
         }
         
@@ -119,8 +118,6 @@ extension PixelGrid {
                 }
             }
         }
-        
-        self.pixels = pixelArray
-        self.width = trimmedWidth
+        self.update(pixels: pixelArray, width: trimmedWidth)
     }
 }

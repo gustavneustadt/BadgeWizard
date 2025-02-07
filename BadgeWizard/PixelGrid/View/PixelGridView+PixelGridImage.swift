@@ -8,10 +8,10 @@ import SwiftUI
 
 extension PixelGridView {
     struct PixelGridImage: View {
-        @ObservedObject var pixelGrid: PixelGrid
+        var pixelGrid: PixelGrid
         var mousePosition: CGPoint? = nil
         var onionSkinning: Bool
-        @ObservedObject var previousGrid: PixelGrid
+        var previousGrid: PixelGrid?
         let pixelSize: CGFloat
         @Environment(\.colorScheme) var colorScheme
         
@@ -21,22 +21,20 @@ extension PixelGridView {
             self.onionSkinning = onionSkinning ?? false
             self.pixelSize = pixelSize
             
-            // Get previous grid if it exists, otherwise use a placeholder
-            let message = pixelGrid.message
             if  onionSkinning == true,
-                let currentIndex = message.pixelGrids.firstIndex(where: { $0.id == pixelGrid.id }),
+                let currentIndex = pixelGrid.getArrayIndex() ,
                 currentIndex > 0 {
-                self.previousGrid = message.pixelGrids[currentIndex - 1]
-            } else {
-                // Create a placeholder grid that won't be displayed
-                self.previousGrid = PixelGrid.placeholder()
+                self.previousGrid = pixelGrid.message?.pixelGrids[currentIndex - 1]
             }
         }
         
         func drawOnionSkin(context: GraphicsContext, symbol: GraphicsContext.ResolvedSymbol) {
+            guard let previousGrid = self.previousGrid  else { return }
+            guard let message = pixelGrid.message else { return }
+            
             // Only draw onion skin if this isn't the first grid
             guard
-                let currentIndex = pixelGrid.message.pixelGrids.firstIndex(where: { $0.id == pixelGrid.id }),
+                let currentIndex = message.pixelGrids.firstIndex(where: { $0.id == pixelGrid.id }),
                 currentIndex > 0
             else { return }
             

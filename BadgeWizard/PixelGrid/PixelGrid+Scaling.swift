@@ -4,19 +4,23 @@ extension PixelGrid {
     /// Resizes the grid from the trailing edge while preserving pixels at the leading edge
     /// - Parameter newWidth: The desired new width for the grid
     func resizeFromTrailingEdge(to newWidth: Int, undoManager: UndoManager?) {
+        guard let message = self.message else { return }
+        guard let index = self.getArrayIndex() else { return }
+        
         guard newWidth != self.width else { return }
         
         let oldWidth = pixels[0].count
         let oldPixels = pixels // Store current state for undo
         
         // Register undo action with the old state
-        undoManager?.registerUndo(withTarget: self) { grid in
+        undoManager?.registerUndo(withTarget: message) { message in
             // Restore the previous state
-            grid.width = oldWidth
-            grid.pixels = oldPixels
+            
+            message.pixelGrids[index].update(pixels: oldPixels, width: oldWidth)
+            
             // Register redo
-            undoManager?.registerUndo(withTarget: grid) { gridRedo in
-                gridRedo.resizeFromTrailingEdge(to: newWidth, undoManager: undoManager)
+            undoManager?.registerUndo(withTarget: message) { message in
+                message.pixelGrids[index].resizeFromTrailingEdge(to: newWidth, undoManager: undoManager)
             }
         }
         undoManager?.setActionName("Resize Grid")
@@ -42,8 +46,7 @@ extension PixelGrid {
             }
         }
         
-        pixels = newPixels
-        width = newWidth
+        self.update(pixels: newPixels, width: newWidth)
     }
     
     

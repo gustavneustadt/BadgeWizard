@@ -11,7 +11,7 @@ import Combine
 
 extension MessageView {
     struct GridScroll: View {
-        @ObservedObject var message: Message
+        @Bindable var message: Message
         let scrollViewSize: CGSize
         @Environment(\.undoManager) var undoManager
         @EnvironmentObject var messageStore: MessageStore
@@ -33,7 +33,7 @@ extension MessageView {
                     }
                     AddGridButton { duplicate in
                         withAnimation(.easeOut(duration: 0.2)) {
-                            message.addGrid(messageStore.selectedGrid, duplicateGrid: duplicate)
+                            message.newGrid(messageStore.selectedGrid, duplicateGrid: duplicate)
                         }
                     }
                     .offset(y: 13)

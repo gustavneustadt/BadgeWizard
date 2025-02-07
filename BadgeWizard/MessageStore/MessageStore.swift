@@ -9,11 +9,11 @@ import SwiftUI
 
 class MessageStore: ObservableObject {
     @Published var messages: [Message]
-    @Published var selectedMessageId: Identifier<Message>?
-    @Published var selectedGridId: Identifier<PixelGrid>?
+    @Published var selectedMessageId: UUID?
+    @Published var selectedGridId: UUID?
     
     
-    init(messages: [Message], selectedMessageId: Identifier<Message>? = nil, selectedGridId: Identifier<PixelGrid>? = nil) {
+    init(messages: [Message], selectedMessageId: UUID? = nil, selectedGridId: UUID? = nil) {
         self.messages = messages
         self.messages.forEach({ message in
             message.store = self
@@ -55,7 +55,7 @@ class MessageStore: ObservableObject {
         }
     }
     
-    func deleteGrid(_ id: Identifier<PixelGrid>) {
+    func deleteGrid(_ id: UUID) {
         messages.forEach { message in
             if let index = message.pixelGrids.firstIndex(where: { grid in
                 return grid.id == id
@@ -66,7 +66,7 @@ class MessageStore: ObservableObject {
                 message.pixelGrids.remove(at: index)
                 
                 if message.pixelGrids.isEmpty {
-                    message.addGrid()
+                    message.newGrid()
                 }
                 
                 return

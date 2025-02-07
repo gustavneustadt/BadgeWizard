@@ -50,6 +50,7 @@ extension Message {
     
     
     static func combinePixelArrays(_ arrays: [[[Bool]]]) -> [[Bool]] {
+        print("Called combinePixelArrays")
         guard !arrays.isEmpty else { return [] }
         
         let height = arrays[0].count // All arrays should have same height

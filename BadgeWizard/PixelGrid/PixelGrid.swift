@@ -1,35 +1,66 @@
 import SwiftUI
+import SwiftData
 
-class PixelGrid: ObservableObject, Identifiable {
-    var id: Identifier<PixelGrid> = .init()
+
+struct PixelGrid: Identifiable, Codable {
     
-    @Published var pixels: [[Bool]]
-    @Published var width: Int {
-        willSet {
-            message.objectWillChange.send()
-        }
+    var id: UUID
+    
+    // MARK: Properties
+    var pixels: [[Bool]]
+    var width: Int
+    var height: Int
+    
+    weak var message: Message?
+    
+    enum CodingKeys: CodingKey {
+        case id
+        case pixels
+        case width
+        case height
     }
-
-    let height = 11
     
-    unowned var message: Message
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(pixels, forKey: .pixels)
+        try container.encode(width, forKey: .width)
+        try container.encode(height, forKey: .height)
+        // We don't encode message since it's weak reference
+    }
     
-    init(pixels: [[Bool]] = [], width: Int? = nil, message: Message) {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        pixels = try container.decode([[Bool]].self, forKey: .pixels)
+        width = try container.decode(Int.self, forKey: .width)
+        height = try container.decode(Int.self, forKey: .height)
+        message = nil // Will be set after decoding
+    }
+    
+    
+    init(pixels: [[Bool]] = [], width: Int? = nil, message: Message?) {
         let setWidth = width ?? 20
+        let setHeight = 11
         
+        self.height = setHeight
         self.width = setWidth
         self.message = message
-        
+        self.id = .init()
         guard pixels.isEmpty else {
             self.pixels = pixels
             return
         }
-        self.pixels = Array(repeating: Array(repeating: false, count: setWidth), count: self.height)
-        
+        self.pixels = Array(repeating: Array(repeating: false, count: setWidth), count: setHeight)
     }
     
+    func getArrayIndex() -> Array<PixelGrid>.Index? {
+        message?.pixelGrids.firstIndex(of: self)
+    }
     
     func buildMatrix() {
+        guard let index = message?.pixelGrids.firstIndex(of: self) else { return }
+        
         let oldPixels = pixels
         let oldWidth = oldPixels.isEmpty ? 1 : oldPixels[0].count
         
@@ -45,8 +76,7 @@ class PixelGrid: ObservableObject, Identifiable {
                 }
             }
         }
-        
-        pixels = newPixels
+        message?.pixelGrids[index].pixels = newPixels
     }
     
     private func chunkToHex(startX: Int) -> String {
@@ -96,36 +126,68 @@ class PixelGrid: ObservableObject, Identifiable {
     }
     
     private func deleteGridFromMessage() {
-        self.message.pixelGrids.removeAll { $0 === self }
-        if self.message.pixelGrids.count < 1 {
-            message.addGrid()
+        guard let message = self.message else { return }
+        guard let index = getArrayIndex() else { return }
+        message.pixelGrids.remove(at: index)
+        if message.pixelGrids.count < 1 {
+            message.newGrid()
         }
     }
     
+    func update(pixels: [[Bool]]? = nil, width: Int? = nil, height: Int? = nil) {
+        guard let message = message else { return }
+        guard let index = getArrayIndex() else { return }
+        
+        if pixels != nil {
+            message.pixelGrids[index].pixels = pixels!
+        }
+        
+        if width != nil {
+            message.pixelGrids[index].width = width!
+        }
+        
+        if height != nil {
+            message.pixelGrids[index].height = height!
+        }
+        
+    }
+    
     func deleteGrid() {
-        guard self.message.store?.selectedGridId == self.id else {
+        guard let message = self.message else { return }
+        
+        guard message.store?.selectedGridId == self.id else {
             self.deleteGridFromMessage()
             return
             
         }
         
-        if let indexBefore = self.message.pixelGrids.firstIndex(where: { grid in
+        if let indexBefore = message.pixelGrids.firstIndex(where: { grid in
             grid == self
         })?.advanced(by: -1) {
             guard indexBefore >= 0 else {
                 
-                self.message.store?.selectedGridId = nil
+                message.store?.selectedGridId = nil
                 self.deleteGridFromMessage()
                 return
             }
             
-            self.message.store?.selectedGridId = self.message.pixelGrids[indexBefore].id
+            message.store?.selectedGridId = message.pixelGrids[indexBefore].id
             self.deleteGridFromMessage()
             return
         }
-        self.message.store?.selectedGridId = nil
+        message.store?.selectedGridId = nil
         
         self.deleteGridFromMessage()
+    }
+    
+    func reorder(direction: MoveDirection) {
+        guard let message = self.message else { return }
+        message.reorderGrid(id: self.id, direction: direction)
+    }
+    
+    func isAt(position: GridPosition) -> Bool {
+        guard let message = self.message else { return false }
+        return message.isGridAt(id: self.id, position: position)
     }
 }
 

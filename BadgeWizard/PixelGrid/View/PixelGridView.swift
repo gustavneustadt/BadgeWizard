@@ -9,7 +9,7 @@ import SwiftUI
 struct PixelGridView: View {
     @EnvironmentObject var messageStore: MessageStore
     @EnvironmentObject private var settings: SettingsStore
-    @ObservedObject var pixelGrid: PixelGrid
+    var pixelGrid: PixelGrid
     @State private var showPopover = false
     var onTrailingWidthChanged: (Int) -> Void = { _ in }
     var onLeadingWidthChanged: (Int) -> Void = { _ in }
@@ -35,7 +35,7 @@ struct PixelGridView: View {
                 
                 if messageStore.selectedGridId != pixelGrid.id {
                     messageStore.selectedGridId = pixelGrid.id
-                    messageStore.selectedMessageId = pixelGrid.message.id
+                    messageStore.selectedMessageId =  pixelGrid.message != nil ? pixelGrid.message!.id : nil
                 }
                 
                 let pixelSize = settings.pixelGridPixelSize
@@ -70,21 +70,21 @@ struct PixelGridView: View {
         VStack {
             HStack {
                 Button {
-                    _ = withAnimation(spring) {
-                        pixelGrid.message.reorderGrid(id: pixelGrid.id, direction: .backward)
+                    withAnimation(spring) {
+                        pixelGrid.reorder(direction: .backward)
                     }
                 } label: {
                     Image(systemName: "arrow.left")
                 }
-                .disabled(pixelGrid.message.isGridAt(id: pixelGrid.id, position: .start))
+                .disabled(pixelGrid.isAt(position: .start))
                 Button {
-                    _ = withAnimation(spring) {
-                        pixelGrid.message.reorderGrid(id: pixelGrid.id, direction: .forward)
+                    withAnimation(spring) {
+                        pixelGrid.reorder(direction: .forward)
                     }
                 } label: {
                     Image(systemName: "arrow.right")
                 }
-                .disabled(pixelGrid.message.isGridAt(id: pixelGrid.id, position: .end))
+                .disabled(pixelGrid.isAt(position: .end))
                 Spacer()
             }
             .controlSize(.small)
@@ -94,7 +94,7 @@ struct PixelGridView: View {
                 PixelGridImage(
                     pixelGrid: pixelGrid,
                     mousePosition: mousePosition,
-                    onionSkinning: pixelGrid.message.onionSkinning,
+                    onionSkinning: pixelGrid.message?.onionSkinning ?? false,
                     pixelSize: settings.pixelGridPixelSize
                 )
                 .frame(width: width,
@@ -147,7 +147,8 @@ struct PixelGridView: View {
                 if !gridIsSelected && newValue == true {
                     messageStore.selectedGridId = pixelGrid.id
                 }
-                messageStore.selectedMessageId = newValue ? pixelGrid.message.id : messageStore.selectedMessageId
+                guard let message = pixelGrid.message else { return }
+                messageStore.selectedMessageId = newValue ? message.id : messageStore.selectedMessageId
                 
             })
         }

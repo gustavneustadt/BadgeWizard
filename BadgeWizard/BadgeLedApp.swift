@@ -103,5 +103,6 @@ struct BadgeLedApp: App {
 #endif
             
         }
+        .modelContainer(for: Message.self, isUndoEnabled: true)
     }
 }

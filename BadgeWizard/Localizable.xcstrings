@@ -4,31 +4,11 @@
     "·" : {
 
     },
-    "%lld Columns" : {
+    "%@" : {
 
     },
-    "%lld Columns in Total" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld Column in Total"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "new",
-                  "value" : "%lld Columns in Total"
-                }
-              }
-            }
-          }
-        }
-      }
+    "%lld Columns" : {
+
     },
     "%lld Grids" : {
       "localizations" : {

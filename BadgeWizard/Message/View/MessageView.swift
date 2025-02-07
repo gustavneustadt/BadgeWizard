@@ -9,7 +9,7 @@ import SwiftUI
 import Combine
 
 struct MessageView: View {
-    @ObservedObject var message: Message
+    @Bindable var message: Message
     let messageNumber: Int
     @State private var scrollViewSize: CGSize = .zero
     @EnvironmentObject var messageStore: MessageStore

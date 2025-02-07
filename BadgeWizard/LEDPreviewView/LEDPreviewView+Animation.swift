@@ -13,7 +13,7 @@ extension LEDPreviewView {
         
         // Calculate frames like firmware does
         let totalFrames = (totalWidth + badgeWidth - 1) / badgeWidth
-        
+        guard totalFrames > 0 else { return }
         // Use integer step counting like firmware
         let step = animationStep
         let frameIndex = (step / animationSteps) % totalFrames

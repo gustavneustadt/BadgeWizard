@@ -9,24 +9,27 @@ import Foundation
 extension PixelGrid {
     func setPixel(x: Int, y: Int, isOn: Bool, isUndo: Bool = false, undoManager: UndoManager?) {
         guard pixels[y][x] != isOn else { return }
-        message.objectWillChange.send()
+        guard let message = message else { return }
+        guard let index = getArrayIndex() else { return }
         
         var newPixels = pixels
         newPixels[y][x] = isOn
-        pixels = newPixels
         
-        
-        undoManager?.registerUndo(withTarget: self) { grid in
-            grid.setPixel(x: x, y: y, isOn: !isOn, isUndo: true, undoManager: undoManager)
+        undoManager?.registerUndo(withTarget: message) { message in
+            message.pixelGrids[index].setPixel(x: x, y: y, isOn: !isOn, isUndo: true, undoManager: undoManager)
         }
         undoManager?.setActionName("\(isOn ? isUndo ? "Disable" : "Enable" : isUndo ? "Enable" : "Disable") Pixel")
+        
+        message.pixelGrids[index].pixels = newPixels
     }
     
     func clear(undoManager: UndoManager?) {
+        guard let message = message else { return }
+        guard let index = getArrayIndex() else { return }
         
         let previousState = pixels
-        undoManager?.registerUndo(withTarget: self) { grid in
-            grid.restoreState(previousState, undoManager: undoManager)
+        undoManager?.registerUndo(withTarget: message) { message in
+            message.pixelGrids[index].restoreState(previousState, undoManager: undoManager)
         }
         
         undoManager?.setActionName("Clear Grid")
@@ -38,26 +41,33 @@ extension PixelGrid {
             }
         }
         
-        pixels = newPixels
+        message.pixelGrids[index].pixels = newPixels
     }
     
     /// Helper function to restore state from given Pixels
     func restoreState(_ state: [[Bool]], undoManager: UndoManager?) {
+        guard let message = message else { return }
+        guard let index = getArrayIndex() else { return }
+        
         // Store the current state for redo
         let previousState = pixels
         
         // Register the redo action
-        undoManager?.registerUndo(withTarget: self) { grid in
-            grid.restoreState(previousState, undoManager: undoManager)
+        undoManager?.registerUndo(withTarget: message) { message in
+            message.pixelGrids[index].restoreState(previousState, undoManager: undoManager)
         }
         
         undoManager?.setActionName("Restore Grid")
         
         // Restore the state
-        pixels = state
+        message.pixelGrids[index].pixels = state
     }
     
     func invert(undoManager: UndoManager?) {
+        guard let message = message else { return }
+        guard let index = getArrayIndex() else { return }
+        
+        
         // Create a new matrix with inverted values
         var newPixels = Array(repeating: Array(repeating: false, count: width), count: height)
         
@@ -69,13 +79,13 @@ extension PixelGrid {
             }
         }
         
-        undoManager?.registerUndo(withTarget: self) { grid in
-            grid.invert(undoManager: undoManager)
+        undoManager?.registerUndo(withTarget: message) { message in
+            message.pixelGrids[index].invert(undoManager: undoManager)
         }
         
         undoManager?.setActionName("Invert Grid")
         
         // Update the pixels array with the inverted values
-        pixels = newPixels
+        message.pixelGrids[index].pixels = newPixels
     }
 }
