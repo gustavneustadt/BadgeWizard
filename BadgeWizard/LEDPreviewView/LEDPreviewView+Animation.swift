@@ -6,6 +6,16 @@
 //
 
 extension LEDPreviewView {
+    func getTotalStepsForAnimation() -> Int {
+        let badgeWidth = 44
+        let totalWidth = pixels[0].count
+        let animationSteps = 5  // ANI_ANIMATION_STEPS from firmware
+        
+        let totalFrames = (totalWidth + badgeWidth - 1) / badgeWidth
+        
+        return animationSteps * totalFrames
+    }
+    
     internal func displayAnimation() {
         let badgeWidth = 44
         let totalWidth = pixels[0].count

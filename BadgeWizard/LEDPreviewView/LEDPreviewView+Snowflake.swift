@@ -116,4 +116,17 @@ extension LEDPreviewView {
             }
         }
     }
+    
+    func getTotalStepsForSnowflake() -> Int {
+        let badgeHeight = 11
+        let framesCount = Int(ceil(Double(pixels[0].count) / 44.0))
+        
+        let fallInSteps = badgeHeight * 3
+        let fallOutSteps = badgeHeight * 3
+        
+        let stepsPerNormalChunk = fallInSteps
+        let stepsForLastChunk = fallInSteps + fallOutSteps
+        
+        return (stepsPerNormalChunk * (framesCount - 1)) + stepsForLastChunk
+    }
 }

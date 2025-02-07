@@ -7,6 +7,16 @@
 import Foundation
 
 extension LEDPreviewView {
+    func getTotalStepsForLaser() -> Int {
+        let badgeWidth = 44
+        let totalWidth = pixels[0].count
+        
+        let frameSteps = badgeWidth * 3
+        let totalFrames = (totalWidth + badgeWidth - 1) / badgeWidth
+        
+        return frameSteps * totalFrames
+    }
+    
     internal func displayLaser() {
         let badgeWidth = 44
         let totalWidth = pixels[0].count

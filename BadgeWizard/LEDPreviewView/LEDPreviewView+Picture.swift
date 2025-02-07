@@ -8,6 +8,17 @@ import Foundation
 // LEDPreviewView+Picture.swift
 
 extension LEDPreviewView {
+
+    func getTotalStepsForPicture() -> Int {
+        let badgeWidth = 44
+        let totalWidth = pixels[0].count
+        
+        let frameSteps = badgeWidth
+        let totalFrames = (totalWidth + badgeWidth - 1) / badgeWidth + 1  // +1 for final out animation
+        
+        return frameSteps * totalFrames
+    }
+    
     internal func displayPicture() {
         let badgeWidth = 44
         let totalWidth = pixels[0].count

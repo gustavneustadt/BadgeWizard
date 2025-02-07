@@ -74,4 +74,11 @@ extension LEDPreviewView {
             }
         }
     }
+    
+    func getTotalStepsForVerticalScroll() -> Int {
+        let frameSteps = 33  // 11 pixels * 3 phases (in, still, out)
+        let framesCount = Int(ceil(Double(pixels[0].count) / 44.0))
+        
+        return frameSteps * framesCount
+    }
 }

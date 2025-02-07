@@ -46,8 +46,7 @@ struct MessageInspector: View {
                 MessageFormView(
                     message: messageStore.selectedMessage
                 )
-                .formStyle(.columns)
-                .padding(8)
+                .padding(.top, 8)
             }
             .disabled(messageStore.selectedMessage == nil)
             

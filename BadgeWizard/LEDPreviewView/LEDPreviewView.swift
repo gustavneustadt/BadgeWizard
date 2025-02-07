@@ -17,6 +17,7 @@ struct LEDPreviewView: View {
     @State internal var marqueeStep: Int = 0
     @State private var flashStep: Int = 0
     @State internal var animationStep: Int = 0
+    @State var isAnimationPlaying: Bool = true
     
     // MARK: Shape drawing states
     @State var onPixelColor: Color = .accentColor
@@ -31,28 +32,30 @@ struct LEDPreviewView: View {
     }
     
     var totalAnimationFrames: Int {
-        switch message.mode {
-        case .left, .right:
-            return pixels[0].count + 44 // Content width + display width
+        let frames = { switch message.mode {
         case .up, .down:
-            return 11 + 11 // Content height + display height
+            return getTotalStepsForVerticalScroll()
+        case .left, .right:
+            return getTotalStepsHorizontalScroll()
         case .animation:
-            return message.pixelGrids.count // Number of animation frames
+            return getTotalStepsForAnimation()
         case .snowflake:
-            return 10
+            return getTotalStepsForSnowflake()
         case .laser:
-            return 10
-        case .fixed, .picture:
-            return 1 // No animation
-        }
+            return getTotalStepsForLaser()
+        case .fixed:
+            return getTotalStepsForFixedDisplay()
+        case .picture:
+            return getTotalStepsForPicture()
+        }}()
+        
+        return max(1, frames)
     }
     var animationProgress: Double {
         guard pixels.isEmpty == false else {
             return 0
         }
-        guard message.mode != .fixed && message.mode != .picture else {
-            return 1.0
-        }
+        
         return Double(animationStep % totalAnimationFrames) / Double(totalAnimationFrames)
     }
     
@@ -169,22 +172,29 @@ struct LEDPreviewView: View {
             }
             .frame(height: 11 * (size.width / 44))
             .getSize($size)
-           
-            HStack {
-                Spacer()
-                Text("\(totalAnimationDuration)")
-                ProgressView(value: animationProgress)
-                    .progressViewStyle(.circular)
-                    .controlSize(.mini)
-            }
-            .font(.body.smallCaps())
-            .monospacedDigit()
-            .foregroundStyle(.secondary)
+            
+            LEDPreviewControlsView(
+                isPlaying: $isAnimationPlaying,
+                progress: animationStep % totalAnimationFrames,
+                total: totalAnimationFrames,
+                onReset: {
+                    animationStep = 0
+                },
+                onForwardFrame: {
+                    animationStep += message.mode == .animation ? 5 : 1
+                },
+                onBackwardFrame: {
+                    let newAnimationStep = animationStep - (message.mode == .animation ? 5 : 1)
+                    animationStep = newAnimationStep < 0 ? totalAnimationFrames : newAnimationStep
+                })
         }
         .onChange(of: size, initial: true, { _, _ in
             updateLedProperties()
         })
-        .onReceive(animationTimer) { _ in updateAnimation() }
+        .onReceive(animationTimer) { _ in
+            timerStep += 1
+            updateAnimation()
+        }
         .onChange(of: pixels) {
             executeAnimationUpdate()
         }
@@ -230,11 +240,10 @@ struct LEDPreviewView: View {
     }
     
     private func updateAnimation() {
-        timerStep += 1
-        
-        
         if timerStep % updateAnimationAfterNumberOfSteps == 0 {
-            animationStep += 1
+            if isAnimationPlaying {
+                animationStep += 1
+            }
             executeAnimationUpdate()
         }
         

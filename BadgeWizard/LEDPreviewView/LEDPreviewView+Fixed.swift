@@ -7,6 +7,15 @@
 import Foundation
 
 extension LEDPreviewView {
+    func getTotalStepsForFixedDisplay() -> Int {
+        let badgeWidth = 44
+        let totalWidth = pixels[0].count
+        
+        let totalFrames = (totalWidth + badgeWidth - 1) / badgeWidth
+        
+        return badgeWidth * totalFrames
+    }
+    
     internal func displayFixed() {
         let badgeWidth = 44
         let totalWidth = pixels[0].count
