@@ -15,6 +15,34 @@ extension PixelGridView {
         let pixelSize: CGFloat
         @Environment(\.colorScheme) var colorScheme
         
+        func updatePaths() {
+            let itemSize = pixelSize - 2
+            let onionOffset = pixelSize / 4
+            let onionSize = pixelSize / 2
+            let itemRadius = round(pixelSize/8)
+            
+            self.itemPath =
+            RoundedRectangle(cornerRadius: itemRadius, style: .continuous)
+                .path(in:
+                        .init(
+                            x: 1, y: 1,
+                            width: itemSize, height: itemSize
+                        )
+                )
+            
+            self.onionSkinPath =
+            Circle().path(in:
+                    .init(
+                        x: onionOffset, y: onionOffset,
+                        width: onionSize, height: onionSize
+                    )
+            )
+        }
+        
+        @State var itemPath: Path = .init()
+        @State var onionSkinPath: Path = .init()
+        
+        
         init(pixelGrid: PixelGrid, mousePosition: CGPoint? = nil, onionSkinning: Bool? = false, pixelSize: CGFloat) {
             self.pixelGrid = pixelGrid
             self.mousePosition = mousePosition
@@ -28,104 +56,127 @@ extension PixelGridView {
             }
         }
         
-        func drawOnionSkin(context: GraphicsContext, symbol: GraphicsContext.ResolvedSymbol) {
-            guard let previousGrid = self.previousGrid  else { return }
-            guard let message = pixelGrid.message else { return }
-            
-            // Only draw onion skin if this isn't the first grid
-            guard
-                let currentIndex = message.pixelGrids.firstIndex(where: { $0.id == pixelGrid.id }),
-                currentIndex > 0
-            else { return }
-            
-            for y in 0..<previousGrid.height {
-                for x in 0..<previousGrid.width {
-                    guard x < pixelGrid.width else { continue }
-                    guard previousGrid.pixels[y][x] == true else { continue }
-                    context.draw(
-                        symbol,
-                        at: CGPoint(
-                            x: CGFloat(x) * pixelSize + pixelSize/2,
-                            y: CGFloat(y) * pixelSize + pixelSize/2
-                        )
+        func iterateThroughLeds(grid: PixelGrid, maxWidth: Int? = nil, callback: (_ x: CGFloat, _ y: CGFloat, _ isOn: Bool) -> Void) {
+            for y in 0..<grid.height {
+                for x in 0..<min(maxWidth ?? grid.width, grid.width) {
+                    callback(
+                        CGFloat(x) * pixelSize,
+                        CGFloat(y) * pixelSize,
+                        grid.pixels[y][x]
                     )
                 }
             }
         }
         
-        func drawHoverPixels(context: GraphicsContext, symbol: GraphicsContext.ResolvedSymbol) {
-            var hoverPixel: (x: Int, y: Int)? = nil
+        var hoverPixelPosition: CGPoint? {
+            var hoverPixel: CGPoint? = nil
             if let mousePosition = mousePosition {
                 let x = Int((mousePosition.x - 2) / pixelSize)
                 let y = Int((mousePosition.y - 2) / pixelSize)
                 if x >= 0 && x < pixelGrid.width && y >= 0 && y < 11 {
-                    hoverPixel = (x, y)
+                    hoverPixel = .init(
+                        x: Double(x) * pixelSize,
+                        y: Double(y) * pixelSize
+                    )
                 }
             }
             
-            // Draw hover effect if applicable
-            if let hoverPixel = hoverPixel {
-                context.draw(
-                    symbol,
-                    at: CGPoint(
-                        x: CGFloat(hoverPixel.x) * pixelSize + pixelSize/2,
-                        y: CGFloat(hoverPixel.y) * pixelSize + pixelSize/2
-                    )
-                )
-            }
+            return hoverPixel
         }
         
         var body: some View {
             Canvas { context, size in
-                // Create symbols
-                guard let itemOn = context.resolveSymbol(id: "itemOn"),
-                      let itemOff = context.resolveSymbol(id: "itemOff"),
-                      let itemHover = context.resolveSymbol(id: "itemHover"),
-                      let itemOnionSkin = context.resolveSymbol(id: "itemOnionSkin")
-                else { return }
                 
-                for y in 0..<pixelGrid.height {
-                    for x in 0..<pixelGrid.width {
-                        context.draw(
-                            pixelGrid.pixels[y][x] == true ? itemOn : itemOff,
-                            at: CGPoint(
-                                x: CGFloat(x) * pixelSize + pixelSize/2,
-                                y: CGFloat(y) * pixelSize + pixelSize/2
-                            )
+                var hoverPixelPath: Path = .init()
+                var allOnionSkinItemsPath: Path = .init()
+                var allItemsOnPath: Path = .init()
+                var allItemsOffPath: Path = .init()
+                
+                iterateThroughLeds(
+                    grid: pixelGrid
+                ) { x, y, isOn in
+                    if isOn {
+                        allItemsOnPath.addPath(
+                            itemPath,
+                            transform:
+                                    .init(
+                                        translationX: x,
+                                        y: y
+                                    )
+                        )
+                    } else {
+                        allItemsOffPath.addPath(
+                            itemPath,
+                            transform:
+                                    .init(
+                                        translationX: x,
+                                        y: y
+                                    )
                         )
                     }
                 }
                 
-                drawHoverPixels(context: context, symbol: itemHover)
-                drawOnionSkin(context: context, symbol: itemOnionSkin)
+                if let grid = previousGrid {
+                    iterateThroughLeds(
+                        grid: grid,
+                        maxWidth: pixelGrid.width
+                    ) { x, y, isOn in
+                        if isOn {
+                            allOnionSkinItemsPath.addPath(
+                                onionSkinPath,
+                                transform:
+                                        .init(
+                                            translationX: x,
+                                            y: y
+                                        )
+                            )
+                        }
+                    }
+                }
                 
-            } symbols: {
-                RoundedRectangle(cornerRadius: pixelSize/8, style: .continuous)
-                    .fill(Color.accentColor)
-                    .frame(width: pixelSize - 2, height: pixelSize - 2)
-                    .tag("itemOn")
+                context.fill(
+                    allItemsOffPath,
+                    with: .color(
+                        Color(nsColor: NSColor.separatorColor)
+                    )
+                )
+                context.fill(
+                    allItemsOnPath,
+                    with: .color(
+                        Color.accentColor
+                    )
+                )
+                context.fill(
+                    allOnionSkinItemsPath,
+                    with: .color(
+                        Color.accentColor.mix(
+                            with: colorScheme == .dark ? .black : .white,
+                            by: colorScheme == .dark ? 0.7 : 0.4,
+                            in: .perceptual
+                        ).opacity(
+                            colorScheme == .dark ? 0.6 : 0.8
+                        )
+                    )
+                )
                 
-                RoundedRectangle(cornerRadius: pixelSize/8, style: .continuous)
-                    .fill(.separator)
-                    .frame(width: pixelSize - 2, height: pixelSize - 2)
-                    .tag("itemOff")
-                
-                RoundedRectangle(cornerRadius: pixelSize/8, style: .continuous)
-                    .fill(.separator)
-                    .frame(width: pixelSize - 2, height: pixelSize - 2)
-                    .tag("itemHover")
-                
-                // Add onion skin symbol
-                Circle()
-                    .fill(Color.accentColor.mix(
-                        with: colorScheme == .dark ? .black : .white,
-                        by: colorScheme == .dark ? 0.7 : 0.4,
-                        in: .perceptual
-                    ).opacity(
-                        colorScheme == .dark ? 0.6 : 0.8
-                    ))
-                    .frame(width: pixelSize / 2, height: pixelSize / 2)
-                    .tag("itemOnionSkin")
+                guard hoverPixelPosition != nil else { return }
+                hoverPixelPath.addPath(
+                    itemPath,
+                    transform:
+                            .init(
+                                translationX: hoverPixelPosition!.x,
+                                y: hoverPixelPosition!.y
+                            )
+                )
+                context.fill(
+                    hoverPixelPath,
+                    with: .color(
+                        Color(nsColor: NSColor.separatorColor)
+                    )
+                )
+            }
+            .onChange(of: pixelSize, initial: true) {
+                updatePaths()
             }
         }
     }

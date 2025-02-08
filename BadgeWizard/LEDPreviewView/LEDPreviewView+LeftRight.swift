@@ -9,8 +9,7 @@ extension LEDPreviewView {
     internal func scrollLeft() {
         let badgeWidth = 44
         let totalWidth = pixels[0].count
-        print(totalWidth)
-        
+
         // Calculate total steps needed for one complete scroll
         let totalSteps = totalWidth + badgeWidth
         
