@@ -10,6 +10,7 @@ struct PixelGridView: View {
     @EnvironmentObject var messageStore: MessageStore
     @EnvironmentObject private var settings: SettingsStore
     var pixelGrid: PixelGrid
+    @State var cachedPixelGrid: PixelGrid?
     @State private var showPopover = false
     var onTrailingWidthChanged: (Int) -> Void = { _ in }
     var onLeadingWidthChanged: (Int) -> Void = { _ in }
@@ -129,6 +130,7 @@ struct PixelGridView: View {
                             .frame(
                                 width: width
                             )
+                            .border(.pink)
                     }
                 }
             }
@@ -169,14 +171,16 @@ struct PixelGridView: View {
                     withAnimation(.easeInOut) {
                         temporaryWidth = 0
                     }
+                    cachedPixelGrid = nil
                     temporaryWidth = nil
                 })
                 .onChanged { value in
                     let newWidth = max(1, pixelGrid.width + Int(value.translation.width / settings.pixelGridPixelSize))
                     if temporaryWidth == nil {
                         temporaryWidth = newWidth
+                        cachedPixelGrid = pixelGrid
                     }
-                    onTrailingWidthChanged(newWidth)
+                    pixelGrid.resizeFromTrailingEdge(to: newWidth, cache: cachedPixelGrid, undoManager: undo)
                 }
         )
     }
