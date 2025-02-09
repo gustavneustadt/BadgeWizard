@@ -130,7 +130,6 @@ struct PixelGridView: View {
                             .frame(
                                 width: width
                             )
-                            .border(.pink)
                     }
                 }
             }
