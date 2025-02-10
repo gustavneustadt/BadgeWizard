@@ -16,29 +16,20 @@ struct MessageView: View {
     
     var body: some View {
         VStack(spacing: 8) {
-            ZStack(alignment: .trailing) {
-                GridScroll(
-                    message: message,
-                    scrollViewSize: scrollViewSize
-                )
-                .getSize($scrollViewSize)
-                Header(
-                    message: message,
-                    messageNumber: messageNumber,
-                    gridSum: message.pixelGrids.count,
-                    columnSum: message.width,
-                    selected: messageStore.selectedMessageId == message.id
-                )
-            }
+            Header(
+                message: message,
+                messageNumber: messageNumber,
+                gridSum: message.pixelGrids.count,
+                columnSum: message.width,
+                selected: true
+            )
+            GridScroll(
+                message: message,
+                scrollViewSize: scrollViewSize
+            )
+            .getSize($scrollViewSize)
         }
-        .onTapGesture {
-            messageStore.selectedMessageId = message.id
-            
-            guard message.pixelGrids.contains(where: { grid in
-                grid.id == messageStore.selectedGridId
-            }) == false else { return }
-            messageStore.selectedGridId = message.pixelGrids.first?.id
-        }
+        .frame(maxHeight: .infinity)
         .focusable(false)
     }
 }

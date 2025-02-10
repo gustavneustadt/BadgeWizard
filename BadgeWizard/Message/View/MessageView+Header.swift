@@ -23,20 +23,6 @@ extension MessageView {
             return VStack {
                 HStack {
                     HStack {
-                        Text("Message \(messageNumber)")
-                            .lineLimit(1)
-                            .truncationMode(.middle)
-                            .foregroundStyle(selected ? .white : .primary)
-                            .fontWeight(.medium)
-                            .padding(.horizontal, padding.x)
-                            .padding(.vertical, padding.y)
-                            .background(
-                                RoundedRectangle(cornerRadius: 4, style: .continuous)
-                                    .fill(selected ? Color.accentColor : Color.clear)
-                            )
-                        Spacer()
-                    }
-                    HStack {
                         Text("\(gridSum) Grids")
                         Text("·")
                         Text("\(columnSum) Columns")
@@ -45,8 +31,7 @@ extension MessageView {
                     .truncationMode(.tail)
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
-                    .frame(minWidth: 0, maxWidth: .infinity)
-                    
+                    Spacer()
                     HStack(spacing: 0) {
                         Spacer()
                         Toggle(isOn: $message.onionSkinning) {
@@ -57,7 +42,6 @@ extension MessageView {
                     }
                 }
                 .offset(y: -padding.y)
-                Spacer()
             }
             .padding()
         }

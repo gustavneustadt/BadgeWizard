@@ -34,9 +34,8 @@ struct PixelGridView: View {
                 mousePosition = value.location
                 isDrawing = true
                 
-                if messageStore.selectedGridId != pixelGrid.id {
-                    messageStore.selectedGridId = pixelGrid.id
-                    messageStore.selectedMessageId =  pixelGrid.message != nil ? pixelGrid.message!.id : nil
+                if pixelGrid.message?.selectedGridId != pixelGrid.id {
+                    pixelGrid.message?.selectGrid(pixelGrid.id)
                 }
                 
                 let pixelSize = settings.pixelGridPixelSize
@@ -55,7 +54,7 @@ struct PixelGridView: View {
     }
     
     var gridIsSelected: Bool {
-        messageStore.selectedGridId == pixelGrid.id
+        pixelGrid.message?.selectedGridId == pixelGrid.id
     }
     
     func calculateWidth(columns: Int) -> CGFloat {
@@ -136,22 +135,18 @@ struct PixelGridView: View {
             .background(
                 RoundedRectangle(cornerRadius: settings.pixelGridPixelSize / 2, style: .continuous)
                     .fill(.background)
+                #if DEBUG
+                    .fill(Color.init(hue: Double.random(in: 0..<1), saturation: Double.random(in: 0..<1), brightness: 0.1))
+                #endif
                     .stroke(Color.accentColor.secondary, lineWidth: gridIsSelected ? 4 : 0)
             )
-            .focusable()
-            .focused($isFocused)
+
             .focusEffectDisabled()
             .onTapGesture {
-                isFocused = true
-            }
-            .onChange(of: isFocused, initial: true, { oldValue, newValue in
-                if !gridIsSelected && newValue == true {
-                    messageStore.selectedGridId = pixelGrid.id
+                if !gridIsSelected {
+                    pixelGrid.message?.selectGrid(pixelGrid.id)
                 }
-                guard let message = pixelGrid.message else { return }
-                messageStore.selectedMessageId = newValue ? message.id : messageStore.selectedMessageId
-                
-            })
+            }
         }
     }
     

@@ -838,8 +838,8 @@ extension Message {
         let message = Message(
             flash: false,
             marquee: false,
-            speed: .veryFast,
-            mode: .animation,
+            speed: .medium,
+            mode: .left,
             grids: pixelGrids
         )
         

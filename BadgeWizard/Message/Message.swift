@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 @Model
-final class Message {
+final class Message: Codable {
 
     // MARK: Relationship
     var pixelGrids: [PixelGrid] = []
@@ -30,6 +30,9 @@ final class Message {
             return partialResult + grid.width
         }
     }
+    
+    @Transient
+    var selectedGridId: UUID? = nil
     
     @Transient
     unowned var store: MessageStore?
@@ -55,6 +58,39 @@ final class Message {
         } else {
             newGrid()
         }
+    }
+    
+    enum CodingKeys: CodingKey {
+        case id
+        case pixelGrids
+        case flash
+        case marquee
+        case speed
+        case mode
+        case onionSkinning
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(pixelGrids, forKey: .pixelGrids)
+        try container.encode(flash, forKey: .flash)
+        try container.encode(marquee, forKey: .marquee)
+        try container.encode(speed, forKey: .speed)
+        try container.encode(mode, forKey: .mode)
+        try container.encode(onionSkinning, forKey: .onionSkinning)
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        pixelGrids = try container.decode([PixelGrid].self, forKey: .pixelGrids)
+        flash = try container.decode(Bool.self, forKey: .flash)
+        marquee = try container.decode(Bool.self, forKey: .marquee)
+        speed = try container.decode(Speed.self, forKey: .speed)
+        mode = try container.decode(Mode.self, forKey: .mode)
+        onionSkinning = try container.decode(Bool.self, forKey: .onionSkinning)
+        store = nil // Will be set after decoding
     }
     
     func getBitmap() -> [String] {
@@ -99,7 +135,6 @@ final class Message {
         if duplicateGrid,
         let newGrid = grid?.duplicate() {
             pixelGrids.append(newGrid)
-            store?.selectedGridId = newGrid.id
             return
         }
         
@@ -109,7 +144,7 @@ final class Message {
         )
         
         pixelGrids.append(newGrid)
-        store?.selectedGridId = newGrid.id
+
     }
     
     var combinedPixelArrays: [[Bool]] {
@@ -126,5 +161,13 @@ final class Message {
     
     static func placeholder () -> Message {
         Message()
+    }
+    
+    func selectGrid(_ pixelGridId: UUID) {
+        self.selectedGridId = pixelGridId
+    }
+    
+    func getSelectedGrid() -> PixelGrid? {
+        pixelGrids.first(where: { $0.id == selectedGridId })
     }
 }

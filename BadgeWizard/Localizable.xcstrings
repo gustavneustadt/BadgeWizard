@@ -7,6 +7,9 @@
     "%lld Columns" : {
 
     },
+    "%lld grids" : {
+
+    },
     "%lld Grids" : {
       "localizations" : {
         "en" : {
@@ -30,6 +33,7 @@
       }
     },
     "%lld Messages" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "variations" : {
@@ -61,9 +65,6 @@
         }
       }
     },
-    "Add Message" : {
-
-    },
     "Add Text" : {
       "localizations" : {
         "de" : {
@@ -73,6 +74,9 @@
           }
         }
       }
+    },
+    "Badge Studio" : {
+
     },
     "Cancel" : {
       "localizations" : {
@@ -94,13 +98,13 @@
         }
       }
     },
+    "Create Message" : {
+
+    },
     "Delete Grid" : {
 
     },
     "Duplicate Grid" : {
-
-    },
-    "Export Message as Debug Code" : {
 
     },
     "Flashing" : {
@@ -124,6 +128,7 @@
       }
     },
     "Grid %lld" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -149,6 +154,9 @@
     "Kerning:" : {
 
     },
+    "Loading Message …" : {
+
+    },
     "Marquee" : {
       "localizations" : {
         "de" : {
@@ -160,6 +168,7 @@
       }
     },
     "Message %lld" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -179,7 +188,17 @@
         }
       }
     },
+    "Message Library" : {
+
+    },
+    "Message Library View" : {
+
+    },
+    "Message Preview" : {
+
+    },
     "Messages" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -200,6 +219,7 @@
       }
     },
     "No Grid selected" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -210,6 +230,7 @@
       }
     },
     "No Message selected" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -222,7 +243,7 @@
     "Onion Skinning" : {
 
     },
-    "Pixel Grid Zoom" : {
+    "Open Library" : {
 
     },
     "Preview" : {
@@ -244,6 +265,9 @@
           }
         }
       }
+    },
+    "Send to Badge" : {
+
     },
     "Size:" : {
 

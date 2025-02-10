@@ -18,29 +18,31 @@ extension MessageView {
         
         var body: some View {
             ScrollView([.horizontal]) {
-                HStack(spacing: 8) {
-                    ForEach(message.pixelGrids) { grid in
-                        PixelGridView(
-                            pixelGrid: grid,
-                            onTrailingWidthChanged: { val in
-                                grid.resizeFromTrailingEdge(to: val, undoManager: undoManager)
-                            },
-                            onLeadingWidthChanged: { val in
-                                // grid.resizeFromLeadingEdge(to: val)
-                            }
-                        )
-                        .zIndex(messageStore.selectedGridId == grid.id ? 1 : 0)
-                    }
-                    AddGridButton { duplicate in
-                        withAnimation(.easeOut(duration: 0.2)) {
-                            message.newGrid(messageStore.selectedGrid, duplicateGrid: duplicate)
+                VStack {
+                    Spacer()
+                    HStack(spacing: 8) {
+                        ForEach(message.pixelGrids) { grid in
+                            PixelGridView(
+                                pixelGrid: grid,
+                                onTrailingWidthChanged: { val in
+                                    grid.resizeFromTrailingEdge(to: val, undoManager: undoManager)
+                                },
+                                onLeadingWidthChanged: { val in
+                                    // grid.resizeFromLeadingEdge(to: val)
+                                }
+                            )
+                            .zIndex(message.selectedGridId == grid.id ? 1 : 0)
                         }
+                        AddGridButton { duplicate in
+                            withAnimation(.easeOut(duration: 0.2)) {
+                                message.newGrid(message.getSelectedGrid(), duplicateGrid: duplicate)
+                            }
+                        }
+                        .offset(y: 13)
                     }
-                    .offset(y: 13)
+                    .padding(.horizontal)
+                    Spacer()
                 }
-                .padding(.horizontal)
-                .padding(.top, 48)
-                .padding(.bottom, 24)
             }
         }
     }

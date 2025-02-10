@@ -155,27 +155,18 @@ struct PixelGrid: Identifiable, Codable {
     func deleteGrid() {
         guard let message = self.message else { return }
         
-        guard message.store?.selectedGridId == self.id else {
-            self.deleteGridFromMessage()
-            return
-            
-        }
-        
         if let indexBefore = message.pixelGrids.firstIndex(where: { grid in
             grid == self
         })?.advanced(by: -1) {
             guard indexBefore >= 0 else {
-                
-                message.store?.selectedGridId = nil
+
                 self.deleteGridFromMessage()
                 return
             }
-            
-            message.store?.selectedGridId = message.pixelGrids[indexBefore].id
+
             self.deleteGridFromMessage()
             return
         }
-        message.store?.selectedGridId = nil
         
         self.deleteGridFromMessage()
     }
