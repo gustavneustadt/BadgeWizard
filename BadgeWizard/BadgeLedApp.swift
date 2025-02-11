@@ -34,6 +34,7 @@ struct BadgeLedApp: App {
                 .frame(maxWidth: 300, maxHeight: 500)
                 .windowResizeBehavior(.disabled)
                 .environmentObject(messageStore)
+                .modelContainer(for: Message.self, isUndoEnabled: true)
             
         })
         .windowStyle(.hiddenTitleBar)
@@ -42,6 +43,8 @@ struct BadgeLedApp: App {
         WindowGroup(for: Message.self) { $message in
             MessageEditorView(message: message)
                 .environmentObject(settingsStore)
+                .modelContainer(for: Message.self, isUndoEnabled: true)
+                .modelContainer(for: PixelGrid.self, isUndoEnabled: true)
         }
         .defaultSize(width: 800, height: 600)
         
@@ -126,6 +129,5 @@ struct BadgeLedApp: App {
         // #endif
         //
         //         }
-        .modelContainer(for: Message.self, isUndoEnabled: true)
     }
 }

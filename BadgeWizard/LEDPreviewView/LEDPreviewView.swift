@@ -2,11 +2,13 @@
 // This View is inspired by the [Flutter App](https://github.com/fossasia/badgemagic-app) from FOSS ASIA and their Badge Preview
 //
 import SwiftUI
+import SwiftData
 import Combine
 
 struct LEDPreviewView: View {
     @Bindable var message: Message
     @State private var size: CGSize = .zero
+    @ObservedObject var pixelGrids: [PixelGrid] = []
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.colorScheme) var colorScheme
     
@@ -28,7 +30,13 @@ struct LEDPreviewView: View {
     let offPixelColor: Color = .accentColor.opacity(0.2)
     
     init(message: Message?) {
-        self.message = message ?? Message.placeholder()
+        let message = message ?? Message.placeholder()
+        self.message = message
+        self._pixelGrids = Query(FetchDescriptor<PixelGrid>(
+            predicate: #Predicate<PixelGrid> { item in
+                message.pixelGrids.contains(item)
+            }
+        ))
     }
     
     var totalAnimationFrames: Int {
@@ -204,8 +212,11 @@ struct LEDPreviewView: View {
         .onChange(of: colorScheme, initial: true) { _, value in
             onPixelColor = value == .dark ?  .accentColor.mix(with: .white, by: 0.5) :  .accentColor
         }
-        .onChange(of: message.pixelGrids, initial: true) {
-            pixels = message.getCombinedPixelArrays()
+        .onChange(of: pixelGrids, initial: true) {
+            let grids: [[[Bool]]] = pixelGrids.map { grid in
+                return grid.pixels
+            }
+            pixels = Message.combinePixelArrays(grids)
         }
     }
     

@@ -57,7 +57,7 @@ extension LEDPreviewView {
     func getTotalStepsHorizontalScroll() -> Int {
         // FIXME: Something is not quite right. For very long pixel arrays, the calculated length is always a bit to short
         let badgeWidth = 44
-        let totalWidth = pixels[0].count
+        let totalWidth = pixels.count > 0 ? pixels[0].count : 0
         
         return totalWidth + badgeWidth
     }

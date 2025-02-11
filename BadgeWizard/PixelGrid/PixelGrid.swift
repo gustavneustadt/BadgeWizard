@@ -1,17 +1,16 @@
 import SwiftUI
 import SwiftData
 
-
-struct PixelGrid: Identifiable, Codable {
+class PixelGrid: Identifiable, Codable, ObservableObject {
     
-    var id: UUID
+    @Attribute(.unique) var id: UUID
     
     // MARK: Properties
     var pixels: [[Bool]]
     var width: Int
     var height: Int
     
-    weak var message: Message?
+    var message: Message?
     
     enum CodingKeys: CodingKey {
         case id
@@ -29,7 +28,7 @@ struct PixelGrid: Identifiable, Codable {
         // We don't encode message since it's weak reference
     }
     
-    init(from decoder: Decoder) throws {
+    required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(UUID.self, forKey: .id)
         pixels = try container.decode([[Bool]].self, forKey: .pixels)

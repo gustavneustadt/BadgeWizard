@@ -9,7 +9,7 @@ import SwiftUI
 struct PixelGridView: View {
     @EnvironmentObject var messageStore: MessageStore
     @EnvironmentObject private var settings: SettingsStore
-    var pixelGrid: PixelGrid
+    @Bindable var pixelGrid: PixelGrid
     @State var cachedPixelGrid: PixelGrid?
     @State private var showPopover = false
     var onTrailingWidthChanged: (Int) -> Void = { _ in }
@@ -93,20 +93,11 @@ struct PixelGridView: View {
             HStack(spacing: 0) {
                 PixelGridImage(
                     pixelGrid: pixelGrid,
-                    mousePosition: mousePosition,
                     onionSkinning: pixelGrid.message?.onionSkinning ?? false,
                     pixelSize: settings.pixelGridPixelSize
                 )
                 .frame(width: width,
                        height: CGFloat(11 * settings.pixelGridPixelSize))
-                .onContinuousHover(coordinateSpace: .local, perform: { phase in
-                    switch phase {
-                    case .active(let pt):
-                        mousePosition = pt
-                    case .ended:
-                        mousePosition = nil
-                    }
-                })
                 .gesture(
                     dragGesture
                 )

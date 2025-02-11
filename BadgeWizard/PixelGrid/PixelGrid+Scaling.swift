@@ -7,22 +7,19 @@ extension PixelGrid {
     ///   - cache: Optional cache grid to restore pixels from when expanding
     ///   - undoManager: UndoManager for undo/redo support
     func resizeFromTrailingEdge(to newWidth: Int, cache: PixelGrid? = nil, undoManager: UndoManager?) {
-        guard let message = self.message else { return }
-        guard let index = self.getArrayIndex() else { return }
-        
         guard newWidth != self.width else { return }
         
         let oldWidth = pixels[0].count
         let oldPixels = pixels // Store current state for undo
         
         // Register undo action with the old state
-        undoManager?.registerUndo(withTarget: message) { message in
+        undoManager?.registerUndo(withTarget: self) { grid in
             // Restore the previous state
-            message.pixelGrids[index].update(pixels: oldPixels, width: oldWidth)
+            grid.update(pixels: oldPixels, width: oldWidth)
             
             // Register redo
-            undoManager?.registerUndo(withTarget: message) { message in
-                message.pixelGrids[index].resizeFromTrailingEdge(to: newWidth, cache: cache, undoManager: undoManager)
+            undoManager?.registerUndo(withTarget: grid) { grid in
+                grid.resizeFromTrailingEdge(to: newWidth, cache: cache, undoManager: undoManager)
             }
         }
         undoManager?.setActionName("Resize Grid")

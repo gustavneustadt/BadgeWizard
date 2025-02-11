@@ -8,8 +8,8 @@ import SwiftUI
 
 extension PixelGridView {
     struct PixelGridImage: View {
-        var pixelGrid: PixelGrid
-        var mousePosition: CGPoint? = nil
+        @Bindable var pixelGrid: PixelGrid
+        @State var mousePosition: CGPoint? = nil
         var onionSkinning: Bool
         var previousGrid: PixelGrid?
         let pixelSize: CGFloat
@@ -43,9 +43,8 @@ extension PixelGridView {
         @State var onionSkinPath: Path = .init()
         
         
-        init(pixelGrid: PixelGrid, mousePosition: CGPoint? = nil, onionSkinning: Bool? = false, pixelSize: CGFloat) {
+        init(pixelGrid: PixelGrid, onionSkinning: Bool? = false, pixelSize: CGFloat) {
             self.pixelGrid = pixelGrid
-            self.mousePosition = mousePosition
             self.onionSkinning = onionSkinning ?? false
             self.pixelSize = pixelSize
             
@@ -85,45 +84,47 @@ extension PixelGridView {
         }
         
         var body: some View {
-            Canvas { context, size in
-                
-                var hoverPixelPath: Path = .init()
-                var allOnionSkinItemsPath: Path = .init()
-                var allItemsOnPath: Path = .init()
-                var allItemsOffPath: Path = .init()
-                
-                iterateThroughLeds(
-                    grid: pixelGrid
-                ) { x, y, isOn in
-                    if isOn {
-                        allItemsOnPath.addPath(
+            ZStack {
+                if mousePosition != nil {
+                    Canvas { context, size in
+                        var hoverPixelPath: Path = .init()
+                        hoverPixelPath.addPath(
                             itemPath,
                             transform:
                                     .init(
-                                        translationX: x,
-                                        y: y
+                                        translationX: hoverPixelPosition!.x,
+                                        y: hoverPixelPosition!.y
                                     )
                         )
-                    } else {
-                        allItemsOffPath.addPath(
-                            itemPath,
-                            transform:
-                                    .init(
-                                        translationX: x,
-                                        y: y
-                                    )
+                        context.fill(
+                            hoverPixelPath,
+                            with: .color(
+                                Color(nsColor: NSColor.separatorColor)
+                            )
                         )
                     }
                 }
-                
-                if let grid = previousGrid {
+                Canvas { context, size in
+                    
+                    var allOnionSkinItemsPath: Path = .init()
+                    var allItemsOnPath: Path = .init()
+                    var allItemsOffPath: Path = .init()
+                    
                     iterateThroughLeds(
-                        grid: grid,
-                        maxWidth: pixelGrid.width
+                        grid: pixelGrid
                     ) { x, y, isOn in
                         if isOn {
-                            allOnionSkinItemsPath.addPath(
-                                onionSkinPath,
+                            allItemsOnPath.addPath(
+                                itemPath,
+                                transform:
+                                        .init(
+                                            translationX: x,
+                                            y: y
+                                        )
+                            )
+                        } else {
+                            allItemsOffPath.addPath(
+                                itemPath,
                                 transform:
                                         .init(
                                             translationX: x,
@@ -132,52 +133,63 @@ extension PixelGridView {
                             )
                         }
                     }
-                }
-                
-                context.fill(
-                    allItemsOffPath,
-                    with: .color(
-                        Color(nsColor: NSColor.separatorColor)
-                    )
-                )
-                context.fill(
-                    allItemsOnPath,
-                    with: .color(
-                        Color.accentColor
-                    )
-                )
-                context.fill(
-                    allOnionSkinItemsPath,
-                    with: .color(
-                        Color.accentColor.mix(
-                            with: colorScheme == .dark ? .black : .white,
-                            by: colorScheme == .dark ? 0.7 : 0.4,
-                            in: .perceptual
-                        ).opacity(
-                            colorScheme == .dark ? 0.6 : 0.8
+                    
+                    if let grid = previousGrid {
+                        iterateThroughLeds(
+                            grid: grid,
+                            maxWidth: pixelGrid.width
+                        ) { x, y, isOn in
+                            if isOn {
+                                allOnionSkinItemsPath.addPath(
+                                    onionSkinPath,
+                                    transform:
+                                            .init(
+                                                translationX: x,
+                                                y: y
+                                            )
+                                )
+                            }
+                        }
+                    }
+                    
+                    context.fill(
+                        allItemsOffPath,
+                        with: .color(
+                            Color(nsColor: NSColor.separatorColor)
                         )
                     )
-                )
-                
-                guard hoverPixelPosition != nil else { return }
-                hoverPixelPath.addPath(
-                    itemPath,
-                    transform:
-                            .init(
-                                translationX: hoverPixelPosition!.x,
-                                y: hoverPixelPosition!.y
-                            )
-                )
-                context.fill(
-                    hoverPixelPath,
-                    with: .color(
-                        Color(nsColor: NSColor.separatorColor)
+                    context.fill(
+                        allItemsOnPath,
+                        with: .color(
+                            Color.accentColor
+                        )
                     )
-                )
+                    context.fill(
+                        allOnionSkinItemsPath,
+                        with: .color(
+                            Color.accentColor.mix(
+                                with: colorScheme == .dark ? .black : .white,
+                                by: colorScheme == .dark ? 0.7 : 0.4,
+                                in: .perceptual
+                            ).opacity(
+                                colorScheme == .dark ? 0.6 : 0.8
+                            )
+                        )
+                    )
+                }
+                .border(Color.init(hue: Double.random(in: 0...1), saturation: 0.5, brightness: 0.4))
             }
             .onChange(of: pixelSize, initial: true) {
                 updatePaths()
             }
+            .onContinuousHover(coordinateSpace: .local, perform: { phase in
+                switch phase {
+                case .active(let pt):
+                    mousePosition = pt
+                case .ended:
+                    mousePosition = nil
+                }
+            })
         }
     }
 }
