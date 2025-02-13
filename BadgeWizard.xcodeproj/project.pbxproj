@@ -6,7 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		6F26AA092D5E9DA700BB9E2F /* OffPixelCanvas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F26AA082D5E9DA700BB9E2F /* OffPixelCanvas.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
+		6F26AA082D5E9DA700BB9E2F /* OffPixelCanvas.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OffPixelCanvas.swift; sourceTree = "<group>"; };
 		6F5FE2032D21A3CA00F15C6D /* BadgeWizard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BadgeWizard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -45,6 +50,7 @@
 		6F5FE1FA2D21A3CA00F15C6D = {
 			isa = PBXGroup;
 			children = (
+				6F26AA082D5E9DA700BB9E2F /* OffPixelCanvas.swift */,
 				6F5FE2052D21A3CA00F15C6D /* BadgeWizard */,
 				6F5FE2042D21A3CA00F15C6D /* Products */,
 			);
@@ -133,6 +139,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6F26AA092D5E9DA700BB9E2F /* OffPixelCanvas.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

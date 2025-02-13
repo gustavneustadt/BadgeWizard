@@ -10,7 +10,7 @@ struct PixelGridView: View {
     @EnvironmentObject var messageStore: MessageStore
     @EnvironmentObject private var settings: SettingsStore
     @State var pixelGrid: PixelGrid
-    @State var cachedPixelGrid: PixelGrid?
+    @State var cachedPixels: [[Bool]]?
     @State private var showPopover = false
     var onTrailingWidthChanged: (Int) -> Void = { _ in }
     var onLeadingWidthChanged: (Int) -> Void = { _ in }
@@ -21,8 +21,22 @@ struct PixelGridView: View {
     @State var temporaryWidth: Int? = nil
     @State var hoveringDragHandle: Bool = false
     
+    @State var hoverPixel: (x: Int, y: Int)?
     @State private var drawMode: Bool = true
     @Environment(\.undoManager) var undo
+    
+    var onionPixels: [[Bool]] {
+        guard pixelGrid.message?.onionSkinning == true else { return [] }
+        
+        if let index = pixelGrid.getArrayIndex(),
+           index > 0
+        {
+            
+            return pixelGrid.message!.pixelGrids[index-1].pixels
+        }
+        
+        return []
+    }
     
     var dragGesture: some Gesture {
         DragGesture(minimumDistance: 0)
@@ -45,6 +59,7 @@ struct PixelGridView: View {
                         drawMode = !pixelGrid.pixels[y][x]
                     }
                     pixelGrid.setPixel(x: x, y: y, isOn: drawMode, undoManager: undo)
+                    calculateHoverPixel(value.location)
                 }
             }
     }
@@ -55,6 +70,17 @@ struct PixelGridView: View {
     
     func calculateWidth(columns: Int) -> CGFloat {
         CGFloat(columns) * settings.pixelGridPixelSize
+    }
+    
+    func calculateHoverPixel(_ point: CGPoint?) {
+        var hoverPixel: (x: Int, y: Int)? = nil
+        if let point = point {
+            let x = Int((point.x - 2) / settings.pixelGridPixelSize)
+            let y = Int((point.y - 2) / settings.pixelGridPixelSize)
+            hoverPixel = (x: x, y: y)
+        }
+        
+        self.hoverPixel = hoverPixel
     }
     
     var width: CGFloat {
@@ -90,9 +116,19 @@ struct PixelGridView: View {
             HStack(spacing: 0) {
                 PixelGridImage(
                     pixels: pixelGrid.pixels,
-                    onionPixels: pixelGrid.pixels,
-                    pixelSize: settings.pixelGridPixelSize
+                    onionPixels: onionPixels,
+                    pixelSize: settings.pixelGridPixelSize,
+                    hoverPixel: hoverPixel
                 )
+                .onContinuousHover(coordinateSpace: .local, perform: { phase in
+                    switch phase {
+                    case .active(let pt):
+                        calculateHoverPixel(pt)
+                        return
+                    case .ended:
+                        hoverPixel = nil
+                    }
+                })
                 .frame(width: width,
                        height: CGFloat(11 * settings.pixelGridPixelSize))
                 .gesture(
@@ -115,7 +151,8 @@ struct PixelGridView: View {
                     if width > 0 {
                         Color.clear
                             .frame(
-                                width: width
+                                width: width,
+                                height: CGFloat(11 * settings.pixelGridPixelSize)
                             )
                     }
                 }
@@ -123,13 +160,8 @@ struct PixelGridView: View {
             .background(
                 RoundedRectangle(cornerRadius: settings.pixelGridPixelSize / 2, style: .continuous)
                     .fill(.background)
-                #if DEBUG
-                    .fill(Color.init(hue: Double.random(in: 0..<1), saturation: Double.random(in: 0..<1), brightness: 0.1))
-                #endif
                     .stroke(Color.accentColor.secondary, lineWidth: gridIsSelected ? 4 : 0)
             )
-
-            .focusEffectDisabled()
             .onTapGesture {
                 if !gridIsSelected {
                     pixelGrid.message?.selectGrid(pixelGrid.id)
@@ -153,16 +185,16 @@ struct PixelGridView: View {
                     withAnimation(.easeInOut) {
                         temporaryWidth = 0
                     }
-                    cachedPixelGrid = nil
+                    cachedPixels = nil
                     temporaryWidth = nil
                 })
                 .onChanged { value in
                     let newWidth = max(1, pixelGrid.width + Int(value.translation.width / settings.pixelGridPixelSize))
                     if temporaryWidth == nil {
                         temporaryWidth = newWidth
-                        cachedPixelGrid = pixelGrid
+                        cachedPixels = pixelGrid.pixels
                     }
-                    pixelGrid.resizeFromTrailingEdge(to: newWidth, cache: cachedPixelGrid, undoManager: undo)
+                    pixelGrid.resizeFromTrailingEdge(to: newWidth, cache: cachedPixels, undoManager: undo)
                 }
         )
     }
