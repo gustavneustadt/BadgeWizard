@@ -9,7 +9,7 @@ import SwiftUI
 struct PixelGridView: View {
     @EnvironmentObject var messageStore: MessageStore
     @EnvironmentObject private var settings: SettingsStore
-    @Bindable var pixelGrid: PixelGrid
+    @State var pixelGrid: PixelGrid
     @State var cachedPixelGrid: PixelGrid?
     @State private var showPopover = false
     var onTrailingWidthChanged: (Int) -> Void = { _ in }
@@ -20,7 +20,6 @@ struct PixelGridView: View {
     @State var isDragging: Bool = false
     @State var temporaryWidth: Int? = nil
     @State var hoveringDragHandle: Bool = false
-    @State var mousePosition: CGPoint? = nil
     
     @State private var drawMode: Bool = true
     @Environment(\.undoManager) var undo
@@ -31,12 +30,9 @@ struct PixelGridView: View {
                 isDrawing = false
             }
             .onChanged { value in
-                mousePosition = value.location
                 isDrawing = true
                 
-                if pixelGrid.message?.selectedGridId != pixelGrid.id {
-                    pixelGrid.message?.selectGrid(pixelGrid.id)
-                }
+                pixelGrid.message?.selectGrid(pixelGrid.id)
                 
                 let pixelSize = settings.pixelGridPixelSize
                 
@@ -54,7 +50,7 @@ struct PixelGridView: View {
     }
     
     var gridIsSelected: Bool {
-        pixelGrid.message?.selectedGridId == pixelGrid.id
+        pixelGrid.selected
     }
     
     func calculateWidth(columns: Int) -> CGFloat {
@@ -67,6 +63,7 @@ struct PixelGridView: View {
     
     var body: some View {
         let spring = Animation.interpolatingSpring(mass: 0.04, stiffness: 11.55, damping: 1.17, initialVelocity: 8.0)
+        
         VStack {
             HStack {
                 Button {
@@ -92,8 +89,8 @@ struct PixelGridView: View {
             
             HStack(spacing: 0) {
                 PixelGridImage(
-                    pixelGrid: pixelGrid,
-                    onionSkinning: pixelGrid.message?.onionSkinning ?? false,
+                    pixels: pixelGrid.pixels,
+                    onionPixels: pixelGrid.pixels,
                     pixelSize: settings.pixelGridPixelSize
                 )
                 .frame(width: width,

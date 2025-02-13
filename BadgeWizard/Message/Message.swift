@@ -32,7 +32,18 @@ final class Message: Codable {
     }
     
     @Transient
-    var selectedGridId: UUID? = nil
+    var selectedGridId: UUID? {
+        get {
+            pixelGrids.first { grid in
+                grid.selected == true
+            }?.id
+        }
+        set(id) {
+            pixelGrids.first { grid in
+                grid.id == id
+            }?.selected = true
+        }
+    }
     
     @Transient
     unowned var store: MessageStore?
@@ -164,7 +175,22 @@ final class Message: Codable {
     }
     
     func selectGrid(_ pixelGridId: UUID) {
-        self.selectedGridId = pixelGridId
+        if let selectedGrid = pixelGrids.first(where: { grid in
+            return grid.selected == true
+        }) {
+            
+            if selectedGrid.id == pixelGridId {
+                return
+            }
+            
+            selectedGrid.selected = false
+        }
+        
+        if let gridToSelect = pixelGrids.first(where: { grid in
+            return grid.id == pixelGridId
+        }) {
+            gridToSelect.selected = true
+        }
     }
     
     func getSelectedGrid() -> PixelGrid? {

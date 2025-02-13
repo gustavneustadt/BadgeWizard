@@ -18,10 +18,12 @@ struct MessageEditorView: View {
                     Text("Loading Message …")
             }
         } else {
-            return MessageView(
-                message: message!,
-                messageNumber: 1
-            )
+            return VStack {
+                MessageView(
+                    message: message!,
+                    messageNumber: 1
+                )
+            }
             .toolbar {
                 //                     ToolbarItem(placement: .primaryAction) {
                 //                         BadgeSendButton(badgeManager: bluetoothManager, messages: messageStore.messages)
@@ -74,7 +76,5 @@ struct MessageEditorView: View {
                     .inspectorColumnWidth(300)
             }
         }
-        
-        
     }
 }

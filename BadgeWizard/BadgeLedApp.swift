@@ -35,7 +35,6 @@ struct BadgeLedApp: App {
                 .windowResizeBehavior(.disabled)
                 .environmentObject(messageStore)
                 .modelContainer(for: Message.self, isUndoEnabled: true)
-            
         })
         .windowStyle(.hiddenTitleBar)
             .defaultSize(width: 300, height: 400)

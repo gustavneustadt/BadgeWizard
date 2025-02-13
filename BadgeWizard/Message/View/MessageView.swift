@@ -11,7 +11,6 @@ import Combine
 struct MessageView: View {
     @Bindable var message: Message
     let messageNumber: Int
-    @State private var scrollViewSize: CGSize = .zero
     @EnvironmentObject var messageStore: MessageStore
     
     var body: some View {
@@ -24,10 +23,8 @@ struct MessageView: View {
                 selected: true
             )
             GridScroll(
-                message: message,
-                scrollViewSize: scrollViewSize
+                message: message
             )
-            .getSize($scrollViewSize)
         }
         .frame(maxHeight: .infinity)
         .focusable(false)

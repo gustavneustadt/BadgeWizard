@@ -8,7 +8,6 @@ import Combine
 struct LEDPreviewView: View {
     @Bindable var message: Message
     @State private var size: CGSize = .zero
-    @ObservedObject var pixelGrids: [PixelGrid] = []
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.colorScheme) var colorScheme
     
@@ -30,15 +29,9 @@ struct LEDPreviewView: View {
     let offPixelColor: Color = .accentColor.opacity(0.2)
     
     init(message: Message?) {
-        let message = message ?? Message.placeholder()
-        self.message = message
-        self._pixelGrids = Query(FetchDescriptor<PixelGrid>(
-            predicate: #Predicate<PixelGrid> { item in
-                message.pixelGrids.contains(item)
-            }
-        ))
+        self.message = message ?? Message.placeholder()
     }
-    
+
     var totalAnimationFrames: Int {
         let frames = { switch message.mode {
         case .up, .down:
@@ -67,9 +60,7 @@ struct LEDPreviewView: View {
         return Double(animationStep % totalAnimationFrames) / Double(totalAnimationFrames)
     }
     
-    
     @State var pixels: [[Bool]] = [[]]
-    
     
     func updateLedProperties() {
         self.ledSize = size.width / CGFloat(44)
@@ -212,15 +203,18 @@ struct LEDPreviewView: View {
         .onChange(of: colorScheme, initial: true) { _, value in
             onPixelColor = value == .dark ?  .accentColor.mix(with: .white, by: 0.5) :  .accentColor
         }
-        .onChange(of: pixelGrids, initial: true) {
-            let grids: [[[Bool]]] = pixelGrids.map { grid in
+        .onChange(of: message.pixelGrids, initial: true) {
+            print("Pixel grids changed")
+            let grids: [[[Bool]]] = message.pixelGrids.map { grid in
                 return grid.pixels
             }
             pixels = Message.combinePixelArrays(grids)
         }
+
     }
     
     fileprivate func executeAnimationUpdate() {
+
         // Increment by 1 since timer matches hardware timing
         guard pixels.isEmpty == false else {
             return

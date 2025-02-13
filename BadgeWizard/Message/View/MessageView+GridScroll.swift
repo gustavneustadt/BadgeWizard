@@ -12,7 +12,6 @@ import Combine
 extension MessageView {
     struct GridScroll: View {
         @Bindable var message: Message
-        let scrollViewSize: CGSize
         @Environment(\.undoManager) var undoManager
         @EnvironmentObject var messageStore: MessageStore
         

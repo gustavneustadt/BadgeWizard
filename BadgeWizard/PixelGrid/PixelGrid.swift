@@ -1,14 +1,18 @@
 import SwiftUI
 import SwiftData
+import Observation
 
-class PixelGrid: Identifiable, Codable, ObservableObject {
+@Model
+final class PixelGrid: Identifiable, Codable {
     
-    @Attribute(.unique) var id: UUID
+    var id: UUID
     
     // MARK: Properties
     var pixels: [[Bool]]
+
     var width: Int
     var height: Int
+    var selected: Bool = false
     
     var message: Message?
     
@@ -58,8 +62,6 @@ class PixelGrid: Identifiable, Codable, ObservableObject {
     }
     
     func buildMatrix() {
-        guard let index = message?.pixelGrids.firstIndex(of: self) else { return }
-        
         let oldPixels = pixels
         let oldWidth = oldPixels.isEmpty ? 1 : oldPixels[0].count
         
@@ -75,7 +77,7 @@ class PixelGrid: Identifiable, Codable, ObservableObject {
                 }
             }
         }
-        message?.pixelGrids[index].pixels = newPixels
+        self.pixels = newPixels
     }
     
     private func chunkToHex(startX: Int) -> String {
@@ -134,21 +136,17 @@ class PixelGrid: Identifiable, Codable, ObservableObject {
     }
     
     func update(pixels: [[Bool]]? = nil, width: Int? = nil, height: Int? = nil) {
-        guard let message = message else { return }
-        guard let index = getArrayIndex() else { return }
-        
         if pixels != nil {
-            message.pixelGrids[index].pixels = pixels!
+            self.pixels = pixels!
         }
         
         if width != nil {
-            message.pixelGrids[index].width = width!
+            self.width = width!
         }
         
         if height != nil {
-            message.pixelGrids[index].height = height!
+            self.height = height!
         }
-        
     }
     
     func deleteGrid() {

@@ -8,12 +8,24 @@ import SwiftUI
 
 extension PixelGridView {
     struct PixelGridImage: View {
-        @Bindable var pixelGrid: PixelGrid
-        @State var mousePosition: CGPoint? = nil
-        var onionSkinning: Bool
-        var previousGrid: PixelGrid?
+        let pixels: [[Bool]]
+        let onionPixels: [[Bool]]
         let pixelSize: CGFloat
+        @State var hoverPixel: (x: Int, y: Int)?
+        
+        @State var mousePosition: CGPoint? = nil
         @Environment(\.colorScheme) var colorScheme
+        
+        func calculateHoverPixel(_ point: CGPoint?) {
+            var hoverPixel: (x: Int, y: Int)? = nil
+            if let point = point {
+                let x = Int((point.x - 2) / pixelSize)
+                let y = Int((point.y - 2) / pixelSize)
+                hoverPixel = (x: x, y: y)
+            }
+            
+            self.hoverPixel = hoverPixel
+        }
         
         func updatePaths() {
             let itemSize = pixelSize - 2
@@ -43,67 +55,41 @@ extension PixelGridView {
         @State var onionSkinPath: Path = .init()
         
         
-        init(pixelGrid: PixelGrid, onionSkinning: Bool? = false, pixelSize: CGFloat) {
-            self.pixelGrid = pixelGrid
-            self.onionSkinning = onionSkinning ?? false
+        init(pixels: [[Bool]], onionPixels: [[Bool]], pixelSize: CGFloat) {
+            self.pixels = pixels
+            self.onionPixels = onionPixels
             self.pixelSize = pixelSize
-            
-            if  onionSkinning == true,
-                let currentIndex = pixelGrid.getArrayIndex() ,
-                currentIndex > 0 {
-                self.previousGrid = pixelGrid.message?.pixelGrids[currentIndex - 1]
-            }
         }
         
-        func iterateThroughLeds(grid: PixelGrid, maxWidth: Int? = nil, callback: (_ x: CGFloat, _ y: CGFloat, _ isOn: Bool) -> Void) {
-            for y in 0..<grid.height {
-                for x in 0..<min(maxWidth ?? grid.width, grid.width) {
+        func iterateThroughLeds(pixels: [[Bool]], maxWidth: Int? = nil, callback: (_ x: CGFloat, _ y: CGFloat, _ isOn: Bool) -> Void) {
+            let firstRowCount = pixels.first?.count ?? 0
+            for y in 0..<pixels.count {
+                for x in 0..<min(maxWidth ?? firstRowCount, firstRowCount) {
                     callback(
                         CGFloat(x) * pixelSize,
                         CGFloat(y) * pixelSize,
-                        grid.pixels[y][x]
+                        pixels[y][x]
                     )
                 }
             }
         }
         
         var hoverPixelPosition: CGPoint? {
-            var hoverPixel: CGPoint? = nil
-            if let mousePosition = mousePosition {
-                let x = Int((mousePosition.x - 2) / pixelSize)
-                let y = Int((mousePosition.y - 2) / pixelSize)
-                if x >= 0 && x < pixelGrid.width && y >= 0 && y < 11 {
-                    hoverPixel = .init(
-                        x: Double(x) * pixelSize,
-                        y: Double(y) * pixelSize
-                    )
-                }
+            guard hoverPixel != nil else { return nil }
+            let firstRowCount = pixels.first?.count ?? 0
+            if hoverPixel!.x >= 0 && hoverPixel!.x < firstRowCount && hoverPixel!.y >= 0 && hoverPixel!.y < 11 {
+                return .init(
+                    x: Double(hoverPixel!.x) * pixelSize,
+                    y: Double(hoverPixel!.y) * pixelSize
+                )
             }
             
-            return hoverPixel
+            return nil
         }
         
         var body: some View {
             ZStack {
-                if mousePosition != nil {
-                    Canvas { context, size in
-                        var hoverPixelPath: Path = .init()
-                        hoverPixelPath.addPath(
-                            itemPath,
-                            transform:
-                                    .init(
-                                        translationX: hoverPixelPosition!.x,
-                                        y: hoverPixelPosition!.y
-                                    )
-                        )
-                        context.fill(
-                            hoverPixelPath,
-                            with: .color(
-                                Color(nsColor: NSColor.separatorColor)
-                            )
-                        )
-                    }
-                }
+                
                 Canvas { context, size in
                     
                     var allOnionSkinItemsPath: Path = .init()
@@ -111,7 +97,7 @@ extension PixelGridView {
                     var allItemsOffPath: Path = .init()
                     
                     iterateThroughLeds(
-                        grid: pixelGrid
+                        pixels: pixels
                     ) { x, y, isOn in
                         if isOn {
                             allItemsOnPath.addPath(
@@ -134,10 +120,10 @@ extension PixelGridView {
                         }
                     }
                     
-                    if let grid = previousGrid {
+                    if let pixels = onionPixels.count > 0 ? onionPixels : nil {
                         iterateThroughLeds(
-                            grid: grid,
-                            maxWidth: pixelGrid.width
+                            pixels: pixels,
+                            maxWidth: pixels.first?.count ?? 0
                         ) { x, y, isOn in
                             if isOn {
                                 allOnionSkinItemsPath.addPath(
@@ -177,17 +163,38 @@ extension PixelGridView {
                         )
                     )
                 }
-                .border(Color.init(hue: Double.random(in: 0...1), saturation: 0.5, brightness: 0.4))
+                if hoverPixelPosition != nil {
+                    Canvas { context, size in
+                        var hoverPixelPath: Path = .init()
+                        hoverPixelPath.addPath(
+                            itemPath,
+                            transform:
+                                    .init(
+                                        translationX: hoverPixelPosition!.x,
+                                        y: hoverPixelPosition!.y
+                                    )
+                        )
+                        context.fill(
+                            hoverPixelPath,
+                            with: .color(
+                                Color(nsColor: NSColor.separatorColor)
+                            )
+                        )
+                    }
+                }
             }
+            
+            .border(Color.init(hue: Double.random(in: 0...1), saturation: 0.5, brightness: 0.4))
+            
             .onChange(of: pixelSize, initial: true) {
                 updatePaths()
             }
             .onContinuousHover(coordinateSpace: .local, perform: { phase in
                 switch phase {
                 case .active(let pt):
-                    mousePosition = pt
+                    calculateHoverPixel(pt)
                 case .ended:
-                    mousePosition = nil
+                    hoverPixel = nil
                 }
             })
         }
