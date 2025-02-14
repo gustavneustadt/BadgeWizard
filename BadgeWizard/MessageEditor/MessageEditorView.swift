@@ -12,15 +12,13 @@ struct MessageEditorView: View {
     @State var showInspector: Bool = true
     @Environment(\.undoManager) var undoManager
     var body: some View {
-        if message == nil {
-            return VStack {
+        VStack {
+            if message == nil {
                 ProgressView()
-                    Text("Loading Message …")
+                Text("Loading Message …")
             }
-        } else {
-            return VStack {
                 MessageView(
-                    message: message!,
+                    message: message,
                     messageNumber: 1
                 )
             }
@@ -72,9 +70,8 @@ struct MessageEditorView: View {
                 //                 }
             }
             .inspector(isPresented: $showInspector) {
-                MessageInspector(message: message!)
+                MessageInspector(message: message)
                     .inspectorColumnWidth(300)
             }
-        }
     }
 }

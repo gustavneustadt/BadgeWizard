@@ -7,19 +7,14 @@
 import SwiftUI
 
 struct PixelGridView: View {
-    @EnvironmentObject var messageStore: MessageStore
     @EnvironmentObject private var settings: SettingsStore
     @State var pixelGrid: PixelGrid
     @State var cachedPixels: [[Bool]]?
     @State private var showPopover = false
-    var onTrailingWidthChanged: (Int) -> Void = { _ in }
-    var onLeadingWidthChanged: (Int) -> Void = { _ in }
-    var onIsDrawingChanged: (Bool) -> Void = { _ in }
     @FocusState private var isFocused: Bool
     @State var isDrawing: Bool = false
     @State var isDragging: Bool = false
     @State var temporaryWidth: Int? = nil
-    @State var hoveringDragHandle: Bool = false
     
     @State var hoverPixel: (x: Int, y: Int)?
     @State private var drawMode: Bool = true
@@ -59,7 +54,6 @@ struct PixelGridView: View {
                         drawMode = !pixelGrid.pixels[y][x]
                     }
                     pixelGrid.setPixel(x: x, y: y, isOn: drawMode, undoManager: undo)
-                    calculateHoverPixel(value.location)
                 }
             }
     }
@@ -70,17 +64,6 @@ struct PixelGridView: View {
     
     func calculateWidth(columns: Int) -> CGFloat {
         CGFloat(columns) * settings.pixelGridPixelSize
-    }
-    
-    func calculateHoverPixel(_ point: CGPoint?) {
-        var hoverPixel: (x: Int, y: Int)? = nil
-        if let point = point {
-            let x = Int((point.x - 2) / settings.pixelGridPixelSize)
-            let y = Int((point.y - 2) / settings.pixelGridPixelSize)
-            hoverPixel = (x: x, y: y)
-        }
-        
-        self.hoverPixel = hoverPixel
     }
     
     var width: CGFloat {
@@ -117,18 +100,8 @@ struct PixelGridView: View {
                 PixelGridImage(
                     pixels: pixelGrid.pixels,
                     onionPixels: onionPixels,
-                    pixelSize: settings.pixelGridPixelSize,
-                    hoverPixel: hoverPixel
+                    pixelSize: settings.pixelGridPixelSize, hoverPixel: nil
                 )
-                .onContinuousHover(coordinateSpace: .local, perform: { phase in
-                    switch phase {
-                    case .active(let pt):
-                        calculateHoverPixel(pt)
-                        return
-                    case .ended:
-                        hoverPixel = nil
-                    }
-                })
                 .frame(width: width,
                        height: CGFloat(11 * settings.pixelGridPixelSize))
                 .gesture(
@@ -157,6 +130,11 @@ struct PixelGridView: View {
                     }
                 }
             }
+#if PIXELGRID_VIEW_DEBUG
+            .background(
+                Color.init(hue: Double.random(in: 0...1), saturation: 0.5, brightness: 0.4)
+            )
+#endif
             .background(
                 RoundedRectangle(cornerRadius: settings.pixelGridPixelSize / 2, style: .continuous)
                     .fill(.background)
@@ -172,12 +150,8 @@ struct PixelGridView: View {
     
     var dragHandleTrailing: some View {
         DragHandle(
-            hoveringDragHandle: hoveringDragHandle || temporaryWidth != nil,
             pixelSize: settings.pixelGridPixelSize
         )
-        .onHover { hovering in
-            hoveringDragHandle = hovering
-        }
         .pointerStyle(.frameResize(position: .trailing))
         .gesture(
             DragGesture()

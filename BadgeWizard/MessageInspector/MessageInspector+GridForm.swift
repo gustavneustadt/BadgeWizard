@@ -9,8 +9,7 @@ import SwiftUI
 
 extension MessageInspector {
     struct GridForm: View {
-        var grid: PixelGrid
-        @Bindable var message: Message
+        @State var grid: PixelGrid?
         @State var selectedFontPostscriptName: String = ""
         @State var showApplyTextPopover: Bool = false
         @State var fontSize: Double = 11
@@ -18,13 +17,8 @@ extension MessageInspector {
         @State var text: String = ""
         @Environment(\.undoManager) var undo
         
-        init(grid: PixelGrid?) {
-            self.grid = grid ?? PixelGrid.placeholder()
-            self.message = grid?.message ?? Message.placeholder()
-        }
-        
         func updateText() {
-            grid.applyText(text, postscriptFontName: selectedFontPostscriptName, size: fontSize, kerning: kerning)
+            grid?.applyText(text, postscriptFontName: selectedFontPostscriptName, size: fontSize, kerning: kerning)
         }
 
         var body: some View {
@@ -55,7 +49,7 @@ extension MessageInspector {
                 Divider()
                     .foregroundStyle(.clear)
                 Button {
-                    grid.invert(undoManager: undo)
+                    grid?.invert(undoManager: undo)
                 } label: {
                     Spacer()
                     Image(systemName: "arrow.2.squarepath")
@@ -63,7 +57,7 @@ extension MessageInspector {
                     Spacer()
                 }
                 Button {
-                    grid.clear(undoManager: undo)
+                    grid?.clear(undoManager: undo)
                 } label: {
                     Spacer()
                     Image("grid.rectangle")
@@ -72,7 +66,7 @@ extension MessageInspector {
                 }
                 Button {
                     withAnimation(.easeInOut(duration: 0.2)) {
-                        grid.deleteGrid()
+                        grid?.deleteGrid()
                     }
                 } label: {
                     Spacer()

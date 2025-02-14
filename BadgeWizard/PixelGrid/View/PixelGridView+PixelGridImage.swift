@@ -12,7 +12,20 @@ extension PixelGridView {
         let onionPixels: [[Bool]]
         let pixelSize: CGFloat
         @Environment(\.colorScheme) var colorScheme
-        let hoverPixel: (x: Int, y: Int)?
+        @State var hoverPixel: (x: Int, y: Int)? = nil
+        // let hoverPixel: (x: Int, y: Int)?
+        
+        func calculateHoverPixel(_ point: CGPoint?) {
+            var hoverPixel: (x: Int, y: Int)? = nil
+            if let point = point {
+                let x = Int((point.x - 2) / pixelSize)
+                let y = Int((point.y - 2) / pixelSize)
+                hoverPixel = (x: x, y: y)
+            }
+            
+            self.hoverPixel = hoverPixel
+        }
+        
         
         func updatePaths() {
             let itemSize = pixelSize - 2
@@ -84,6 +97,15 @@ extension PixelGridView {
                     HoverCanvas(hoverPixelPosition: hoverPixelPosition!, itemPath: itemPath)
                 }
             }
+            .onContinuousHover(coordinateSpace: .local, perform: { phase in
+                switch phase {
+                case .active(let pt):
+                    calculateHoverPixel(pt)
+                    return
+                case .ended:
+                    hoverPixel = nil
+                }
+            })
             .onChange(of: pixelSize, initial: true) {
                 updatePaths()
             }

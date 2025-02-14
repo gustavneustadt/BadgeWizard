@@ -9,8 +9,8 @@ import SwiftUI
 
 extension PixelGridView {
     struct DragHandle: View {
-        let hoveringDragHandle: Bool
         let pixelSize: CGFloat
+        @State var hovering: Bool = false
         
         var body: some View {
             Canvas { context, size in
@@ -34,7 +34,7 @@ extension PixelGridView {
                         Color(nsColor: .separatorColor)
                     )
                 )
-                if hoveringDragHandle {
+                if hovering {
                     context.fill(
                         backgroundPath,
                         with: .color(
@@ -63,6 +63,9 @@ extension PixelGridView {
             }
             .frame(width: pixelSize - 1, height: 3 * pixelSize - 2)
             .shadow(radius: 1, x: 0, y: 0)
+            .onHover { hovering in
+                self.hovering = hovering
+            }
         }
     }
 }

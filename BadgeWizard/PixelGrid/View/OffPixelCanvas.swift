@@ -28,12 +28,16 @@ struct OffPixelCanvas: View {
                     )
                 }
             }
+#if PIXELGRID_VIEW_DEBUG
+            let fillColor = Color.init(hue: Double.random(in: 0...1), saturation: 0.5, brightness: 0.4)
+#else
+            let fillColor = Color(nsColor: NSColor.separatorColor)
+#endif
             
             context.fill(
                 allItemsOffPath,
                 with: .color(
-                    // Color(nsColor: NSColor.separatorColor)
-                    Color.init(hue: Double.random(in: 0...1), saturation: 0.5, brightness: 0.4)
+                    fillColor
                 )
             )
         }

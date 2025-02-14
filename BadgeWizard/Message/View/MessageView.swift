@@ -9,22 +9,24 @@ import SwiftUI
 import Combine
 
 struct MessageView: View {
-    @Bindable var message: Message
+    @State var message: Message?
     let messageNumber: Int
     @EnvironmentObject var messageStore: MessageStore
     
     var body: some View {
         VStack(spacing: 8) {
-            Header(
-                message: message,
-                messageNumber: messageNumber,
-                gridSum: message.pixelGrids.count,
-                columnSum: message.width,
-                selected: true
-            )
-            GridScroll(
-                message: message
-            )
+            if message != nil {
+                Header(
+                    message: message!,
+                    messageNumber: messageNumber,
+                    gridSum: message!.pixelGrids.count,
+                    columnSum: message!.width,
+                    selected: true
+                )
+                GridScroll(
+                    message: message!
+                )
+            }
         }
         .frame(maxHeight: .infinity)
         .focusable(false)

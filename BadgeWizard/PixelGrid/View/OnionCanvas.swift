@@ -45,17 +45,22 @@ struct OnionCanvas: View {
                     )
                 }
             }
+            
+#if PIXELGRID_VIEW_DEBUG
+            let fillColor = Color.init(hue: Double.random(in: 0...1), saturation: 0.5, brightness: 0.4)
+#else
+            let fillColor = Color.accentColor.mix(
+                with: colorScheme == .dark ? .black : .white,
+                by: colorScheme == .dark ? 0.7 : 0.4,
+                in: .perceptual
+            ).opacity(
+                colorScheme == .dark ? 0.6 : 0.8
+            )
+#endif
             context.fill(
                 allOnionSkinItemsPath,
                 with: .color(
-                    Color.init(hue: Double.random(in: 0...1), saturation: 0.5, brightness: 0.4)
-                    // Color.accentColor.mix(
-                    //     with: colorScheme == .dark ? .black : .white,
-                    //     by: colorScheme == .dark ? 0.7 : 0.4,
-                    //     in: .perceptual
-                    // ).opacity(
-                    //     colorScheme == .dark ? 0.6 : 0.8
-                    // )
+                    fillColor
                 )
             )
         }

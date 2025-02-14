@@ -43,11 +43,16 @@ struct PixelCanvas: View {
                     )
                 }
             }
+#if PIXELGRID_VIEW_DEBUG
+            let fillColor = Color.init(hue: Double.random(in: 0...1), saturation: 0.5, brightness: 0.4)
+#else
+            let fillColor = Color.accentColor
+#endif
+            
             context.fill(
                 allItemsOnPath,
                 with: .color(
-                    // Color.accentColor
-                    Color.init(hue: Double.random(in: 0...1), saturation: 0.5, brightness: 0.4)
+                    fillColor
                 )
             )
         }

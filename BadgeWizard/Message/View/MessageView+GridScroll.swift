@@ -11,7 +11,7 @@ import Combine
 
 extension MessageView {
     struct GridScroll: View {
-        @Bindable var message: Message
+        @State var message: Message
         @Environment(\.undoManager) var undoManager
         @EnvironmentObject var messageStore: MessageStore
         
@@ -22,15 +22,10 @@ extension MessageView {
                     HStack(spacing: 8) {
                         ForEach(message.pixelGrids) { grid in
                             PixelGridView(
-                                pixelGrid: grid,
-                                onTrailingWidthChanged: { val in
-                                    grid.resizeFromTrailingEdge(to: val, undoManager: undoManager)
-                                },
-                                onLeadingWidthChanged: { val in
-                                    // grid.resizeFromLeadingEdge(to: val)
-                                }
+                                pixelGrid: grid
                             )
                             .zIndex(message.selectedGridId == grid.id ? 1 : 0)
+                            
                         }
                         AddGridButton { duplicate in
                             withAnimation(.easeOut(duration: 0.2)) {
@@ -42,6 +37,11 @@ extension MessageView {
                     .padding(.horizontal)
                     Spacer()
                 }
+                #if PIXELGRID_VIEW_DEBUG
+                .background(
+                    Color.init(hue: Double.random(in: 0...1), saturation: 0.5, brightness: 0.4)
+                )
+                #endif
             }
         }
     }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct MessageInspector: View {
-    @Bindable var message: Message
+    @State var message: Message?
     @Environment(\.undoManager) var undo
 
     var body: some View {
@@ -42,10 +42,10 @@ struct MessageInspector: View {
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)
-                GridForm(grid: message.getSelectedGrid())
+                GridForm(grid: message?.getSelectedGrid())
                     .formStyle(.columns)
             }
-            .disabled(message.getSelectedGrid() == nil)
+            .disabled(message?.getSelectedGrid() == nil)
             Spacer()
         }
         .padding()
