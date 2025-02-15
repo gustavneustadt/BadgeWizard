@@ -14,6 +14,13 @@ final class Message: Codable {
     // MARK: Relationship
     var pixelGrids: [PixelGrid] = []
     
+    @Attribute(.ephemeral)
+    var forcePixelUpdate: Int = 0
+    
+    func notifyPixelContentChanged() {
+        forcePixelUpdate += 1
+    }
+    
     @Attribute(.unique) var id: UUID
     
     // MARK: Properties
@@ -23,15 +30,13 @@ final class Message: Codable {
     var mode: Mode
     var onionSkinning: Bool
     
-    
-    @Transient
+
     var width: Int {
         pixelGrids.reduce(0) { partialResult, grid in
             return partialResult + grid.width
         }
     }
     
-    @Transient
     var selectedGridId: UUID? {
         get {
             pixelGrids.first { grid in

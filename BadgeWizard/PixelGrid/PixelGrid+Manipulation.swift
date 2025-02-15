@@ -15,6 +15,8 @@ extension PixelGrid {
             grid.setPixel(x: x, y: y, isOn: !isOn, isUndo: true, undoManager: undoManager)
         }
         undoManager?.setActionName("\(isOn ? isUndo ? "Disable" : "Enable" : isUndo ? "Enable" : "Disable") Pixel")
+
+        message?.notifyPixelContentChanged()
     }
     
     func clear(undoManager: UndoManager?) {
@@ -27,6 +29,7 @@ extension PixelGrid {
         undoManager?.setActionName("Clear Grid")
         
         self.pixels = Array(repeating: Array(repeating: false, count: self.width), count: self.height)
+        message?.notifyPixelContentChanged()
     }
     
     /// Helper function to restore state from given Pixels
@@ -43,6 +46,7 @@ extension PixelGrid {
         
         // Restore the state
         self.pixels = state
+        message?.notifyPixelContentChanged()
     }
     
     func invert(undoManager: UndoManager?) {
@@ -66,5 +70,6 @@ extension PixelGrid {
         
         // Update the pixels array with the inverted values
         self.pixels = newPixels
+        message?.notifyPixelContentChanged()
     }
 }

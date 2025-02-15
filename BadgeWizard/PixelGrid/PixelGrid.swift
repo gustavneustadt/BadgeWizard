@@ -138,6 +138,7 @@ final class PixelGrid: Identifiable, Codable {
     func update(pixels: [[Bool]]? = nil, width: Int? = nil, height: Int? = nil) {
         if pixels != nil {
             self.pixels = pixels!
+            message?.notifyPixelContentChanged()
         }
         
         if width != nil {

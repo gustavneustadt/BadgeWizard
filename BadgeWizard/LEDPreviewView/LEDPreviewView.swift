@@ -13,7 +13,6 @@ struct LEDPreviewView: View {
     
     // MARK: Animation states
     @StateObject internal var displayBuffer: DisplayBuffer = DisplayBuffer()
-    let animationTimer = Timer.publish(every: 0.025, on: .main, in: .common).autoconnect()
     @State internal var timerStep: Int = 0
     @State internal var marqueeStep: Int = 0
     @State private var flashStep: Int = 0
@@ -31,7 +30,7 @@ struct LEDPreviewView: View {
     init(message: Message?) {
         self.message = message ?? Message.placeholder()
     }
-
+    
     var totalAnimationFrames: Int {
         let frames = { switch message.mode {
         case .up, .down:
@@ -52,6 +51,7 @@ struct LEDPreviewView: View {
         
         return max(1, frames)
     }
+    
     var animationProgress: Double {
         guard pixels.isEmpty == false else {
             return 0
@@ -114,61 +114,66 @@ struct LEDPreviewView: View {
         return formatter.string(from: value) ?? "\(value) seconds"
     }
     
+    @State private var forceRedraw: UUID = UUID()
+    
     var body: some View {
-        VStack(spacing: 4){
-            ZStack {
-                Canvas { context, _ in
-                    
-                    if !isEnabled {
-                        context.fill(
-                            Path(roundedRect: CGRect(origin: .zero, size: size),
-                                 cornerRadius: (ledSize / 2) - ledSpacing),
-                            with: .color(Color(nsColor: NSColor.separatorColor))
-                        )
-                        return
-                    }
-                    
-                    var offPixelBatch = Path()
-                    
-                    iterateThroughLeds { x, y, isOn in
-                        if isOn == false {
-                            offPixelBatch.addPath(
-                                ledPath,
-                                transform:
-                                        .init(translationX: x, y: y)
+        VStack(spacing: 4) {
+            TimelineView(.animation(minimumInterval: 0.025, paused: !isAnimationPlaying)) { timeline in
+                ZStack {
+                    Canvas { context, _ in
+                        if !isEnabled {
+                            context.fill(
+                                Path(roundedRect: CGRect(origin: .zero, size: size),
+                                     cornerRadius: (ledSize / 2) - ledSpacing),
+                                with: .color(Color(nsColor: NSColor.separatorColor))
                             )
-                        }
-                    }
-                    
-                    context.fill(
-                        offPixelBatch,
-                        with: .color(offPixelColor)
-                    )
-                }
-                Canvas { context, size in
-                    guard isEnabled else { return }
-                    
-                    var onPixelBatch = Path()
-                    
-                    iterateThroughLeds { x, y, isOn in
-                        if isOn {
-                            onPixelBatch.addPath(
-                                ledPath,
-                                transform:
-                                        .init(translationX: x, y: y)
-                            )
+                            return
                         }
                         
+                        var offPixelBatch = Path()
+                        
+                        iterateThroughLeds { x, y, isOn in
+                            if isOn == false {
+                                offPixelBatch.addPath(
+                                    ledPath,
+                                    transform: .init(translationX: x, y: y)
+                                )
+                            }
+                        }
+                        
+                        context.fill(
+                            offPixelBatch,
+                            with: .color(offPixelColor)
+                        )
                     }
-                    
-                    context.fill(
-                        onPixelBatch,
-                        with: .color(onPixelColor)
-                    )
+                    Canvas { context, size in
+                        guard isEnabled else { return }
+                        
+                        var onPixelBatch = Path()
+                        
+                        iterateThroughLeds { x, y, isOn in
+                            if isOn {
+                                onPixelBatch.addPath(
+                                    ledPath,
+                                    transform: .init(translationX: x, y: y)
+                                )
+                            }
+                        }
+                        
+                        context.fill(
+                            onPixelBatch,
+                            with: .color(onPixelColor)
+                        )
+                    }
+                    .shadow(color: .accentColor, radius: 2)
+                    .shadow(color: .accentColor, radius: 5)
                 }
-                .shadow(color: .accentColor, radius: 2)
-                .shadow(color: .accentColor, radius: 5)
+                .onChange(of: timeline.date) { _, _ in
+                    timerStep += 1
+                    updateAnimation()
+                }
             }
+            .id(forceRedraw)
             .frame(height: 11 * (size.width / 44))
             .getSize($size)
             
@@ -178,43 +183,59 @@ struct LEDPreviewView: View {
                 total: totalAnimationFrames,
                 onReset: {
                     animationStep = 0
+                    executeAnimationUpdate()
+                    redraw()
                 },
                 onForwardFrame: {
                     animationStep += message.mode == .animation ? 5 : 1
+                    executeAnimationUpdate()
+                    redraw()
                 },
                 onBackwardFrame: {
                     let newAnimationStep = animationStep - (message.mode == .animation ? 5 : 1)
                     animationStep = newAnimationStep < 0 ? totalAnimationFrames : newAnimationStep
+                    executeAnimationUpdate()
+                    redraw()
                 })
         }
-        .onChange(of: size, initial: true, { _, _ in
+        .onChange(of: size, initial: true) { _, _ in
             updateLedProperties()
-        })
-        .onReceive(animationTimer) { _ in
-            timerStep += 1
-            updateAnimation()
         }
         .onChange(of: pixels) {
             executeAnimationUpdate()
         }
         .onChange(of: message.mode) {
             animationStep = 0
+            executeAnimationUpdate()
+            redraw()
         }
         .onChange(of: colorScheme, initial: true) { _, value in
-            onPixelColor = value == .dark ?  .accentColor.mix(with: .white, by: 0.5) :  .accentColor
+            onPixelColor = value == .dark ? .accentColor.mix(with: .white, by: 0.5) : .accentColor
         }
-        .onChange(of: message.pixelGrids, initial: true) {
-            print("Pixel grids changed")
-            let grids: [[[Bool]]] = message.pixelGrids.map { grid in
-                return grid.pixels
-            }
-            pixels = Message.combinePixelArrays(grids)
+        .onChange(of: message.forcePixelUpdate, initial: true) {
+            updatePixels()
         }
-
+    }
+    func updatePixels() {
+        let grids: [[[Bool]]] = message.pixelGrids.map { grid in
+            return grid.pixels
+        }
+        
+        let newPixels = Message.combinePixelArrays(grids)
+        pixels = newPixels
+        
+        if isAnimationPlaying == false {
+            executeAnimationUpdate()
+            redraw()
+        }
+        
+    }
+    
+    func redraw() {
+        forceRedraw = UUID()
     }
     
     fileprivate func executeAnimationUpdate() {
-
         // Increment by 1 since timer matches hardware timing
         guard pixels.isEmpty == false else {
             return
