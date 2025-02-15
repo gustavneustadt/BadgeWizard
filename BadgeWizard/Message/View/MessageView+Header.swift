@@ -12,7 +12,6 @@ import Combine
 extension MessageView {
     struct Header: View {
         @Bindable var message: Message
-        let messageNumber: Int
         let gridSum: Int
         let columnSum: Int
         let selected: Bool

@@ -9,7 +9,7 @@ import SwiftUI
 
 extension MessageInspector {
     struct GridForm: View {
-        @State var grid: PixelGrid?
+        let grid: PixelGrid?
         @State var selectedFontPostscriptName: String = ""
         @State var showApplyTextPopover: Bool = false
         @State var fontSize: Double = 11

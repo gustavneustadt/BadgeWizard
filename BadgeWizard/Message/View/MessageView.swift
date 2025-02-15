@@ -9,8 +9,7 @@ import SwiftUI
 import Combine
 
 struct MessageView: View {
-    @State var message: Message?
-    let messageNumber: Int
+    let message: Message?
     @EnvironmentObject var messageStore: MessageStore
     
     var body: some View {
@@ -18,7 +17,6 @@ struct MessageView: View {
             if message != nil {
                 Header(
                     message: message!,
-                    messageNumber: messageNumber,
                     gridSum: message!.pixelGrids.count,
                     columnSum: message!.width,
                     selected: true

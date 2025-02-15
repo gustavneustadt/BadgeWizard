@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct MessageInspector: View {
-    @State var message: Message?
+    let message: Message?
     @Environment(\.undoManager) var undo
 
     var body: some View {

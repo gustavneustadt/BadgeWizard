@@ -11,7 +11,7 @@ import Combine
 
 extension MessageView {
     struct GridScroll: View {
-        @State var message: Message
+        let message: Message
         @Environment(\.undoManager) var undoManager
         @EnvironmentObject var messageStore: MessageStore
         

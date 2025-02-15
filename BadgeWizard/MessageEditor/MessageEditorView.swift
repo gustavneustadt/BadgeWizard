@@ -11,7 +11,9 @@ struct MessageEditorView: View {
     var message: Message?
     @State var showInspector: Bool = true
     @Environment(\.undoManager) var undoManager
-    @EnvironmentObject var messageStore: MessageStore
+    @EnvironmentObject private var messageStore: MessageStore
+    @EnvironmentObject private var bluetoothManager: LEDBadgeManager
+    @EnvironmentObject private var settingsStore: SettingsStore
     let isNewMessage: Bool
     
     init(message: Message? = nil) {
@@ -34,68 +36,64 @@ struct MessageEditorView: View {
                 Spacer()
                 
             }
-                MessageView(
-                    message: message,
-                    messageNumber: 1
-                )
-                .onAppear {
-                    if isNewMessage {
-                        messageStore.addToStore(message!)
+            MessageView(
+                message: message
+            )
+            .onAppear {
+                if isNewMessage {
+                    messageStore.addToStore(message!)
+                }
+            }
+        }
+        .toolbar {
+            // ToolbarItem(placement: .primaryAction) {
+            //     BadgeSendButton(badgeManager: bluetoothManager, messages: messageStore.messages)
+            // }
+            
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    
+                } label: {
+                    Image("grid.text")
+                    Text("Add Text")
+                }
+
+            }
+            
+            ToolbarItem {
+                ControlGroup {
+                    
+                    Button {
+                        settingsStore.decreaseSize()
+                    } label: {
+                        Image(systemName: "minus.magnifyingglass")
                     }
+                    
+                    Button {
+                        settingsStore.increaseSize()
+                    } label: {
+                        Image(systemName: "plus.magnifyingglass")
+                    }
+                    
+                } label: {
+                    Text("Pixel Grid Zoom")
                 }
             }
-            .toolbar {
-                //                     ToolbarItem(placement: .primaryAction) {
-                //                         BadgeSendButton(badgeManager: bluetoothManager, messages: messageStore.messages)
-                //                     }
-                //
-                //                     ToolbarItem {
-                //                         ControlGroup {
-                //
-                //                             Button {
-                //                                 settingsStore.decreaseSize()
-                //                             } label: {
-                //                                 Image(systemName: "minus.magnifyingglass")
-                //                             }
-                //
-                //                             Button {
-                //                                 settingsStore.increaseSize()
-                //                             } label: {
-                //                                 Image(systemName: "plus.magnifyingglass")
-                //                             }
-                //
-                //                         } label: {
-                //                             Text("Pixel Grid Zoom")
-                //                         }
-                //                     }
-                //
-                //                     ToolbarItem(placement: .principal) {
-                //                         HStack {
-                //                             Picker("Messages", selection: $messagesCount) {
-                //                                 ForEach(0..<8, id: \.self) { index in
-                //                                     Text("\(index + 1) Messages")
-                //                                         .tag(index + 1)
-                //                                 }
-                //                             }
-                //                         }
-                //                     }
-                //
-                //
-                //                     ToolbarItem {
-                //                         Button {
-                //                             showInspector.toggle()
-                //                         } label: {
-                //                             Image(systemName: "sidebar.trailing")
-                //                         }
-                //                     }
-                //                     .hidden(showInspector)
-                //                 }
-            }
-            .inspector(isPresented: $showInspector) {
-                if message != nil {
-                    MessageInspector(message: message)
-                        .inspectorColumnWidth(300)
+            
+            ToolbarItem {
+                Button {
+                    showInspector.toggle()
+                } label: {
+                    Image(systemName: "sidebar.trailing")
                 }
             }
-    }
+            .hidden(showInspector)
+        }
+        .inspector(isPresented: $showInspector) {
+            if message != nil {
+                MessageInspector(message: message)
+                    .inspectorColumnWidth(300)
+            }
+        }
+}
 }

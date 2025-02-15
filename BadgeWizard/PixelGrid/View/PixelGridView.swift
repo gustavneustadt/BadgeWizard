@@ -8,7 +8,7 @@ import SwiftUI
 
 struct PixelGridView: View {
     @EnvironmentObject private var settings: SettingsStore
-    @State var pixelGrid: PixelGrid
+    let pixelGrid: PixelGrid
     @State var cachedPixels: [[Bool]]?
     @State private var showPopover = false
     @FocusState private var isFocused: Bool

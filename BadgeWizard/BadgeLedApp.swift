@@ -37,6 +37,7 @@ struct BadgeLedApp: App {
                 .modelContainer(for: Message.self, isUndoEnabled: true)
         })
         .windowStyle(.hiddenTitleBar)
+        .windowBackgroundDragBehavior(.enabled)
         .defaultSize(width: 300, height: 400)
         // .defaultLaunchBehavior(.suppressed)
         
@@ -47,7 +48,8 @@ struct BadgeLedApp: App {
                 .modelContainer(for: Message.self, isUndoEnabled: true)
                 .modelContainer(for: PixelGrid.self, isUndoEnabled: true)
         }
-        .defaultSize(width: 800, height: 600)
+        .windowToolbarStyle(.unified)
+        .defaultSize(width: 800, height: 400)
         
         // Message library window
         Window("Message Library", id: "message-library") {

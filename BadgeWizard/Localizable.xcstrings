@@ -246,6 +246,9 @@
     "Open Library" : {
 
     },
+    "Pixel Grid Zoom" : {
+
+    },
     "Preview" : {
       "localizations" : {
         "de" : {
@@ -265,6 +268,9 @@
           }
         }
       }
+    },
+    "Reset" : {
+
     },
     "Send to Badge" : {
 

@@ -15,10 +15,10 @@ final class Message: Codable {
     var pixelGrids: [PixelGrid] = []
     
     @Attribute(.ephemeral)
-    var forcePixelUpdate: Int = 0
+    var forcePixelUpdate: Bool = false
     
     func notifyPixelContentChanged() {
-        forcePixelUpdate += 1
+        forcePixelUpdate.toggle()
     }
     
     @Attribute(.unique) var id: UUID

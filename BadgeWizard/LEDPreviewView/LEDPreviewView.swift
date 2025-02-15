@@ -6,7 +6,7 @@ import SwiftData
 import Combine
 
 struct LEDPreviewView: View {
-    @Bindable var message: Message
+    let message: Message
     @State private var size: CGSize = .zero
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.colorScheme) var colorScheme
@@ -23,18 +23,15 @@ struct LEDPreviewView: View {
     
     // MARK: Shape drawing states
     @State var onPixelColor: Color = .accentColor
+    @State var offPixelColor: Color = .accentColor.opacity(0.2)
+    @State var onPixelShine: Color = .accentColor
     
     @State private var ledSize: CGFloat = 0
     @State private var ledSpacing: CGFloat = 0
     @State private var ledPath: Path = .init()
-    let offPixelColor: Color = .accentColor.opacity(0.2)
     
     init(message: Message?) {
         self.message = message ?? Message.placeholder()
-    }
-    
-    func updateTotalAnimationFrames() {
-        
     }
     
     var totalAnimationFrames: Int {
@@ -74,6 +71,31 @@ struct LEDPreviewView: View {
         self.ledPath = Path(ellipseIn: CGRect(origin: .zero, size: CGSize(width: ledSize-2, height: ledSize-2)))
     }
     
+    func updateLedColors() {
+        let accentColor = Color.accentColor
+        self.onPixelColor = {
+            if appearsActive == false {
+                return Color.secondary
+            }
+            
+            return colorScheme == .dark ? accentColor.mix(with: .white, by: 0.5) : .accentColor
+        }()
+        
+        self.offPixelColor = {
+            if appearsActive == false {
+                return Color.secondary.opacity(0.2)
+            }
+            return accentColor.opacity(0.2)
+        }()
+        
+        self.onPixelShine = {
+            if appearsActive == false {
+                return accentColor.opacity(0)
+            }
+            return accentColor
+        }()
+    }
+    
     func iterateThroughLeds(callback: (_ offsetX: CGFloat, _ offsetY: CGFloat, _ isOn: Bool) -> Void) {
         for y in 0..<11 {
             let offsetY: CGFloat = CGFloat(y) * ledSize + ledSpacing / 2
@@ -107,19 +129,6 @@ struct LEDPreviewView: View {
         }
     }
     
-    var totalAnimationDuration: String {
-        guard pixels.isEmpty == false else {
-            return ""
-        }
-        let value = Double(totalAnimationFrames * updateAnimationAfterNumberOfSteps) * 0.025
-        let formatter = DateComponentsFormatter()
-        formatter.allowedUnits = value < 60 ? [.second] : [.minute, .second]
-        formatter.allowsFractionalUnits = true
-        formatter.unitsStyle = .short
-        
-        return formatter.string(from: value) ?? "\(value) seconds"
-    }
-    
     var isPaused: Bool {
         playAnimation == false || appearsActive == false
     }
@@ -127,61 +136,57 @@ struct LEDPreviewView: View {
     @State private var forceRedraw: UUID = UUID()
     
     var body: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 0) {
             TimelineView(.animation(minimumInterval: 0.025, paused: isPaused)) { timeline in
                 ZStack {
-                    if appearsActive {
-                        Canvas { context, _ in
-                            if !isEnabled {
-                                context.fill(
-                                    Path(roundedRect: CGRect(origin: .zero, size: size),
-                                         cornerRadius: (ledSize / 2) - ledSpacing),
-                                    with: .color(Color(nsColor: NSColor.separatorColor))
+                    Canvas { context, _ in
+                        if !isEnabled {
+                            context.fill(
+                                Path(roundedRect: CGRect(origin: .zero, size: size),
+                                     cornerRadius: (ledSize / 2) - ledSpacing),
+                                with: .color(Color(nsColor: NSColor.separatorColor))
+                            )
+                            return
+                        }
+                        
+                        var offPixelBatch = Path()
+                        
+                        iterateThroughLeds { x, y, isOn in
+                            if isOn == false {
+                                offPixelBatch.addPath(
+                                    ledPath,
+                                    transform: .init(translationX: x, y: y)
                                 )
-                                return
                             }
-                            
-                            var offPixelBatch = Path()
-                            
-                            iterateThroughLeds { x, y, isOn in
-                                if isOn == false {
-                                    offPixelBatch.addPath(
-                                        ledPath,
-                                        transform: .init(translationX: x, y: y)
-                                    )
-                                }
-                            }
-                            
-                            context.fill(
-                                offPixelBatch,
-                                with: .color(offPixelColor)
-                            )
                         }
-                        Canvas { context, size in
-                            guard isEnabled else { return }
-                            
-                            var onPixelBatch = Path()
-                            
-                            iterateThroughLeds { x, y, isOn in
-                                if isOn {
-                                    onPixelBatch.addPath(
-                                        ledPath,
-                                        transform: .init(translationX: x, y: y)
-                                    )
-                                }
-                            }
-                            
-                            context.fill(
-                                onPixelBatch,
-                                with: .color(onPixelColor)
-                            )
-                        }
-                        .shadow(color: .accentColor, radius: 2)
-                        .shadow(color: .accentColor, radius: 5)
-                    } else {
-                        Rectangle()
-                            .fill(.background)
+                        
+                        context.fill(
+                            offPixelBatch,
+                            with: .color(offPixelColor)
+                        )
                     }
+                    Canvas { context, size in
+                        guard isEnabled else { return }
+                        
+                        var onPixelBatch = Path()
+                        
+                        iterateThroughLeds { x, y, isOn in
+                            if isOn {
+                                onPixelBatch.addPath(
+                                    ledPath,
+                                    transform: .init(translationX: x, y: y)
+                                )
+                            }
+                        }
+                        
+                        context.fill(
+                            onPixelBatch,
+                            with: .color(onPixelColor)
+                        )
+                    }
+                    .shadow(color: onPixelShine, radius: 2)
+                    .shadow(color: onPixelShine, radius: 5)
+                    
                 }
                 .onChange(of: timeline.date) { _, _ in
                     timerStep += 1
@@ -192,29 +197,35 @@ struct LEDPreviewView: View {
             .frame(height: 11 * (size.width / 44))
             .getSize($size)
             
-            LEDPreviewControlsView(
-                isPlaying: $playAnimation,
-                progress: animationStep % totalAnimationFrames,
-                total: totalAnimationFrames,
-                updateAfterNumberOfSteps: updateAnimationAfterNumberOfSteps,
-                onReset: {
-                    animationStep = 0
-                    executeAnimationUpdate()
-                    redraw()
-                },
-                onForwardFrame: {
-                    animationStep += message.mode == .animation ? 5 : 1
-                    executeAnimationUpdate()
-                    redraw()
-                },
-                onBackwardFrame: {
-                    let newAnimationStep = animationStep - (message.mode == .animation ? 5 : 1)
-                    animationStep = newAnimationStep < 0 ? totalAnimationFrames : newAnimationStep
-                    executeAnimationUpdate()
-                    redraw()
-                })
+            ZStack(alignment: .center) {
+                ProgressBar(
+                    progress: (animationStep % totalAnimationFrames) * updateAnimationAfterNumberOfSteps,
+                    total: totalAnimationFrames * updateAnimationAfterNumberOfSteps
+                )
+                
+                LEDPreviewControlsView(
+                    isPlaying: $playAnimation,
+                    onReset: {
+                        animationStep = 0
+                        executeAnimationUpdate()
+                        redraw()
+                    },
+                    onForwardFrame: {
+                        animationStep += message.mode == .animation ? 5 : 1
+                        executeAnimationUpdate()
+                        redraw()
+                    },
+                    onBackwardFrame: {
+                        let newAnimationStep = animationStep - (message.mode == .animation ? 5 : 1)
+                        animationStep = newAnimationStep < 0 ? totalAnimationFrames : newAnimationStep
+                        executeAnimationUpdate()
+                        redraw()
+                    })
+                .padding(.top, 8)
+            }
+            .padding(.bottom)
         }
-        .onChange(of: size, initial: true) { _, _ in
+        .onChange(of: size) {
             updateLedProperties()
         }
         .onChange(of: pixels) {
@@ -225,11 +236,19 @@ struct LEDPreviewView: View {
             executeAnimationUpdate()
             redraw()
         }
-        .onChange(of: colorScheme, initial: true) { _, value in
-            onPixelColor = value == .dark ? .accentColor.mix(with: .white, by: 0.5) : .accentColor
+        .onChange(of: colorScheme) { _, value in
+            updateLedColors()
         }
-        .onChange(of: message.forcePixelUpdate, initial: true) {
+        .onChange(of: appearsActive) {
+            updateLedColors()
+        }
+        .onChange(of: message.forcePixelUpdate) {
             updatePixels()
+        }
+        .onAppear {
+            updateLedColors()
+            updatePixels()
+            updateLedProperties()
         }
     }
     func updatePixels() {
