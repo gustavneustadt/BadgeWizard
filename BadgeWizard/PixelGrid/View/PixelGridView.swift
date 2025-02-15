@@ -19,6 +19,7 @@ struct PixelGridView: View {
     @State var hoverPixel: (x: Int, y: Int)?
     @State private var drawMode: Bool = true
     @Environment(\.undoManager) var undo
+    @Environment(\.appearsActive) private var appearsActive
     
     var onionPixels: [[Bool]] {
         guard pixelGrid.message?.onionSkinning == true else { return [] }
@@ -37,6 +38,7 @@ struct PixelGridView: View {
         DragGesture(minimumDistance: 0)
             .onEnded { _ in
                 isDrawing = false
+                hoverPixel = nil
             }
             .onChanged { value in
                 isDrawing = true
@@ -54,6 +56,7 @@ struct PixelGridView: View {
                         drawMode = !pixelGrid.pixels[y][x]
                     }
                     pixelGrid.setPixel(x: x, y: y, isOn: drawMode, undoManager: undo)
+                    hoverPixel = (x: x, y: y)
                 }
             }
     }
@@ -100,7 +103,8 @@ struct PixelGridView: View {
                 PixelGridImage(
                     pixels: pixelGrid.pixels,
                     onionPixels: onionPixels,
-                    pixelSize: settings.pixelGridPixelSize, hoverPixel: nil
+                    pixelSize: settings.pixelGridPixelSize,
+                    hoverPixel: hoverPixel
                 )
                 .frame(width: width,
                        height: CGFloat(11 * settings.pixelGridPixelSize))
@@ -138,7 +142,10 @@ struct PixelGridView: View {
             .background(
                 RoundedRectangle(cornerRadius: settings.pixelGridPixelSize / 2, style: .continuous)
                     .fill(.background)
-                    .stroke(Color.accentColor.secondary, lineWidth: gridIsSelected ? 4 : 0)
+                    .stroke(
+                        appearsActive ? Color.accentColor.opacity(0.7) : Color.secondary.opacity(0.5),
+                        lineWidth: gridIsSelected ? 4 : 0
+                    )
             )
             .onTapGesture {
                 if !gridIsSelected {

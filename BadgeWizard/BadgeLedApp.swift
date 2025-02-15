@@ -37,11 +37,13 @@ struct BadgeLedApp: App {
                 .modelContainer(for: Message.self, isUndoEnabled: true)
         })
         .windowStyle(.hiddenTitleBar)
-            .defaultSize(width: 300, height: 400)
+        .defaultSize(width: 300, height: 400)
+        // .defaultLaunchBehavior(.suppressed)
         
         WindowGroup(for: Message.self) { $message in
             MessageEditorView(message: message)
                 .environmentObject(settingsStore)
+                .environmentObject(messageStore)
                 .modelContainer(for: Message.self, isUndoEnabled: true)
                 .modelContainer(for: PixelGrid.self, isUndoEnabled: true)
         }

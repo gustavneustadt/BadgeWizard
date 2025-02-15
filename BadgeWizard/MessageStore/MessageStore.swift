@@ -19,12 +19,18 @@ class MessageStore: ObservableObject {
     }
 
     @discardableResult
-    func addMessage() -> Message? {
-        guard messages.count < 8 else { return nil }
+    func addMessage() -> Message {
         let newMessage = Message(store: self)
         messages.append(newMessage)
         return newMessage
     }
+    
+    @discardableResult
+    func addToStore(_ message: Message) -> Message {
+        self.messages.append(message)
+        return message
+    }
+    
     
     func updateMessageCount(to count: Int, undoManager: UndoManager?) {
         let current = messages.count

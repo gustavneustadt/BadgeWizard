@@ -11,16 +11,38 @@ struct MessageEditorView: View {
     var message: Message?
     @State var showInspector: Bool = true
     @Environment(\.undoManager) var undoManager
+    @EnvironmentObject var messageStore: MessageStore
+    let isNewMessage: Bool
+    
+    init(message: Message? = nil) {
+        guard message == nil else {
+            self.message = message
+            isNewMessage = false
+            return
+        }
+        
+        self.message = Message()
+        isNewMessage = true
+    }
+    
     var body: some View {
         VStack {
             if message == nil {
+                Spacer()
                 ProgressView()
                 Text("Loading Message …")
+                Spacer()
+                
             }
                 MessageView(
                     message: message,
                     messageNumber: 1
                 )
+                .onAppear {
+                    if isNewMessage {
+                        messageStore.addToStore(message!)
+                    }
+                }
             }
             .toolbar {
                 //                     ToolbarItem(placement: .primaryAction) {
@@ -70,8 +92,10 @@ struct MessageEditorView: View {
                 //                 }
             }
             .inspector(isPresented: $showInspector) {
-                MessageInspector(message: message)
-                    .inspectorColumnWidth(300)
+                if message != nil {
+                    MessageInspector(message: message)
+                        .inspectorColumnWidth(300)
+                }
             }
     }
 }

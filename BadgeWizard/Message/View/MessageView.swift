@@ -30,5 +30,10 @@ struct MessageView: View {
         }
         .frame(maxHeight: .infinity)
         .focusable(false)
+        .onAppear {
+            if let firstGrid = message?.pixelGrids.first {
+                message?.selectGrid(firstGrid.id)                
+            }
+        }
     }
 }

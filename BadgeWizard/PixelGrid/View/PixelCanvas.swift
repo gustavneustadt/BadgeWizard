@@ -11,6 +11,7 @@ struct PixelCanvas: View {
     let pixels: [[Bool]]
     let pixelSize: CGFloat
     let itemPath: Path
+    @Environment(\.appearsActive) private var appearsActive
     
     func iterateThroughLeds(pixels: [[Bool]], maxWidth: Int? = nil, callback: (_ x: CGFloat, _ y: CGFloat, _ isOn: Bool) -> Void) {
         let firstRowCount = pixels.first?.count ?? 0
@@ -46,7 +47,7 @@ struct PixelCanvas: View {
 #if PIXELGRID_VIEW_DEBUG
             let fillColor = Color.init(hue: Double.random(in: 0...1), saturation: 0.5, brightness: 0.4)
 #else
-            let fillColor = Color.accentColor
+            let fillColor = appearsActive ? Color.accentColor : Color.secondary
 #endif
             
             context.fill(

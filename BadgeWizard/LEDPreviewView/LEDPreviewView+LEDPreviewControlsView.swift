@@ -28,13 +28,7 @@ extension LEDPreviewView {
             return formatter.string(from: value) ?? "\(value) seconds"
         }
         var totalAnimationDuration: String {
-            let value = 0.025 * Double(total)
-            let formatter = DateComponentsFormatter()
-            formatter.allowedUnits = value < 60 ? [.second] : [.minute, .second]
-            formatter.allowsFractionalUnits = true
-            formatter.unitsStyle = .short
-            
-            return formatter.string(from: value) ?? "\(value) seconds"
+            getDuration(total)
         }
         
         var progressWidth: CGFloat {

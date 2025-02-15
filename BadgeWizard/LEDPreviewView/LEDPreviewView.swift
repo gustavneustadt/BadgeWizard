@@ -10,6 +10,7 @@ struct LEDPreviewView: View {
     @State private var size: CGSize = .zero
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.appearsActive) private var appearsActive
     
     // MARK: Animation states
     @StateObject internal var displayBuffer: DisplayBuffer = DisplayBuffer()
@@ -17,7 +18,8 @@ struct LEDPreviewView: View {
     @State internal var marqueeStep: Int = 0
     @State private var flashStep: Int = 0
     @State internal var animationStep: Int = 0
-    @State var isAnimationPlaying: Bool = true
+    @State var playAnimation: Bool = true
+    @State var isInBackground: Bool = false
     
     // MARK: Shape drawing states
     @State var onPixelColor: Color = .accentColor
@@ -29,6 +31,10 @@ struct LEDPreviewView: View {
     
     init(message: Message?) {
         self.message = message ?? Message.placeholder()
+    }
+    
+    func updateTotalAnimationFrames() {
+        
     }
     
     var totalAnimationFrames: Int {
@@ -114,59 +120,68 @@ struct LEDPreviewView: View {
         return formatter.string(from: value) ?? "\(value) seconds"
     }
     
+    var isPaused: Bool {
+        playAnimation == false || appearsActive == false
+    }
+    
     @State private var forceRedraw: UUID = UUID()
     
     var body: some View {
         VStack(spacing: 4) {
-            TimelineView(.animation(minimumInterval: 0.025, paused: !isAnimationPlaying)) { timeline in
+            TimelineView(.animation(minimumInterval: 0.025, paused: isPaused)) { timeline in
                 ZStack {
-                    Canvas { context, _ in
-                        if !isEnabled {
+                    if appearsActive {
+                        Canvas { context, _ in
+                            if !isEnabled {
+                                context.fill(
+                                    Path(roundedRect: CGRect(origin: .zero, size: size),
+                                         cornerRadius: (ledSize / 2) - ledSpacing),
+                                    with: .color(Color(nsColor: NSColor.separatorColor))
+                                )
+                                return
+                            }
+                            
+                            var offPixelBatch = Path()
+                            
+                            iterateThroughLeds { x, y, isOn in
+                                if isOn == false {
+                                    offPixelBatch.addPath(
+                                        ledPath,
+                                        transform: .init(translationX: x, y: y)
+                                    )
+                                }
+                            }
+                            
                             context.fill(
-                                Path(roundedRect: CGRect(origin: .zero, size: size),
-                                     cornerRadius: (ledSize / 2) - ledSpacing),
-                                with: .color(Color(nsColor: NSColor.separatorColor))
+                                offPixelBatch,
+                                with: .color(offPixelColor)
                             )
-                            return
                         }
-                        
-                        var offPixelBatch = Path()
-                        
-                        iterateThroughLeds { x, y, isOn in
-                            if isOn == false {
-                                offPixelBatch.addPath(
-                                    ledPath,
-                                    transform: .init(translationX: x, y: y)
-                                )
+                        Canvas { context, size in
+                            guard isEnabled else { return }
+                            
+                            var onPixelBatch = Path()
+                            
+                            iterateThroughLeds { x, y, isOn in
+                                if isOn {
+                                    onPixelBatch.addPath(
+                                        ledPath,
+                                        transform: .init(translationX: x, y: y)
+                                    )
+                                }
                             }
+                            
+                            context.fill(
+                                onPixelBatch,
+                                with: .color(onPixelColor)
+                            )
                         }
-                        
-                        context.fill(
-                            offPixelBatch,
-                            with: .color(offPixelColor)
-                        )
+                        .shadow(color: .accentColor, radius: 2)
+                        .shadow(color: .accentColor, radius: 5)
+                    } else {
+                        Rectangle()
+                            .fill(.background)
                     }
-                    Canvas { context, size in
-                        guard isEnabled else { return }
-                        
-                        var onPixelBatch = Path()
-                        
-                        iterateThroughLeds { x, y, isOn in
-                            if isOn {
-                                onPixelBatch.addPath(
-                                    ledPath,
-                                    transform: .init(translationX: x, y: y)
-                                )
-                            }
-                        }
-                        
-                        context.fill(
-                            onPixelBatch,
-                            with: .color(onPixelColor)
-                        )
-                    }
-                    .shadow(color: .accentColor, radius: 2)
-                    .shadow(color: .accentColor, radius: 5)
                 }
                 .onChange(of: timeline.date) { _, _ in
                     timerStep += 1
@@ -178,7 +193,7 @@ struct LEDPreviewView: View {
             .getSize($size)
             
             LEDPreviewControlsView(
-                isPlaying: $isAnimationPlaying,
+                isPlaying: $playAnimation,
                 progress: animationStep % totalAnimationFrames,
                 total: totalAnimationFrames,
                 onReset: {
@@ -224,7 +239,7 @@ struct LEDPreviewView: View {
         let newPixels = Message.combinePixelArrays(grids)
         pixels = newPixels
         
-        if isAnimationPlaying == false {
+        if playAnimation == false {
             executeAnimationUpdate()
             redraw()
         }
@@ -241,7 +256,6 @@ struct LEDPreviewView: View {
             return
         }
         
-        displayBuffer.objectWillChange.send()
         displayBuffer.clear()
         switch message.mode {
         case .left:
@@ -267,7 +281,7 @@ struct LEDPreviewView: View {
     
     private func updateAnimation() {
         if timerStep % updateAnimationAfterNumberOfSteps == 0 {
-            if isAnimationPlaying {
+            if playAnimation {
                 animationStep += 1
             }
             executeAnimationUpdate()

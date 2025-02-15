@@ -34,9 +34,9 @@ struct BadgeStudioView: View {
         .toolbar {
             ToolbarItemGroup {
                 Button {
-                    if let message = messageStore.addMessage() {
-                        openWindow(value: message)
-                    }
+                    let message = messageStore.addMessage()
+                    openWindow(value: message)
+                    
                 } label: {
                     Label("Create Message", systemImage: "plus")
                 }
