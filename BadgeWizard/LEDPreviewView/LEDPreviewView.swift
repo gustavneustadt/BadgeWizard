@@ -196,6 +196,7 @@ struct LEDPreviewView: View {
                 isPlaying: $playAnimation,
                 progress: animationStep % totalAnimationFrames,
                 total: totalAnimationFrames,
+                updateAfterNumberOfSteps: updateAnimationAfterNumberOfSteps,
                 onReset: {
                     animationStep = 0
                     executeAnimationUpdate()

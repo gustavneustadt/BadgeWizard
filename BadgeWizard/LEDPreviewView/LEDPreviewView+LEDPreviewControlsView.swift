@@ -13,13 +13,14 @@ extension LEDPreviewView {
         @Binding var isPlaying: Bool
         var progress: Int
         var total: Int
+        var updateAfterNumberOfSteps: Int
         var onReset: () -> Void
         var onForwardFrame: () -> Void
         var onBackwardFrame: () -> Void
         @State var progressBarSize: CGSize = .zero
         
         func getDuration(_ totalSteps: Int) -> String {
-            let value = 0.025 * Double(totalSteps)
+            let value = 0.025 * Double(totalSteps * updateAfterNumberOfSteps)
             let formatter = DateComponentsFormatter()
             formatter.allowedUnits = value < 60 ? [.second] : [.minute, .second]
             formatter.allowsFractionalUnits = true
